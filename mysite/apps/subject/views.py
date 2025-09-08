@@ -1,0 +1,512 @@
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import AllowAny
+from django.db.models import Count, Q
+from django.db import transaction
+from .models import Marhala, MarhalaSubject, SubjectSettings
+from .serializers import MarhalaWithCountsSerializer, MarhalaSerializer, MarhalaSubjectSerializer, SubjectSettingsSerializer
+
+
+class MarhalaWithCountsView(APIView):
+    """মারহালা উইথ কাউন্টস ভিউ - ফ্রন্টএন্ডের জন্য ডেটা প্রদান"""
+    permission_classes = [AllowAny]
+    
+    def get(self, request):
+        """মারহালা তালিকা কাউন্টস সহ ফেরত দেয়"""
+        try:
+            # Django ORM দিয়ে counts সহ data fetch
+            marhalas = Marhala.objects.annotate(
+                total_subjects=Count('subjects'),
+                male_subjects=Count('subjects', filter=Q(subjects__status='SRtype_1')),
+                female_subjects=Count('subjects', filter=Q(subjects__status='SRtype_0')),
+                both_subjects=Count('subjects', filter=Q(subjects__status='both'))
+            ).order_by('id')
+            
+            serializer = MarhalaWithCountsSerializer(marhalas, many=True)
+            
+            return Response({
+                'success': True,
+                'data': serializer.data,
+                'message': 'মারহালা তালিকা সফলভাবে প্রাপ্ত হয়েছে'
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response({
+                'success': False,
+                'data': [],
+                'message': f'ডেটা প্রাপ্তিতে সমস্যা: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class MarhalaListView(APIView):
+    """মারহালা তালিকা ভিউ"""
+    permission_classes = [AllowAny]
+    
+    def get(self, request):
+        """সব মারহালার তালিকা ফেরত দেয়"""
+        try:
+            marhalas = Marhala.objects.all().order_by('id')
+            serializer = MarhalaSerializer(marhalas, many=True)
+            
+            return Response({
+                'success': True,
+                'data': serializer.data,
+                'message': 'মারহালা তালিকা সফলভাবে প্রাপ্ত হয়েছে'
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response({
+                'success': False,
+                'data': [],
+                'message': f'ডেটা প্রাপ্তিতে সমস্যা: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class MarhalaSubjectListView(APIView):
+    """মারহালা সাবজেক্ট তালিকা ভিউ"""
+    permission_classes = [AllowAny]
+    
+    def get(self, request):
+        """নির্দিষ্ট মারহালার সাবজেক্ট তালিকা ফেরত দেয়"""
+        try:
+            marhala_id = request.query_params.get('marhala_id')
+            
+            if marhala_id:
+                subjects = MarhalaSubject.objects.filter(
+                    marhala_id=marhala_id
+                ).order_by('name_bangla')
+            else:
+                subjects = MarhalaSubject.objects.all().order_by('marhala_id', 'name_bangla')
+            
+            serializer = MarhalaSubjectSerializer(subjects, many=True)
+            
+            return Response({
+                'success': True,
+                'data': serializer.data,
+                'message': 'সাবজেক্ট তালিকা সফলভাবে প্রাপ্ত হয়েছে'
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response({
+                'success': False,
+                'data': [],
+                'message': f'ডেটা প্রাপ্তিতে সমস্যা: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class MarhalaSubjectCreateView(APIView):
+    """মারহালা সাবজেক্ট তৈরি ভিউ"""
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        """নতুন সাবজেক্ট তৈরি করে"""
+        try:
+            serializer = MarhalaSubjectSerializer(data=request.data)
+            
+            if serializer.is_valid():
+                subject = serializer.save()
+                return Response({
+                    'success': True,
+                    'data': MarhalaSubjectSerializer(subject).data,
+                    'message': 'সাবজেক্ট সফলভাবে তৈরি হয়েছে'
+                }, status=status.HTTP_201_CREATED)
+            else:
+                return Response({
+                    'success': False,
+                    'data': serializer.errors,
+                    'message': 'ডেটা ভ্যালিডেশন ত্রুটি'
+                }, status=status.HTTP_400_BAD_REQUEST)
+                
+        except Exception as e:
+            return Response({
+                'success': False,
+                'data': {},
+                'message': f'সাবজেক্ট তৈরিতে সমস্যা: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class MarhalaWithSubjectsCreateView(APIView):
+    """মারহালা এবং সাবজেক্ট একসাথে তৈরি করার ভিউ"""
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        """নতুন মারহালা এবং তার সাবজেক্টগুলো একসাথে তৈরি করে"""
+        try:
+            data = request.data
+            
+            # Validate required fields
+            required_fields = ['marhala_name_bn', 'marhala_name_en', 'marhala_name_ar', 'subjects']
+            for field in required_fields:
+                if field not in data:
+                    return Response({
+                        'success': False,
+                        'message': f'প্রয়োজনীয় ফিল্ড অনুপস্থিত: {field}'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+            
+            with transaction.atomic():
+                # Create Marhala using Django ORM
+                marhala = Marhala.objects.create(
+                    marhala_name_bn=data['marhala_name_bn'],
+                    marhala_name_en=data['marhala_name_en'],
+                    marhala_name_ar=data['marhala_name_ar']
+                )
+                
+                # Create Subjects using Django ORM
+                subjects_created = []
+                for subject_data in data['subjects']:
+                    # Skip empty subjects
+                    if not subject_data.get('subject_code') or not subject_data.get('name_bangla'):
+                        continue
+                    
+                    subject = MarhalaSubject.objects.create(
+                        marhala=marhala,
+                        subject_code=subject_data.get('subject_code', ''),
+                        name_bangla=subject_data.get('name_bangla', ''),
+                        name_english=subject_data.get('name_english', ''),
+                        name_arabic=subject_data.get('name_arabic', ''),
+                        status=subject_data.get('status', 'both')
+                    )
+                    subjects_created.append(subject)
+                
+                return Response({
+                    'success': True,
+                    'data': {
+                        'marhala': MarhalaSerializer(marhala).data,
+                        'subjects': MarhalaSubjectSerializer(subjects_created, many=True).data
+                    },
+                    'message': f'মারহালা "{marhala.marhala_name_bn}" এবং {len(subjects_created)}টি সাবজেক্ট সফলভাবে তৈরি হয়েছে'
+                }, status=status.HTTP_201_CREATED)
+                
+        except Exception as e:
+            return Response({
+                'success': False,
+                'data': {},
+                'message': f'ডেটা তৈরিতে সমস্যা: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class MarhalaDetailView(APIView):
+    """মারহালা বিস্তারিত ভিউ - একটি নির্দিষ্ট মারহালা ও তার সাবজেক্ট"""
+    permission_classes = [AllowAny]
+    
+    def get(self, request, marhala_id):
+        """নির্দিষ্ট মারহালার তথ্য ও সাবজেক্ট ফেরত দেয়"""
+        try:
+            marhala = Marhala.objects.get(id=marhala_id)
+            subjects = MarhalaSubject.objects.filter(marhala=marhala)
+            
+            return Response({
+                'success': True,
+                'data': {
+                    'marhala': MarhalaSerializer(marhala).data,
+                    'subjects': MarhalaSubjectSerializer(subjects, many=True).data
+                },
+                'message': 'মারহালা তথ্য সফলভাবে প্রাপ্ত হয়েছে'
+            }, status=status.HTTP_200_OK)
+            
+        except Marhala.DoesNotExist:
+            return Response({
+                'success': False,
+                'data': {},
+                'message': 'মারহালা পাওয়া যায়নি'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'success': False,
+                'data': {},
+                'message': f'ডেটা প্রাপ্তিতে সমস্যা: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class MarhalaUpdateView(APIView):
+    """মারহালা আপডেট ভিউ"""
+    permission_classes = [AllowAny]
+    
+    def put(self, request, marhala_id):
+        """মারহালা ও তার সাবজেক্ট আপডেট করে"""
+        try:
+            data = request.data
+            
+            # Validate required fields
+            required_fields = ['marhala_name_bn', 'marhala_name_en', 'marhala_name_ar', 'subjects']
+            for field in required_fields:
+                if field not in data:
+                    return Response({
+                        'success': False,
+                        'message': f'প্রয়োজনীয় ফিল্ড অনুপস্থিত: {field}'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+            
+            with transaction.atomic():
+                # Update Marhala
+                marhala = Marhala.objects.get(id=marhala_id)
+                marhala.marhala_name_bn = data['marhala_name_bn']
+                marhala.marhala_name_en = data['marhala_name_en']
+                marhala.marhala_name_ar = data['marhala_name_ar']
+                marhala.save()
+                
+                # Get existing subjects
+                existing_subjects = MarhalaSubject.objects.filter(marhala=marhala)
+                existing_subjects_dict = {sub.id: sub for sub in existing_subjects}
+                
+                # Process new subjects data
+                processed_subject_ids = set()
+                subjects_created = []
+                
+                for subject_data in data['subjects']:
+                    # Skip empty subjects
+                    if not subject_data.get('subject_code') or not subject_data.get('name_bangla'):
+                        continue
+                    
+                    subject_id = subject_data.get('id')
+                    
+                    if subject_id and subject_id in existing_subjects_dict:
+                        # Update existing subject
+                        subject = existing_subjects_dict[subject_id]
+                        subject.subject_code = subject_data.get('subject_code', '')
+                        subject.name_bangla = subject_data.get('name_bangla', '')
+                        subject.name_english = subject_data.get('name_english', '')
+                        subject.name_arabic = subject_data.get('name_arabic', '')
+                        subject.status = subject_data.get('status', 'both')
+                        subject.save()
+                        processed_subject_ids.add(subject_id)
+                    else:
+                        # Create new subject
+                        subject = MarhalaSubject.objects.create(
+                            marhala=marhala,
+                            subject_code=subject_data.get('subject_code', ''),
+                            name_bangla=subject_data.get('name_bangla', ''),
+                            name_english=subject_data.get('name_english', ''),
+                            name_arabic=subject_data.get('name_arabic', ''),
+                            status=subject_data.get('status', 'both')
+                        )
+                    
+                    subjects_created.append(subject)
+                
+                # Delete subjects that are no longer needed
+                subjects_to_delete = [sid for sid in existing_subjects_dict.keys() if sid not in processed_subject_ids]
+                if subjects_to_delete:
+                    MarhalaSubject.objects.filter(id__in=subjects_to_delete).delete()
+                
+                return Response({
+                    'success': True,
+                    'data': {
+                        'marhala': MarhalaSerializer(marhala).data,
+                        'subjects': MarhalaSubjectSerializer(subjects_created, many=True).data
+                    },
+                    'message': f'মারহালা "{marhala.marhala_name_bn}" সফলভাবে আপডেট হয়েছে'
+                }, status=status.HTTP_200_OK)
+                
+        except Marhala.DoesNotExist:
+            return Response({
+                'success': False,
+                'data': {},
+                'message': 'মারহালা পাওয়া যায়নি'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'success': False,
+                'data': {},
+                'message': f'ডেটা আপডেটে সমস্যা: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class MarhalaDeleteView(APIView):
+    """মারহালা ডিলিট ভিউ"""
+    permission_classes = [AllowAny]
+    
+    def delete(self, request, marhala_id):
+        """মারহালা ও তার সাবজেক্ট ডিলিট করে"""
+        try:
+            with transaction.atomic():
+                marhala = Marhala.objects.get(id=marhala_id)
+                marhala_name = marhala.marhala_name_bn
+                
+                # Delete subjects first (cascade will handle this, but explicit is better)
+                MarhalaSubject.objects.filter(marhala=marhala).delete()
+                
+                # Delete marhala
+                marhala.delete()
+                
+                return Response({
+                    'success': True,
+                    'data': {},
+                    'message': f'মারহালা "{marhala_name}" সফলভাবে ডিলিট হয়েছে'
+                }, status=status.HTTP_200_OK)
+                
+        except Marhala.DoesNotExist:
+            return Response({
+                'success': False,
+                'data': {},
+                'message': 'মারহালা পাওয়া যায়নি'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'success': False,
+                'data': {},
+                'message': f'ডেটা ডিলিটে সমস্যা: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class SubjectSettingsListView(APIView):
+    """সাবজেক্ট সেটিংস তালিকা ভিউ"""
+    permission_classes = [AllowAny]
+    
+    def get(self, request):
+        """সব সাবজেক্ট সেটিংসের তালিকা ফেরত দেয়"""
+        try:
+            marhala_id = request.query_params.get('marhala_id')
+            
+            settings = SubjectSettings.objects.select_related(
+                'marhala', 'subject'
+            ).order_by('marhala_id', 'subject_code')
+            
+            if marhala_id:
+                settings = settings.filter(marhala_id=marhala_id)
+            
+            serializer = SubjectSettingsSerializer(settings, many=True)
+            
+            return Response({
+                'success': True,
+                'data': serializer.data,
+                'message': 'সাবজেক্ট সেটিংস তালিকা সফলভাবে প্রাপ্ত হয়েছে'
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response({
+                'success': False,
+                'data': [],
+                'message': f'ডেটা প্রাপ্তিতে সমস্যা: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class SubjectSettingsCreateView(APIView):
+    """সাবজেক্ট সেটিংস তৈরি ভিউ"""
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        """নতুন সাবজেক্ট সেটিংস তৈরি করে"""
+        try:
+            serializer = SubjectSettingsSerializer(data=request.data)
+            
+            if serializer.is_valid():
+                settings = serializer.save()
+                return Response({
+                    'success': True,
+                    'data': SubjectSettingsSerializer(settings).data,
+                    'message': 'সাবজেক্ট সেটিংস সফলভাবে তৈরি হয়েছে'
+                }, status=status.HTTP_201_CREATED)
+            else:
+                return Response({
+                    'success': False,
+                    'data': serializer.errors,
+                    'message': 'ডেটা ভ্যালিডেশন ত্রুটি'
+                }, status=status.HTTP_400_BAD_REQUEST)
+                
+        except Exception as e:
+            return Response({
+                'success': False,
+                'data': {},
+                'message': f'সাবজেক্ট সেটিংস তৈরিতে সমস্যা: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class SubjectSettingsDetailView(APIView):
+    """সাবজেক্ট সেটিংস বিস্তারিত ভিউ"""
+    permission_classes = [AllowAny]
+    
+    def get(self, request, settings_id):
+        """নির্দিষ্ট সাবজেক্ট সেটিংসের তথ্য ফেরত দেয়"""
+        try:
+            settings = SubjectSettings.objects.select_related(
+                'marhala_subject__marhala'
+            ).get(id=settings_id)
+            
+            serializer = SubjectSettingsSerializer(settings)
+            
+            return Response({
+                'success': True,
+                'data': serializer.data,
+                'message': 'সাবজেক্ট সেটিংস তথ্য সফলভাবে প্রাপ্ত হয়েছে'
+            }, status=status.HTTP_200_OK)
+            
+        except SubjectSettings.DoesNotExist:
+            return Response({
+                'success': False,
+                'data': {},
+                'message': 'সাবজেক্ট সেটিংস পাওয়া যায়নি'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'success': False,
+                'data': {},
+                'message': f'ডেটা প্রাপ্তিতে সমস্যা: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class SubjectSettingsUpdateView(APIView):
+    """সাবজেক্ট সেটিংস আপডেট ভিউ"""
+    permission_classes = [AllowAny]
+    
+    def put(self, request, settings_id):
+        """সাবজেক্ট সেটিংস আপডেট করে"""
+        try:
+            settings = SubjectSettings.objects.get(id=settings_id)
+            serializer = SubjectSettingsSerializer(settings, data=request.data)
+            
+            if serializer.is_valid():
+                settings = serializer.save()
+                return Response({
+                    'success': True,
+                    'data': SubjectSettingsSerializer(settings).data,
+                    'message': 'সাবজেক্ট সেটিংস সফলভাবে আপডেট হয়েছে'
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({
+                    'success': False,
+                    'data': serializer.errors,
+                    'message': 'ডেটা ভ্যালিডেশন ত্রুটি'
+                }, status=status.HTTP_400_BAD_REQUEST)
+                
+        except SubjectSettings.DoesNotExist:
+            return Response({
+                'success': False,
+                'data': {},
+                'message': 'সাবজেক্ট সেটিংস পাওয়া যায়নি'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'success': False,
+                'data': {},
+                'message': f'সাবজেক্ট সেটিংস আপডেটে সমস্যা: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class SubjectSettingsDeleteView(APIView):
+    """সাবজেক্ট সেটিংস ডিলিট ভিউ"""
+    permission_classes = [AllowAny]
+    
+    def delete(self, request, settings_id):
+        """সাবজেক্ট সেটিংস ডিলিট করে"""
+        try:
+            settings = SubjectSettings.objects.get(id=settings_id)
+            settings.delete()
+            
+            return Response({
+                'success': True,
+                'data': {},
+                'message': 'সাবজেক্ট সেটিংস সফলভাবে ডিলিট হয়েছে'
+            }, status=status.HTTP_200_OK)
+            
+        except SubjectSettings.DoesNotExist:
+            return Response({
+                'success': False,
+                'data': {},
+                'message': 'সাবজেক্ট সেটিংস পাওয়া যায়নি'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'success': False,
+                'data': {},
+                'message': f'সাবজেক্ট সেটিংস ডিলিটে সমস্যা: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
