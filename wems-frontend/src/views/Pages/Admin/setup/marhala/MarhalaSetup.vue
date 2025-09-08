@@ -240,14 +240,29 @@ const totalSubjects = computed(() =>
 
 // convert API data to UI format
 const marhalas = computed<Marhala[]>(() => {
-  return marhalaData.value.map(item => ({
-    id: String(item.id),
-    name: item.marhala_name_bn,
-    subjects: item.total_subjects,
-    male: item.male_subjects,
-    female: item.female_subjects,
-    high: item.both_subjects
-  }));
+  return marhalaData.value.map(item => {
+    // Extract numeric ID from various formats
+    let id = item.id;
+    if (typeof id === 'string') {
+      // If ID is in format '10:9', extract the numeric part after ':'
+      if (id.includes(':')) {
+        id = id.split(':').pop() || id;
+      }
+      // Convert to number then back to string for consistency
+      id = String(Number(id));
+    } else {
+      id = String(id);
+    }
+
+    return {
+      id: id,
+      name: item.marhala_name_bn,
+      subjects: item.total_subjects,
+      male: item.male_subjects,
+      female: item.female_subjects,
+      high: item.both_subjects
+    };
+  });
 });
 
 const visualizeData = computed<VisualizeItem[]>(() => {
@@ -262,13 +277,13 @@ const visualizeData = computed<VisualizeItem[]>(() => {
 
 // fallback mock data
 const defaultMarhalaData: MarhalaData[] = [
-  { id: '10:9', marhala_name_bn: 'নূরানী', total_subjects: 11, male_subjects: 4, female_subjects: 4, both_subjects: 3 },
-  { id: '10:10', marhala_name_bn: 'সানাভিয়্য উলিয়া', total_subjects: 10, male_subjects: 1, female_subjects: 2, both_subjects: 7 },
-  { id: '10:11', marhala_name_bn: 'সানাভিয়া', total_subjects: 8, male_subjects: 8, female_subjects: 0, both_subjects: 0 },
-  { id: '10:12', marhala_name_bn: 'মুতাওয়াসসিত', total_subjects: 9, male_subjects: 1, female_subjects: 8, both_subjects: 0 },
-  { id: '10:14', marhala_name_bn: 'ইনফিরাদ', total_subjects: 9, male_subjects: 2, female_subjects: 1, both_subjects: 6 },
-  { id: '10:15', marhala_name_bn: 'আলিমিয়্য কুদ্দাম', total_subjects: 3, male_subjects: 0, female_subjects: 0, both_subjects: 3 },
-  { id: '10:16', marhala_name_bn: 'ইমামত ইমামিয়্য এবং কিরাআত', total_subjects: 4, male_subjects: 0, female_subjects: 0, both_subjects: 4 },
+  { id: 9, marhala_name_bn: 'নূরানী', total_subjects: 11, male_subjects: 4, female_subjects: 4, both_subjects: 3 },
+  { id: 10, marhala_name_bn: 'সানাভিয়্য উলিয়া', total_subjects: 10, male_subjects: 1, female_subjects: 2, both_subjects: 7 },
+  { id: 11, marhala_name_bn: 'সানাভিয়া', total_subjects: 8, male_subjects: 8, female_subjects: 0, both_subjects: 0 },
+  { id: 12, marhala_name_bn: 'মুতাওয়াসসিত', total_subjects: 9, male_subjects: 1, female_subjects: 8, both_subjects: 0 },
+  { id: 14, marhala_name_bn: 'ইনফিরাদ', total_subjects: 9, male_subjects: 2, female_subjects: 1, both_subjects: 6 },
+  { id: 15, marhala_name_bn: 'আলিমিয়্য কুদ্দাম', total_subjects: 3, male_subjects: 0, female_subjects: 0, both_subjects: 3 },
+  { id: 16, marhala_name_bn: 'ইমামত ইমামিয়্য এবং কিরাআত', total_subjects: 4, male_subjects: 0, female_subjects: 0, both_subjects: 4 },
 ];
 
 // API call function with intelligent caching
