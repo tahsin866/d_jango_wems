@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'mysite.apps.users',
     'mysite.apps.school',
     'mysite.apps.subject',  # New subject app
+    'mysite.apps.CentralExam',  # Central Exam app
 ]
 
 MIDDLEWARE = [

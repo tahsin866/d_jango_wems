@@ -109,6 +109,35 @@ const routes = [
         meta: { title: 'বিষয় সংশোধন ', requiresAuth: true, role: 'admin' },
       },
 
+
+// সেন্ট্রাল এক্সাম
+
+ {
+        path: '/central-exam/setup',
+        name: 'CentralExamSetup',
+        component: () => import('@/views/Pages/Admin/setup/CentralExam/CentralExamMange.vue'),
+        meta: { title: 'সেন্ট্রাল এক্সাম সেটাপ', requiresAuth: true, role: 'admin' },
+      },
+
+
+ {
+        path: '/central/exam/Create',
+        name: 'CentralExamCreate',
+        component: () => import('@/views/Pages/Admin/setup/CentralExam/Create.vue'),
+        meta: { title: 'সেন্ট্রাল এক্সাম তৈরি', requiresAuth: true, role: 'admin' },
+      },
+
+
+ {
+        path: '/central/exam/edit/:id',
+        name: 'CentralExamEdit',
+        component: () => import('@/views/Pages/Admin/setup/CentralExam/edit.vue'),
+        meta: { title: 'সেন্ট্রাল এক্সাম তৈরি', requiresAuth: true, role: 'admin' },
+      },
+
+
+
+
 // নেগরান/মুমতাহিন
 
 
@@ -149,11 +178,29 @@ const routes = [
     redirect: '/admin/setup/list'
   },
 
+  {
+    path: '/central-exam/setup',
+    redirect: '/admin/central-exam/setup'
+  },
+
+
+  {
+    path: '/central/exam/Create',
+    redirect: '/admin/CentralExam/Create'
+  },
+
+  {
+    path: '/central/exam/edit/:id',
+    redirect: (to: { params: { id: string } }) => `/admin/CentralExam/edit/${to.params.id}`
+  },
+
 
   {
     path: '/setup/edit/:id',
     redirect: (to: { params: { id: string } }) => `/admin/setup/edit/${to.params.id}`
   },
+
+
 
 
   {

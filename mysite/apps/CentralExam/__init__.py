@@ -1,0 +1,1 @@
+# CentralExam app initialization

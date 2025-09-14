@@ -36,6 +36,9 @@ urlpatterns = [
     # Subject APIs
     path('api/', include('mysite.apps.subject.urls')),
     
+    # CentralExam APIs
+    path('api/central-exam/', include('mysite.apps.CentralExam.urls')),
+    
     # Dashboard APIs
     path('api/admin/dashboard/', admin_dashboard_api),
     path('api/madrasa/dashboard/', madrasa_dashboard_api),
