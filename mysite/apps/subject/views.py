@@ -395,18 +395,23 @@ class SubjectSettingsListView(APIView):
     permission_classes = [AllowAny]
     
     def get(self, request):
-        """সব সাবজেক্ট সেটিংসের তালিকা ফেরত দেয়"""
+        """সব সাবজেক্ট সেটিংসের তালিকা ফেরত দেয় (pagination সহ)"""
         try:
             marhala_id = request.query_params.get('marhala_id')
+            page = int(request.query_params.get('page', 1))
+            page_size = int(request.query_params.get('page_size', 100))  # Default 100 items per page
             
             # Generate cache key based on query parameters
-            if marhala_id:
-                cache_key = SubjectCache.generate_key_with_params(
-                    SubjectCache.SUBJECT_SETTINGS_BY_MARHALA_KEY, 
-                    marhala_id=marhala_id
-                )
-            else:
-                cache_key = SubjectCache.SUBJECT_SETTINGS_LIST_KEY
+            cache_params = {
+                'marhala_id': marhala_id or 'all',
+                'page': page,
+                'page_size': page_size
+            }
+            
+            cache_key = SubjectCache.generate_query_key(
+                SubjectCache.SUBJECT_SETTINGS_LIST_KEY, 
+                cache_params
+            )
             
             # Try to get from cache first
             cached_data = SubjectCache.get_cache(cache_key)
@@ -414,27 +419,90 @@ class SubjectSettingsListView(APIView):
             if cached_data:
                 return Response({
                     'success': True,
-                    'data': cached_data,
+                    'data': cached_data['data'],
+                    'pagination': cached_data['pagination'],
                     'message': 'সাবজেক্ট সেটিংস তালিকা সফলভাবে প্রাপ্ত হয়েছে (ক্যাশ থেকে)',
                     'cached': True
                 }, status=status.HTTP_200_OK)
             
+            # Base queryset with optimizations
             settings = SubjectSettings.objects.select_related(
                 'marhala', 'subject'
+            ).only(
+                'id', 'marhala_id', 'subject_id', 'marhala_type', 'subject_names',
+                'student_type', 'syllabus_type', 'markaz_type', 'subject_type',
+                'total_marks', 'pass_marks', 'status', 'subject_code',
+                'created_at', 'updated_at',
+                # Related fields
+                'marhala__id', 'marhala__marhala_name_bn',
+                'subject__id', 'subject__subject_code'
             ).order_by('marhala_id', 'subject_code')
             
             if marhala_id:
                 settings = settings.filter(marhala_id=marhala_id)
             
-            serializer = SubjectSettingsSerializer(settings, many=True)
+            # Get total count for pagination
+            total_count = settings.count()
+            
+            # Apply pagination
+            start_index = (page - 1) * page_size
+            end_index = start_index + page_size
+            paginated_settings = settings[start_index:end_index]
+            
+            # Use values() for faster serialization
+            serializer_data = list(paginated_settings.values(
+                'id', 'marhala_id', 'subject_id', 'marhala_type', 'subject_names',
+                'student_type', 'syllabus_type', 'markaz_type', 'subject_type',
+                'total_marks', 'pass_marks', 'status', 'subject_code',
+                'marhala__marhala_name_bn', 'subject__subject_code'
+            ))
+            
+            # Format data to match frontend expectations
+            formatted_data = []
+            for item in serializer_data:
+                formatted_data.append({
+                    'id': item['id'],
+                    'marhala': item['marhala_id'],
+                    'subject': item['subject_id'],
+                    'marhala_id': item['marhala_id'],
+                    'subject_id': item['subject_id'],
+                    'marhala_name': item['marhala__marhala_name_bn'],
+                    'related_subject_code': item['subject__subject_code'],
+                    'marhala_type': item['marhala_type'],
+                    'subject_names': item['subject_names'],
+                    'student_type': item['student_type'],
+                    'syllabus_type': item['syllabus_type'],
+                    'markaz_type': item['markaz_type'],
+                    'subject_type': item['subject_type'],
+                    'total_marks': item['total_marks'],
+                    'pass_marks': item['pass_marks'],
+                    'status': item['status'],
+                    'subject_code': item['subject_code']
+                })
+            
+            # Prepare pagination info
+            pagination_info = {
+                'current_page': page,
+                'page_size': page_size,
+                'total_count': total_count,
+                'total_pages': (total_count + page_size - 1) // page_size,
+                'has_next': end_index < total_count,
+                'has_previous': page > 1
+            }
+            
+            response_data = {
+                'data': formatted_data,
+                'pagination': pagination_info
+            }
             
             # Cache the result
             timeout = SubjectCache.CACHE_TIMEOUT_SHORT if marhala_id else SubjectCache.CACHE_TIMEOUT_MEDIUM
-            SubjectCache.set_cache(cache_key, serializer.data, timeout)
+            SubjectCache.set_cache(cache_key, response_data, timeout)
             
             return Response({
                 'success': True,
-                'data': serializer.data,
+                'data': formatted_data,
+                'pagination': pagination_info,
                 'message': 'সাবজেক্ট সেটিংস তালিকা সফলভাবে প্রাপ্ত হয়েছে',
                 'cached': False
             }, status=status.HTTP_200_OK)

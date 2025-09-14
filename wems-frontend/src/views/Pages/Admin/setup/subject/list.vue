@@ -151,7 +151,18 @@ style="font-family: 'SolaimanLipi', sans-serif;"
                   </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-100">
-                  <tr v-for="subject in paginatedSubjects" :key="subject.id" class="hover:bg-gray-50 transition">
+                  <!-- Loading State -->
+                  <tr v-if="isLoading">
+                    <td colspan="8" class="px-6 py-12 text-center">
+                      <div class="flex flex-col items-center justify-center">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600"></div>
+                        <h3 class="mt-4 text-lg font-medium text-gray-600">ডেটা লোড হচ্ছে...</h3>
+                        <p class="mt-1 text-sm text-gray-400">অনুগ্রহ করে অপেক্ষা করুন</p>
+                      </div>
+                    </td>
+                  </tr>
+                  <!-- Data Rows -->
+                  <tr v-else v-for="subject in paginatedSubjects" :key="subject.id" class="hover:bg-gray-50 transition">
                     <td class="px-6 py-4 font-medium text-gray-900">{{ subject.code }}</td>
                     <td class="px-6 py-4 text-xl">
                       <div class="font-medium text-gray-900">{{ subject.Subject_Names }}</div>
@@ -358,13 +369,20 @@ const sortOption = ref('code-asc');
 const currentPage = ref(1);
 const rowsPerPage = ref(10);
 const selectedSubject = ref<Subject | null>(null);
+const isLoading = ref(false);
 
 const fetchData = async () => {
   try {
+    isLoading.value = true;
+    console.log('Loading subject data...');
+
     const response = await axios.get('http://127.0.0.1:8000/api/subject-settings/', {
       params: {
-        marhala_id: marhalaType.value || undefined
-      }
+        marhala_id: marhalaType.value || undefined,
+        page: 1,
+        page_size: 200  // Reduced to 200 for faster loading
+      },
+      timeout: 10000  // 10 second timeout
     });
     if (response.data.success) {
       subjects.value = response.data.data.map((item: ApiSubjectSettings) => ({
@@ -397,6 +415,8 @@ const fetchData = async () => {
     subjects.value = [];
     marhalaTypes.value = [];
     alert('ডেটা লোড করতে সমস্যা হয়েছে। দয়া করে পরে আবার চেষ্টা করুন।');
+  } finally {
+    isLoading.value = false;
   }
 };
 

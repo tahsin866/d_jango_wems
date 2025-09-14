@@ -142,6 +142,13 @@ class SubjectSettings(models.Model):
         verbose_name = 'সাবজেক্ট সেটিংস'
         verbose_name_plural = 'সাবজেক্ট সেটিংসমূহ'
         ordering = ['marhala_id', 'subject_names']
+        indexes = [
+            models.Index(fields=['marhala_id'], name='subj_set_marhala_idx'),
+            models.Index(fields=['status'], name='subj_set_status_idx'),
+            models.Index(fields=['markaz_type'], name='subj_set_markaz_idx'),
+            models.Index(fields=['student_type'], name='subj_set_student_idx'),
+            models.Index(fields=['marhala_id', 'status'], name='subj_set_mar_stat_idx'),
+        ]
 
     def __str__(self):
         return f"{self.marhala_type} - {self.subject_names}"
