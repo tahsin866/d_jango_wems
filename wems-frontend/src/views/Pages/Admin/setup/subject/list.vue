@@ -1,6 +1,5 @@
 <template>
   <div
-
 style="font-family: 'SolaimanLipi', sans-serif;"
   class="py-12 bg-gray-50">
     <div class="mx-auto px-4 sm:px-8">
@@ -188,7 +187,7 @@ style="font-family: 'SolaimanLipi', sans-serif;"
                     <td class="px-6 py-4 text-right text-xl font-medium">
                       <div class="flex justify-center gap-2">
                         <router-link
-                          :to="route('subjects_for_Admin.subject_setings_edit', { id: subject.id })"
+                          :to="{ name: 'subjectEdit', params: { id: subject.id } }"
                           class="inline-flex items-center p-1.5 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400 transition"
                           title="সংশোধন করুন"
                         >

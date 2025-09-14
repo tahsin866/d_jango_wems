@@ -18,7 +18,7 @@
           <form @submit.prevent="handleSubmit" @submit.stop class="space-y-10">
 
             <!-- Loading State -->
-            <div v-if="loadingData" class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <div v-if="loadingData" class="bg-blue-50 border border-blue-200 rounded-sm p-4 mb-4">
               <div class="flex items-center gap-2 text-blue-700">
                 <i class="fas fa-spinner fa-spin"></i>
                 <span>ডেটা লোড করা হচ্ছে...</span>
@@ -26,7 +26,7 @@
             </div>
 
             <!-- Loading State -->
-            <div v-else-if="loading" class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <div v-else-if="loading" class="bg-blue-50 border border-blue-200 rounded-sm p-4 mb-4">
               <div class="flex items-center gap-2 text-blue-700">
                 <i class="fas fa-spinner fa-spin"></i>
                 <span>ডেটা সংরক্ষণ করা হচ্ছে...</span>

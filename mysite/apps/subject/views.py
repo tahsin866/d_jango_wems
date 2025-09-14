@@ -419,14 +419,16 @@ class SubjectSettingsDetailView(APIView):
         """নির্দিষ্ট সাবজেক্ট সেটিংসের তথ্য ফেরত দেয়"""
         try:
             settings = SubjectSettings.objects.select_related(
-                'marhala_subject__marhala'
+                'marhala', 'subject'
             ).get(id=settings_id)
             
             serializer = SubjectSettingsSerializer(settings)
             
             return Response({
                 'success': True,
-                'data': serializer.data,
+                'data': {
+                    'subject_setting': serializer.data
+                },
                 'message': 'সাবজেক্ট সেটিংস তথ্য সফলভাবে প্রাপ্ত হয়েছে'
             }, status=status.HTTP_200_OK)
             
@@ -510,3 +512,118 @@ class SubjectSettingsDeleteView(APIView):
                 'data': {},
                 'message': f'সাবজেক্ট সেটিংস ডিলিটে সমস্যা: {str(e)}'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class GetSubjectDataView(APIView):
+    """মারহালা অনুযায়ী সাবজেক্ট তথ্য প্রদান - Laravel getsubjecData এর মতো"""
+    permission_classes = [AllowAny]
+    
+    def get(self, request, marhala_id):
+        """একটি নির্দিষ্ট মারহালার সব সাবজেক্টের তথ্য ফেরত দেয়"""
+        try:
+            # Get marhala details
+            marhala = Marhala.objects.values('id', 'marhala_name_bn').get(id=marhala_id)
+            
+            # Get subjects for this marhala
+            subjects = MarhalaSubject.objects.filter(marhala_id=marhala_id).values(
+                'id', 'name_bangla', 'subject_code'
+            )
+            
+            return Response({
+                'success': True,
+                'data': {
+                    'marhala': marhala,
+                    'subjects': list(subjects)
+                },
+                'message': 'মারহালা ও সাবজেক্ট তথ্য সফলভাবে প্রাপ্ত হয়েছে'
+            }, status=status.HTTP_200_OK)
+            
+        except Marhala.DoesNotExist:
+            return Response({
+                'success': False,
+                'data': {},
+                'message': 'মারহালা পাওয়া যায়নি'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'success': False,
+                'data': {},
+                'message': f'ডেটা প্রাপ্তিতে সমস্যা: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class UpdateSubjectSettingView(APIView):
+    """সাবজেক্ট সেটিংস আপডেট - Laravel updateSubjectSetting এর মতো"""
+    permission_classes = [AllowAny]
+    
+    def post(self, request, settings_id):
+        """সাবজেক্ট সেটিংস আপডেট করে (POST method for frontend compatibility)"""
+        try:
+            # Validation
+            required_fields = [
+                'marhala_id', 'subject_id', 'marhala_type', 'subject_names',
+                'student_type', 'syllabus_type', 'markaz_type', 'subject_type',
+                'total_marks', 'pass_marks', 'status'
+            ]
+            
+            for field in required_fields:
+                if field not in request.data:
+                    return Response({
+                        'success': False,
+                        'data': {},
+                        'message': f'{field} ফিল্ড আবশ্যক'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Check if status is valid
+            if request.data['status'] not in ['active', 'inactive']:
+                return Response({
+                    'success': False,
+                    'data': {},
+                    'message': 'স্ট্যাটাস active অথবা inactive হতে হবে'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Find and update the subject setting
+            subject_setting = SubjectSettings.objects.get(id=settings_id)
+            
+            # Update fields
+            subject_setting.marhala_id = request.data['marhala_id']
+            subject_setting.subject_id = request.data['subject_id']
+            subject_setting.marhala_type = request.data['marhala_type']
+            subject_setting.subject_names = request.data['subject_names']
+            subject_setting.student_type = request.data['student_type']
+            subject_setting.syllabus_type = request.data['syllabus_type']
+            subject_setting.markaz_type = request.data['markaz_type']
+            subject_setting.subject_type = request.data['subject_type']
+            subject_setting.total_marks = request.data['total_marks']
+            subject_setting.pass_marks = request.data['pass_marks']
+            subject_setting.status = request.data['status']
+            
+            # Update subject_code if available
+            if 'subject_code' in request.data:
+                subject_setting.subject_code = request.data['subject_code']
+            
+            subject_setting.save()
+            
+            return Response({
+                'success': True,
+                'data': {},
+                'message': 'বিষয় সেটাপ সঠিকভাবে আপডেট করা হয়েছে'
+            }, status=status.HTTP_200_OK)
+            
+        except SubjectSettings.DoesNotExist:
+            return Response({
+                'success': False,
+                'data': {},
+                'message': 'সাবজেক্ট সেটিংস পাওয়া যায়নি'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'success': False,
+                'data': {},
+                'message': f'সাবজেক্ট সেটিংস আপডেটে সমস্যা: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    def put(self, request, settings_id):
+        """সাবজেক্ট সেটিংস আপডেট করে (PUT method)"""
+        # Same logic as POST method
+        return self.post(request, settings_id)

@@ -12,7 +12,9 @@ from .views import (
     SubjectSettingsCreateView,
     SubjectSettingsDetailView,
     SubjectSettingsUpdateView,
-    SubjectSettingsDeleteView
+    SubjectSettingsDeleteView,
+    GetSubjectDataView,
+    UpdateSubjectSettingView
 )
 
 app_name = 'subject'
@@ -36,4 +38,8 @@ urlpatterns = [
     path('subject-settings/<int:settings_id>/', SubjectSettingsDetailView.as_view(), name='subject-settings-detail'),
     path('subject-settings/<int:settings_id>/update/', SubjectSettingsUpdateView.as_view(), name='subject-settings-update'),
     path('subject-settings/<int:settings_id>/delete/', SubjectSettingsDeleteView.as_view(), name='subject-settings-delete'),
+    
+    # নতুন Laravel-style endpoints
+    path('marhala/<int:marhala_id>/subjects/', GetSubjectDataView.as_view(), name='get-subject-data'),
+    path('subject-settings/<int:settings_id>/update-setting/', UpdateSubjectSettingView.as_view(), name='update-subject-setting'),
 ]

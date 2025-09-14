@@ -98,9 +98,16 @@ const routes = [
         path: '/setup/list',
         name: 'subjectSetup',
         component: () => import('@/views/Pages/Admin/setup/subject/list.vue'),
-        meta: { title: 'বিষয় তালিকা', requiresAuth: true, role: 'admin' },
+        meta: { title: 'বিষয় তালিকা', requiresAuth: true, role: 'admin' },
       },
 
+
+       {
+        path: '/setup/edit/:id',
+        name: 'subjectEdit',
+        component: () => import('@/views/Pages/Admin/setup/subject/edit.vue'),
+        meta: { title: 'বিষয় সংশোধন ', requiresAuth: true, role: 'admin' },
+      },
 
 // নেগরান/মুমতাহিন
 
@@ -141,6 +148,14 @@ const routes = [
     path: '/setup/list',
     redirect: '/admin/setup/list'
   },
+
+
+  {
+    path: '/setup/edit/:id',
+    redirect: (to: { params: { id: string } }) => `/admin/setup/edit/${to.params.id}`
+  },
+
+
   {
     path: '/setup/marhala/edit/:id',
     redirect: (to: { params: { id: string } }) => `/admin/setup/marhala/edit/${to.params.id}`

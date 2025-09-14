@@ -75,7 +75,7 @@ class SubjectSettings(models.Model):
     
     SUBJECT_TYPE_CHOICES = [
         ('মিইয়ারী', 'মিইয়ারী'),
-        ('গায়রে মিইয়ারী', 'গায়রে মিইয়ারী'),
+        ('গায়রে মি\'ইয়ারী', 'গায়রে মি\'ইয়ারী'),
     ]
     
     STATUS_CHOICES = [

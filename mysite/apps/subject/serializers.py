@@ -43,6 +43,8 @@ class SubjectSettingsSerializer(serializers.ModelSerializer):
     """সাবজেক্ট সেটিংস সিরিয়ালাইজার"""
     marhala_name = serializers.CharField(source='marhala.marhala_name_bn', read_only=True)
     related_subject_code = serializers.CharField(source='subject.subject_code', read_only=True)
+    marhala_id = serializers.IntegerField(source='marhala.id', read_only=True)
+    subject_id = serializers.IntegerField(source='subject.id', read_only=True)
     
     class Meta:
         model = SubjectSettings
@@ -50,6 +52,8 @@ class SubjectSettingsSerializer(serializers.ModelSerializer):
             'id',
             'marhala',
             'subject',
+            'marhala_id',
+            'subject_id',
             'marhala_name',
             'related_subject_code',
             'marhala_type',
