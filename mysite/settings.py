@@ -141,22 +141,58 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Cache configuration for performance optimization
+# Cache configuration - Using memory cache as fallback if Redis is not available
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
-        'TIMEOUT': 300,  # 5 minutes default timeout
+        'LOCATION': 'wems-cache',
         'OPTIONS': {
             'MAX_ENTRIES': 1000,
-            'CULL_FREQUENCY': 3,
-        }
+        },
+        'TIMEOUT': 300,  # 5 minutes default timeout
+        'KEY_PREFIX': 'wems',  # Prefix for all cache keys
+        'VERSION': 1,
+    },
+    'sessions': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache', 
+        'LOCATION': 'wems-sessions',
+        'TIMEOUT': 1800,  # 30 minutes for sessions
+        'KEY_PREFIX': 'wems_session',
     }
 }
 
-# Session configuration for better performance
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Use database sessions
-SESSION_CACHE_ALIAS = 'default'
+# Alternative Redis configuration (uncomment when Redis is available)
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django_redis.cache.RedisCache',
+#         'LOCATION': 'redis://127.0.0.1:6379/1',
+#         'OPTIONS': {
+#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+#             'CONNECTION_POOL_KWARGS': {
+#                 'max_connections': 50,
+#                 'retry_on_timeout': True,
+#             },
+#             'SERIALIZER': 'django_redis.serializers.json.JSONSerializer',
+#             'COMPRESSOR': 'django_redis.compressors.zlib.ZlibCompressor',
+#         },
+#         'TIMEOUT': 300,  # 5 minutes default timeout
+#         'KEY_PREFIX': 'wems',  # Prefix for all cache keys
+#         'VERSION': 1,
+#     },
+#     'sessions': {
+#         'BACKEND': 'django_redis.cache.RedisCache',
+#         'LOCATION': 'redis://127.0.0.1:6379/2',
+#         'OPTIONS': {
+#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+#         },
+#         'TIMEOUT': 1800,  # 30 minutes for sessions
+#         'KEY_PREFIX': 'wems_session',
+#     }
+# }
+
+# Session configuration for better performance with Redis
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'sessions'
 SESSION_COOKIE_AGE = 1800  # 30 minutes
 SESSION_COOKIE_HTTPONLY = False  # Allow frontend to access session
 SESSION_COOKIE_SAMESITE = None  # For cross-origin requests
@@ -213,3 +249,15 @@ CSRF_COOKIE_SECURE = False    # Only True in HTTPS production
 # Media files (uploads)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Cache timeout settings (in seconds)
+CACHE_TIMEOUT_SHORT = 300       # 5 minutes
+CACHE_TIMEOUT_MEDIUM = 900      # 15 minutes  
+CACHE_TIMEOUT_LONG = 3600       # 1 hour
+CACHE_TIMEOUT_VERY_LONG = 86400 # 24 hours
+
+# Cache key prefixes
+CACHE_KEY_PREFIX = 'wems'
+CACHE_MARHALA_LIST = f'{CACHE_KEY_PREFIX}:marhala:list'
+CACHE_SUBJECT_LIST = f'{CACHE_KEY_PREFIX}:subject:list'
+CACHE_SUBJECT_SETTINGS = f'{CACHE_KEY_PREFIX}:subject:settings'

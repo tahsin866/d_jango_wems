@@ -19,7 +19,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from .views import admin_dashboard_api, madrasa_dashboard_api
-from .sidebar_api import get_sidebar_data, test_menu_data
+from .sidebar_api import get_sidebar_data, test_menu_data, clear_sidebar_cache
 from .apps.users.auth_views import SecureSigninView, SecureLogoutView, get_user_profile, validate_route_access
 
 urlpatterns = [
@@ -41,6 +41,7 @@ urlpatterns = [
     path('api/madrasa/dashboard/', madrasa_dashboard_api),
     path('api/sidebar/', get_sidebar_data),
     path('api/test-menu/', test_menu_data),
+    path('api/clear-sidebar-cache/', clear_sidebar_cache),
 ]
 
 # Add media files serving in development

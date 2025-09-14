@@ -4,8 +4,10 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny
 from django.db.models import Count, Q
 from django.db import transaction
+from django.conf import settings
 from .models import Marhala, MarhalaSubject, SubjectSettings
 from .serializers import MarhalaWithCountsSerializer, MarhalaSerializer, MarhalaSubjectSerializer, SubjectSettingsSerializer
+from .cache import SubjectCache
 
 
 class MarhalaWithCountsView(APIView):
@@ -15,6 +17,18 @@ class MarhalaWithCountsView(APIView):
     def get(self, request):
         """মারহালা তালিকা কাউন্টস সহ ফেরত দেয়"""
         try:
+            # Try to get from cache first
+            cache_key = SubjectCache.MARHALA_WITH_COUNTS_KEY
+            cached_data = SubjectCache.get_cache(cache_key)
+            
+            if cached_data:
+                return Response({
+                    'success': True,
+                    'data': cached_data,
+                    'message': 'মারহালা তালিকা সফলভাবে প্রাপ্ত হয়েছে (ক্যাশ থেকে)',
+                    'cached': True
+                }, status=status.HTTP_200_OK)
+            
             # Django ORM দিয়ে counts সহ data fetch
             marhalas = Marhala.objects.annotate(
                 total_subjects=Count('subjects'),
@@ -25,10 +39,14 @@ class MarhalaWithCountsView(APIView):
             
             serializer = MarhalaWithCountsSerializer(marhalas, many=True)
             
+            # Cache the result
+            SubjectCache.set_cache(cache_key, serializer.data, settings.CACHE_TIMEOUT_MEDIUM)
+            
             return Response({
                 'success': True,
                 'data': serializer.data,
-                'message': 'মারহালা তালিকা সফলভাবে প্রাপ্ত হয়েছে'
+                'message': 'মারহালা তালিকা সফলভাবে প্রাপ্ত হয়েছে',
+                'cached': False
             }, status=status.HTTP_200_OK)
             
         except Exception as e:
@@ -46,13 +64,29 @@ class MarhalaListView(APIView):
     def get(self, request):
         """সব মারহালার তালিকা ফেরত দেয়"""
         try:
+            # Try to get from cache first
+            cache_key = SubjectCache.MARHALA_LIST_KEY
+            cached_data = SubjectCache.get_cache(cache_key)
+            
+            if cached_data:
+                return Response({
+                    'success': True,
+                    'data': cached_data,
+                    'message': 'মারহালা তালিকা সফলভাবে প্রাপ্ত হয়েছে (ক্যাশ থেকে)',
+                    'cached': True
+                }, status=status.HTTP_200_OK)
+            
             marhalas = Marhala.objects.all().order_by('id')
             serializer = MarhalaSerializer(marhalas, many=True)
+            
+            # Cache the result
+            SubjectCache.set_cache(cache_key, serializer.data, settings.CACHE_TIMEOUT_LONG)
             
             return Response({
                 'success': True,
                 'data': serializer.data,
-                'message': 'মারহালা তালিকা সফলভাবে প্রাপ্ত হয়েছে'
+                'message': 'মারহালা তালিকা সফলভাবে প্রাপ্ত হয়েছে',
+                'cached': False
             }, status=status.HTTP_200_OK)
             
         except Exception as e:
@@ -288,6 +322,10 @@ class MarhalaUpdateView(APIView):
                 if subjects_to_delete:
                     MarhalaSubject.objects.filter(id__in=subjects_to_delete).delete()
                 
+                # Invalidate relevant caches after updating marhala and subjects
+                SubjectCache.invalidate_pattern_cache('marhala:*')
+                SubjectCache.invalidate_pattern_cache('subject_settings:*')
+                
                 return Response({
                     'success': True,
                     'data': {
@@ -328,6 +366,10 @@ class MarhalaDeleteView(APIView):
                 # Delete marhala
                 marhala.delete()
                 
+                # Invalidate relevant caches after deleting marhala
+                SubjectCache.invalidate_pattern_cache('marhala:*')
+                SubjectCache.invalidate_pattern_cache('subject_settings:*')
+                
                 return Response({
                     'success': True,
                     'data': {},
@@ -357,6 +399,26 @@ class SubjectSettingsListView(APIView):
         try:
             marhala_id = request.query_params.get('marhala_id')
             
+            # Generate cache key based on query parameters
+            if marhala_id:
+                cache_key = SubjectCache.generate_key_with_params(
+                    SubjectCache.SUBJECT_SETTINGS_BY_MARHALA_KEY, 
+                    marhala_id=marhala_id
+                )
+            else:
+                cache_key = SubjectCache.SUBJECT_SETTINGS_LIST_KEY
+            
+            # Try to get from cache first
+            cached_data = SubjectCache.get_cache(cache_key)
+            
+            if cached_data:
+                return Response({
+                    'success': True,
+                    'data': cached_data,
+                    'message': 'সাবজেক্ট সেটিংস তালিকা সফলভাবে প্রাপ্ত হয়েছে (ক্যাশ থেকে)',
+                    'cached': True
+                }, status=status.HTTP_200_OK)
+            
             settings = SubjectSettings.objects.select_related(
                 'marhala', 'subject'
             ).order_by('marhala_id', 'subject_code')
@@ -366,10 +428,15 @@ class SubjectSettingsListView(APIView):
             
             serializer = SubjectSettingsSerializer(settings, many=True)
             
+            # Cache the result
+            timeout = SubjectCache.CACHE_TIMEOUT_SHORT if marhala_id else SubjectCache.CACHE_TIMEOUT_MEDIUM
+            SubjectCache.set_cache(cache_key, serializer.data, timeout)
+            
             return Response({
                 'success': True,
                 'data': serializer.data,
-                'message': 'সাবজেক্ট সেটিংস তালিকা সফলভাবে প্রাপ্ত হয়েছে'
+                'message': 'সাবজেক্ট সেটিংস তালিকা সফলভাবে প্রাপ্ত হয়েছে',
+                'cached': False
             }, status=status.HTTP_200_OK)
             
         except Exception as e:
@@ -391,6 +458,11 @@ class SubjectSettingsCreateView(APIView):
             
             if serializer.is_valid():
                 settings = serializer.save()
+                
+                # Invalidate relevant caches after creating new subject settings
+                SubjectCache.invalidate_pattern_cache('subject_settings:*')
+                SubjectCache.invalidate_pattern_cache('marhala:*')
+                
                 return Response({
                     'success': True,
                     'data': SubjectSettingsSerializer(settings).data,
@@ -418,18 +490,40 @@ class SubjectSettingsDetailView(APIView):
     def get(self, request, settings_id):
         """নির্দিষ্ট সাবজেক্ট সেটিংসের তথ্য ফেরত দেয়"""
         try:
+            # Generate cache key for specific subject setting
+            cache_key = SubjectCache.generate_key_with_params(
+                SubjectCache.SUBJECT_SETTING_DETAIL_KEY, 
+                id=settings_id
+            )
+            
+            # Try to get from cache first
+            cached_data = SubjectCache.get_cache(cache_key)
+            
+            if cached_data:
+                return Response({
+                    'success': True,
+                    'data': cached_data,
+                    'message': 'সাবজেক্ট সেটিংস তথ্য সফলভাবে প্রাপ্ত হয়েছে (ক্যাশ থেকে)',
+                    'cached': True
+                }, status=status.HTTP_200_OK)
+            
             settings = SubjectSettings.objects.select_related(
                 'marhala', 'subject'
             ).get(id=settings_id)
             
             serializer = SubjectSettingsSerializer(settings)
+            response_data = {
+                'subject_setting': serializer.data
+            }
+            
+            # Cache the result
+            SubjectCache.set_cache(cache_key, response_data, SubjectCache.CACHE_TIMEOUT_MEDIUM)
             
             return Response({
                 'success': True,
-                'data': {
-                    'subject_setting': serializer.data
-                },
-                'message': 'সাবজেক্ট সেটিংস তথ্য সফলভাবে প্রাপ্ত হয়েছে'
+                'data': response_data,
+                'message': 'সাবজেক্ট সেটিংস তথ্য সফলভাবে প্রাপ্ত হয়েছে',
+                'cached': False
             }, status=status.HTTP_200_OK)
             
         except SubjectSettings.DoesNotExist:
@@ -458,6 +552,18 @@ class SubjectSettingsUpdateView(APIView):
             
             if serializer.is_valid():
                 settings = serializer.save()
+                
+                # Invalidate relevant caches after updating subject settings
+                SubjectCache.invalidate_pattern_cache('subject_settings:*')
+                SubjectCache.invalidate_pattern_cache('marhala:*')
+                
+                # Also invalidate the specific setting detail cache
+                detail_cache_key = SubjectCache.generate_key_with_params(
+                    SubjectCache.SUBJECT_SETTING_DETAIL_KEY, 
+                    id=settings_id
+                )
+                SubjectCache.delete_cache(detail_cache_key)
+                
                 return Response({
                     'success': True,
                     'data': SubjectSettingsSerializer(settings).data,
@@ -494,6 +600,17 @@ class SubjectSettingsDeleteView(APIView):
             settings = SubjectSettings.objects.get(id=settings_id)
             settings.delete()
             
+            # Invalidate relevant caches after deleting subject settings
+            SubjectCache.invalidate_pattern_cache('subject_settings:*')
+            SubjectCache.invalidate_pattern_cache('marhala:*')
+            
+            # Also invalidate the specific setting detail cache
+            detail_cache_key = SubjectCache.generate_key_with_params(
+                SubjectCache.SUBJECT_SETTING_DETAIL_KEY, 
+                id=settings_id
+            )
+            SubjectCache.delete_cache(detail_cache_key)
+            
             return Response({
                 'success': True,
                 'data': {},
@@ -521,6 +638,21 @@ class GetSubjectDataView(APIView):
     def get(self, request, marhala_id):
         """একটি নির্দিষ্ট মারহালার সব সাবজেক্টের তথ্য ফেরত দেয়"""
         try:
+            # Try to get from cache first
+            cache_key = SubjectCache.generate_key_with_params(
+                SubjectCache.MARHALA_SUBJECTS_KEY, 
+                id=marhala_id
+            )
+            cached_data = SubjectCache.get_cache(cache_key)
+            
+            if cached_data:
+                return Response({
+                    'success': True,
+                    'data': cached_data,
+                    'message': 'মারহালা ও সাবজেক্ট তথ্য সফলভাবে প্রাপ্ত হয়েছে (ক্যাশ থেকে)',
+                    'cached': True
+                }, status=status.HTTP_200_OK)
+            
             # Get marhala details
             marhala = Marhala.objects.values('id', 'marhala_name_bn').get(id=marhala_id)
             
@@ -529,13 +661,19 @@ class GetSubjectDataView(APIView):
                 'id', 'name_bangla', 'subject_code'
             )
             
+            response_data = {
+                'marhala': marhala,
+                'subjects': list(subjects)
+            }
+            
+            # Cache the result
+            SubjectCache.set_cache(cache_key, response_data, settings.CACHE_TIMEOUT_MEDIUM)
+            
             return Response({
                 'success': True,
-                'data': {
-                    'marhala': marhala,
-                    'subjects': list(subjects)
-                },
-                'message': 'মারহালা ও সাবজেক্ট তথ্য সফলভাবে প্রাপ্ত হয়েছে'
+                'data': response_data,
+                'message': 'মারহালা ও সাবজেক্ট তথ্য সফলভাবে প্রাপ্ত হয়েছে',
+                'cached': False
             }, status=status.HTTP_200_OK)
             
         except Marhala.DoesNotExist:
