@@ -8,12 +8,14 @@ from .views import (
 )
 
 urlpatterns = [
-    # Laravel store_1 function এর মতো - POST request for creating exam setup
+    # Create (POST)
     path('exam-setups/', ExamSetupCreateView.as_view(), name='exam_setup_create'),
-    
-    # Other CRUD operations  
+    # List (GET)
     path('exam-setups/list/', ExamSetupListView.as_view(), name='exam_setup_list'),
+    # Detail (GET)
     path('exam-setups/<int:exam_id>/', ExamSetupDetailView.as_view(), name='exam_setup_detail'),
+    # Update (PUT)
     path('exam-setups/<int:exam_id>/update/', ExamSetupUpdateView.as_view(), name='exam_setup_update'),
+    # Delete (DELETE)
     path('exam-setups/<int:exam_id>/delete/', ExamSetupDeleteView.as_view(), name='exam_setup_delete'),
 ]

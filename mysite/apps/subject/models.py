@@ -12,10 +12,10 @@ class Marhala(models.Model):
         db_table = 'marhalas'
         verbose_name = 'মারহালা'
         verbose_name_plural = 'মারহালাসমূহ'
+        ordering = ['id']
 
     def __str__(self):
         return self.marhala_name_bn or self.marhala_name_en or str(self.id)
-
 
 class MarhalaSubject(models.Model):
     """মারহালা সাবজেক্ট মডেল - Existing Table"""
@@ -24,7 +24,6 @@ class MarhalaSubject(models.Model):
         ('SRtype_1', 'শুধু ছেলেদের'),
         ('SRtype_0', 'শুধু মেয়েদের'),
     ]
-    
     marhala = models.ForeignKey(
         Marhala, 
         on_delete=models.CASCADE, 
@@ -48,42 +47,35 @@ class MarhalaSubject(models.Model):
         db_table = 'marhala_subjects'
         verbose_name = 'মারহালা সাবজেক্ট'
         verbose_name_plural = 'মারহালা সাবজেক্টসমূহ'
+        ordering = ['marhala_id', 'name_bangla']
 
     def __str__(self):
         return f"{self.marhala.marhala_name_bn} - {self.name_bangla}"
 
-
 class SubjectSettings(models.Model):
     """সাবজেক্ট সেটিংস মডেল - subject_settings table"""
-    
     STUDENT_TYPE_CHOICES = [
         ('ছাত্র', 'ছাত্র'),
         ('ছাত্রী', 'ছাত্রী'),
         ('উভয়', 'উভয়'),
     ]
-    
     SYLLABUS_TYPE_CHOICES = [
         ('আবশ্যিক', 'আবশ্যিক'),
         ('নৈর্বাচনিক', 'নৈর্বাচনিক'),
     ]
-    
     MARKAZ_TYPE_CHOICES = [
         ('দরসিয়াত', 'দরসিয়াত'),
         ('হিফজুল কোরআন', 'হিফজুল কোরআন'),
         ('কিরাআত', 'কিরাআত'),
     ]
-    
     SUBJECT_TYPE_CHOICES = [
         ('মিইয়ারী', 'মিইয়ারী'),
         ('গায়রে মি\'ইয়ারী', 'গায়রে মি\'ইয়ারী'),
     ]
-    
     STATUS_CHOICES = [
         ('active', 'সক্রিয়'),
         ('inactive', 'নিষ্ক্রিয়'),
     ]
-    
-    # ForeignKey relationships to existing tables
     marhala = models.ForeignKey(
         Marhala, 
         on_delete=models.CASCADE, 
@@ -96,8 +88,6 @@ class SubjectSettings(models.Model):
         db_column='subject_id',
         verbose_name="সাবজেক্ট"
     )
-    
-    # Other direct fields
     marhala_type = models.CharField(max_length=100, verbose_name="মারহালার ধরন")
     subject_names = models.CharField(max_length=255, verbose_name="সাবজেক্টের নাম")
     student_type = models.CharField(
@@ -138,7 +128,7 @@ class SubjectSettings(models.Model):
 
     class Meta:
         db_table = 'subject_settings'
-        managed = True  # Django will manage this table
+        managed = True
         verbose_name = 'সাবজেক্ট সেটিংস'
         verbose_name_plural = 'সাবজেক্ট সেটিংসমূহ'
         ordering = ['marhala_id', 'subject_names']

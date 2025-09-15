@@ -38,7 +38,7 @@
                 </svg>
               </div>
               <div class="ml-3">
-                <p class="text-sm font-medium">{{ message }}</p>
+                <p class="text-xl font-medium">{{ message }}</p>
               </div>
             </div>
           </div>
@@ -56,7 +56,7 @@
               </div>
               <div class="ml-4">
                 <h3 class="text-xl font-semibold text-white">নতুন পরীক্ষা যোগ করুন</h3>
-                <p class="text-slate-200 text-sm">সমস্ত তথ্য সঠিকভাবে পূরণ করুন</p>
+                <p class="text-slate-200 text-xl">সমস্ত তথ্য সঠিকভাবে পূরণ করুন</p>
               </div>
             </div>
           </div>
@@ -73,7 +73,7 @@
                   পরীক্ষার তথ্য
                 </h4>
                 <div class="space-y-2">
-                  <label for="examName" class="block text-sm font-semibold text-gray-700">
+                  <label for="examName" class="block text-xl font-semibold text-gray-700">
                     পরীক্ষার নাম
                     <span class="text-red-500 ml-1">*</span>
                   </label>
@@ -84,13 +84,13 @@
                     required
                     placeholder="উদাহরণ: ২০২৫ সালের বার্ষিক পরীক্ষা"
                     :class="[
-                      'w-full px-4 py-3 border rounded-lg transition-all duration-200 focus:outline-none focus:ring-2',
+                      'w-full  text-xl px-4 py-3 border rounded-lg transition-all duration-200 focus:outline-none focus:ring-2',
                       errors.examName
                         ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                         : 'border-gray-300 focus:ring-slate-500 focus:border-slate-500'
                     ]"
                   />
-                  <p v-if="errors.examName" class="text-red-600 text-sm mt-1">{{ errors.examName }}</p>
+                  <p v-if="errors.examName" class="text-red-600 text-xl mt-1">{{ errors.examName }}</p>
                 </div>
               </div>
 
@@ -106,7 +106,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <!-- Arabic Year (Hijri) -->
                   <div class="space-y-2">
-                    <label for="arabicYear" class="block text-sm font-semibold text-gray-700">
+                    <label for="arabicYear" class="block text-xl font-semibold text-gray-700">
                       আরবি সন (হিজরি)
                       <span class="text-red-500 ml-1">*</span>
                     </label>
@@ -118,7 +118,7 @@
                         required
                         placeholder="১৪৪৭"
                         :class="[
-                          'w-full px-4 py-3 border rounded-lg transition-all duration-200 focus:outline-none focus:ring-2',
+                          'w-full text-xl px-4 py-3 border rounded-lg transition-all duration-200 focus:outline-none focus:ring-2',
                           errors.arabicYear
                             ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                             : 'border-gray-300 focus:ring-slate-500 focus:border-slate-500'
@@ -130,12 +130,12 @@
                         </svg>
                       </div>
                     </div>
-                    <p v-if="errors.arabicYear" class="text-red-600 text-sm">{{ errors.arabicYear }}</p>
+                    <p v-if="errors.arabicYear" class="text-red-600 text-xl">{{ errors.arabicYear }}</p>
                   </div>
 
                   <!-- Bangla Year -->
                   <div class="space-y-2">
-                    <label for="banglaYear" class="block text-sm font-semibold text-gray-700">
+                    <label for="banglaYear" class="block text-xl font-semibold text-gray-700">
                       বাংলা সন (বঙ্গাব্দ)
                       <span class="text-red-500 ml-1">*</span>
                     </label>
@@ -147,7 +147,7 @@
                         required
                         placeholder="১৪৩২"
                         :class="[
-                          'w-full px-4 py-3 border rounded-lg transition-all duration-200 focus:outline-none focus:ring-2',
+                          'w-full text-xl px-4 py-3 border rounded-lg transition-all duration-200 focus:outline-none focus:ring-2',
                           errors.banglaYear
                             ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                             : 'border-gray-300 focus:ring-slate-500 focus:border-slate-500'
@@ -159,12 +159,12 @@
                         </svg>
                       </div>
                     </div>
-                    <p v-if="errors.banglaYear" class="text-red-600 text-sm">{{ errors.banglaYear }}</p>
+                    <p v-if="errors.banglaYear" class="text-red-600 text-xl">{{ errors.banglaYear }}</p>
                   </div>
 
                   <!-- English Year -->
                   <div class="space-y-2">
-                    <label for="englishYear" class="block text-sm font-semibold text-gray-700">
+                    <label for="englishYear" class="block text-xl font-semibold text-gray-700">
                       ইংরেজি সন (ঈসাব্দ)
                       <span class="text-red-500 ml-1">*</span>
                     </label>
@@ -178,7 +178,7 @@
                         max="2030"
                         placeholder="২০২৫"
                         :class="[
-                          'w-full px-4 py-3 border rounded-lg transition-all duration-200 focus:outline-none focus:ring-2',
+                          'w-full text-xl px-4 py-3 border rounded-lg transition-all duration-200 focus:outline-none focus:ring-2',
                           errors.englishYear
                             ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                             : 'border-gray-300 focus:ring-slate-500 focus:border-slate-500'
@@ -190,7 +190,7 @@
                         </svg>
                       </div>
                     </div>
-                    <p v-if="errors.englishYear" class="text-red-600 text-sm">{{ errors.englishYear }}</p>
+                    <p v-if="errors.englishYear" class="text-red-600 text-xl">{{ errors.englishYear }}</p>
                   </div>
                 </div>
               </div>
@@ -199,14 +199,14 @@
 
               <!-- Form Actions -->
               <div class="flex items-center justify-between pt-6 border-t border-gray-200">
-                <div class="text-sm text-gray-500">
+                <div class="text-xl text-gray-500">
                   <span class="text-red-500">*</span> চিহ্নিত ক্ষেত্রগুলি বাধ্যতামূলক
                 </div>
                 <div class="flex space-x-4">
                   <button
                     type="button"
                     @click="resetForm"
-                    class="px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-all duration-200"
+                    class="px-6 py-3 border border-gray-300 rounded-lg text-xl font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-all duration-200"
                   >
                     <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -217,7 +217,7 @@
                     type="submit"
                     :disabled="isSubmitting || !isFormValid"
                     :class="[
-                      'px-8 py-3 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2',
+                      'px-8 py-3 rounded-lg text-xl font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2',
                       isSubmitting || !isFormValid
                         ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
                         : 'bg-slate-700 text-white hover:bg-slate-800 focus:ring-slate-500 shadow-lg hover:shadow-xl transform hover:scale-105'

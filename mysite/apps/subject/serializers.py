@@ -1,14 +1,11 @@
 from rest_framework import serializers
 from .models import Marhala, MarhalaSubject, SubjectSettings
 
-
 class MarhalaSubjectSerializer(serializers.ModelSerializer):
     """মারহালা সাবজেক্ট সিরিয়ালাইজার"""
-    
     class Meta:
         model = MarhalaSubject
         fields = '__all__'
-
 
 class MarhalaWithCountsSerializer(serializers.ModelSerializer):
     """মারহালা উইথ কাউন্টস সিরিয়ালাইজার"""
@@ -16,7 +13,6 @@ class MarhalaWithCountsSerializer(serializers.ModelSerializer):
     male_subjects = serializers.IntegerField(read_only=True)
     female_subjects = serializers.IntegerField(read_only=True)
     both_subjects = serializers.IntegerField(read_only=True)
-    
     class Meta:
         model = Marhala
         fields = [
@@ -30,14 +26,11 @@ class MarhalaWithCountsSerializer(serializers.ModelSerializer):
             'both_subjects'
         ]
 
-
 class MarhalaSerializer(serializers.ModelSerializer):
     """মারহালা সিরিয়ালাইজার"""
-    
     class Meta:
         model = Marhala
         fields = '__all__'
-
 
 class SubjectSettingsSerializer(serializers.ModelSerializer):
     """সাবজেক্ট সেটিংস সিরিয়ালাইজার"""
@@ -45,7 +38,6 @@ class SubjectSettingsSerializer(serializers.ModelSerializer):
     related_subject_code = serializers.CharField(source='subject.subject_code', read_only=True)
     marhala_id = serializers.IntegerField(source='marhala.id', read_only=True)
     subject_id = serializers.IntegerField(source='subject.id', read_only=True)
-    
     class Meta:
         model = SubjectSettings
         fields = [
