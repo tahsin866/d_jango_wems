@@ -431,7 +431,7 @@
             </svg>
             সব রিসেট করুন
           </button>
-          <button @click="submit"
+          <button @click="updateAllFees"
             class="inline-flex items-center px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-500 border border-transparent rounded-lg text-white hover:from-emerald-700 hover:to-teal-600 focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition duration-150 shadow-md">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
               stroke="currentColor">
@@ -447,6 +447,45 @@
 </template>
 
 <script setup lang="ts">
+// সব ফি একসাথে আপডেট করার ফাংশন
+async function updateAllFees() {
+  let successCount = 0;
+  let failCount = 0;
+  for (const row of rows.value) {
+    if (row.id) {
+      // examName বাদ দিয়ে শুধু valid ফিল্ড পাঠান
+      const payload = {
+        exam_setup: row.exam_setup,
+        reg_date_from: row.dateFrom1,
+        reg_date_to: row.dateTo1,
+        reg_regular_fee: row.fee1,
+        reg_irregular_jemni: row.invest1Men,
+        reg_irregular_manonnoyon: row.invest1Madan,
+        reg_irregular_others: row.invest1Others,
+        late_date_from: row.dateFrom2,
+        late_date_to: row.dateTo2,
+        late_regular_fee: row.fee2,
+        late_irregular_jemni: row.invest2Men,
+        late_irregular_manonnoyon: row.invest2Madan,
+        late_irregular_others: row.invest2Others
+      };
+      try {
+        const response = await axios.put(
+          `http://127.0.0.1:8000/api/central-exam/exam-fees/${row.id}/update/`,
+          payload
+        );
+        if (response.data.success) {
+          successCount++;
+        } else {
+          failCount++;
+        }
+      } catch (error) {
+        failCount++;
+      }
+    }
+  }
+  alert(`সফলভাবে আপডেট হয়েছে: ${successCount} | ব্যর্থ: ${failCount}`);
+}
 
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
@@ -610,37 +649,6 @@ function resetForm() {
 function downloadExcel() {
   alert('এক্সেল ডাউনলোড ফাংশন বাস্তবায়ন করা হবে।')
 }
-async function submit() {
-  // Prepare payload for bulk insert
-  const fees = rows.value.map(row => ({
-    exam_setup: examSetup.value?.id,
-    exam_name: row.examName,
-    reg_date_from: row.dateFrom1,
-    reg_date_to: row.dateTo1,
-    reg_regular_fee: row.fee1,
-    reg_irregular_jemni: row.invest1Men,
-    reg_irregular_manonnoyon: row.invest1Madan,
-    reg_irregular_others: row.invest1Others,
-    late_date_from: row.dateFrom2,
-    late_date_to: row.dateTo2,
-    late_regular_fee: row.fee2,
-    late_irregular_jemni: row.invest2Men,
-    late_irregular_manonnoyon: row.invest2Madan,
-    late_irregular_others: row.invest2Others
-  }));
-  try {
-    const response = await axios.post('http://127.0.0.1:8000/api/central-exam/exam-fees/bulk-create/', { fees });
-    if (response.data.success) {
-      alert('পরীক্ষার ফি সফলভাবে সংরক্ষণ করা হয়েছে!');
-    } else {
-      alert('সংরক্ষণে সমস্যা হয়েছে: ' + (response.data.message || 'Unknown error'));
-      console.error(response.data.errors);
-    }
-  } catch (error) {
-    alert('API তে সমস্যা হয়েছে!');
-    console.error(error);
-  }
-}
 async function submitUpdate(feeId, updatedData) {
   try {
     const response = await axios.put(
@@ -671,10 +679,32 @@ const fetchMarhalaNames = async () => {
     }));
   }
 };
+const fetchExamFees = async () => {
+  const response = await axios.get(`http://127.0.0.1:8000/api/central-exam/exam-fees/by-setup/?exam_setup=${examSetup.value?.id}`);
+  if (response.data.success) {
+    // response.data.data থেকে rows.value সেট করুন
+    rows.value = response.data.data.map(fee => ({
+      examName: '', // মারহালা নাম backend থেকে না এলে, ফাঁকা রাখুন বা mapping করুন
+      dateFrom1: fee.reg_date_from,
+      dateTo1: fee.reg_date_to,
+      fee1: Number(fee.reg_regular_fee),
+      invest1Men: Number(fee.reg_irregular_jemni),
+      invest1Madan: Number(fee.reg_irregular_manonnoyon),
+      invest1Others: Number(fee.reg_irregular_others),
+      dateFrom2: fee.late_date_from,
+      dateTo2: fee.late_date_to,
+      fee2: Number(fee.late_regular_fee),
+      invest2Men: Number(fee.late_irregular_jemni),
+      invest2Madan: Number(fee.late_irregular_manonnoyon),
+      invest2Others: Number(fee.late_irregular_others),
+      id: fee.id // future update-এর জন্য
+    }));
+  }
+};
 
 onMounted(() => {
   expandedCards.value = { 0: true }
   activeTab.value = { 0: 'regular' }
-  fetchMarhalaNames()
+  fetchExamFees()
 });
 </script>
