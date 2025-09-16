@@ -331,24 +331,24 @@
               </RouterLink>
                 </td>
                 <td class="px-6 py-4">
-                  <SplitButton
-                    :model="[
-                      { label: 'নিবন্ধন তৈরি', command: () => onRegisterCreate(exam) },
-                      { label: 'সংশোধন', command: () => onRegisterEdit(exam) }
-                    ]"
-                    label="নিবন্ধন সেটাপ"
-                    class="p-button-primary"
-                  />
+  <SplitButton
+    :model="[
+      { label: 'নিবন্ধন তৈরি', command: () => onInclusionCreate() },
+      { label: 'সংশোধন', command: () => onEdit(editId) }
+    ]"
+    label="নিবন্ধন সেটাপ"
+    class="p-button-secondary"
+  />
                 </td>
                 <td class="px-6 py-4">
-                  <SplitButton
-                    :model="[
-                      { label: 'নিবন্ধন তৈরি', command: () => onInclusionCreate(exam) },
-                      { label: 'সংশোধন', command: () => onInclusionEdit(exam) }
-                    ]"
-                    label="অন্তর্ভুক্তি সেটাপ"
-                    class="p-button-secondary"
-                  />
+                 <SplitButton
+  :model="[
+    { label: 'নিবন্ধন তৈরি', command: () => onInclusionCreate() },
+    { label: 'সংশোধন', command: () => router.push('/central/exam/FeeSetups') }
+  ]"
+  label="অন্তর্ভুক্তি সেটাপ"
+  class="p-button-secondary"
+/>
                 </td>
                 <td class="px-6 py-4">
                   <SplitButton
@@ -482,18 +482,27 @@ interface ExamSetup {
 const router = useRouter()
 
 // SplitButton Actions
-const onRegisterCreate = (exam: ExamSetup) => {
-  router.push(`/central/exam/${exam.id}/register/create`)
-}
-const onRegisterEdit = (exam: ExamSetup) => {
-  router.push(`/central/exam/${exam.id}/register/edit`)
-}
-const onInclusionCreate = (exam: ExamSetup) => {
-  router.push(`/central/exam/${exam.id}/inclusion/create`)
-}
-const onInclusionEdit = (exam: ExamSetup) => {
-  router.push(`/central/exam/${exam.id}/inclusion/edit`)
-}
+// const onRegisterCreate = (exam: ExamSetup) => {
+//   router.push(`/central/exam/${exam.id}/register/create`)
+// }
+// const onRegisterEdit = (exam: ExamSetup) => {
+//   router.push(`/central/exam/${exam.id}/register/edit`)
+// }
+const onInclusionCreate = () => {
+  router.push('/central/exam/FeeSetups');
+};
+
+// "সংশোধন" ফাংশন, id প্যারামিটার হিসেবে দিতে হবে
+const onEdit = (id) => {
+  router.push(`/central/exam/FeeEdit/${id}`);
+};
+
+// উদাহরণ id, তুমি ডাটার থেকে নিতে পারো
+const editId = 123;
+
+
+
+// এখানে সংশোধন অপশন /central/exam/FeeSetups রাউটে রিডাইরেক্ট করবে
 const onOtherCreate = (exam: ExamSetup) => {
   router.push(`/central/exam/${exam.id}/other/create`)
 }

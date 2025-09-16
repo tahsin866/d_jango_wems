@@ -6,10 +6,13 @@ from django.db.models import Count, Q
 from django.db import transaction
 from django.conf import settings
 from .models import Marhala, MarhalaSubject, SubjectSettings
+from mysite.apps.CentralExam.models import ExamFee
+from mysite.apps.CentralExam.models import ExamFee
 from .serializers import (
     MarhalaWithCountsSerializer, MarhalaSerializer,
     MarhalaSubjectSerializer, SubjectSettingsSerializer
 )
+from mysite.apps.CentralExam.serializers import ExamFeeSerializer
 from .cache import SubjectCache
 
 # ====== Utility Functions ======
@@ -592,3 +595,16 @@ class UpdateSubjectSettingView(APIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     def put(self, request, settings_id):
         return self.post(request, settings_id)
+
+
+class ExamFeeListBySetupView(APIView):
+    """একটি পরীক্ষার সব ফি দেখার API (GET)"""
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        exam_setup_id = request.GET.get('exam_setup')
+        if not exam_setup_id:
+            return Response({'success': False, 'message': 'exam_setup id আবশ্যক'}, status=status.HTTP_400_BAD_REQUEST)
+        fees = ExamFee.objects.filter(exam_setup_id=exam_setup_id)
+        serializer = ExamFeeSerializer(fees, many=True)
+        return Response({'success': True, 'data': serializer.data}, status=status.HTTP_200_OK)

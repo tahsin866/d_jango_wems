@@ -641,6 +641,23 @@ async function submit() {
     console.error(error);
   }
 }
+async function submitUpdate(feeId, updatedData) {
+  try {
+    const response = await axios.put(
+      `http://127.0.0.1:8000/api/central-exam/exam-fees/${feeId}/update/`,
+      updatedData
+    );
+    if (response.data.success) {
+      alert('ফি সফলভাবে আপডেট হয়েছে!');
+    } else {
+      alert('আপডেটে সমস্যা: ' + (response.data.message || 'Unknown error'));
+      console.error(response.data.errors);
+    }
+  } catch (error) {
+    alert('API তে সমস্যা হয়েছে!');
+    console.error(error);
+  }
+}
 const fetchMarhalaNames = async () => {
   const response = await axios.get('http://127.0.0.1:8000/api/marhalas/');
   if (response.data.success) {

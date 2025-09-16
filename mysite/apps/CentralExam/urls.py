@@ -4,18 +4,21 @@ from .views import (
     ExamSetupListView,
     ExamSetupDetailView,
     ExamSetupUpdateView,
-    ExamSetupDeleteView
+    ExamSetupDeleteView,
+    ExamFeeBulkCreateView,
+    ExamFeeUpdateView,
+    ExamFeeDetailView,
+    ExamFeeListBySetupView,
 )
 
 urlpatterns = [
-    # Create (POST)
     path('exam-setups/', ExamSetupCreateView.as_view(), name='exam_setup_create'),
-    # List (GET)
     path('exam-setups/list/', ExamSetupListView.as_view(), name='exam_setup_list'),
-    # Detail (GET)
     path('exam-setups/<int:exam_id>/', ExamSetupDetailView.as_view(), name='exam_setup_detail'),
-    # Update (PUT)
     path('exam-setups/<int:exam_id>/update/', ExamSetupUpdateView.as_view(), name='exam_setup_update'),
-    # Delete (DELETE)
     path('exam-setups/<int:exam_id>/delete/', ExamSetupDeleteView.as_view(), name='exam_setup_delete'),
+    path('exam-fees/bulk-create/', ExamFeeBulkCreateView.as_view(), name='exam-fee-bulk-create'),
+    path('exam-fees/<int:fee_id>/update/', ExamFeeUpdateView.as_view(), name='exam-fee-update'),
+    path('exam-fees/<int:fee_id>/', ExamFeeDetailView.as_view(), name='exam-fee-detail'),
+    path('exam-fees/by-setup/', ExamFeeListBySetupView.as_view(), name='exam-fee-list-by-setup'),
 ]

@@ -14,7 +14,8 @@ from .views import (
     SubjectSettingsUpdateView,
     SubjectSettingsDeleteView,
     GetSubjectDataView,
-    UpdateSubjectSettingView
+    UpdateSubjectSettingView,
+
 )
 
 app_name = 'subject'
@@ -42,4 +43,7 @@ urlpatterns = [
     # নতুন Laravel-style endpoints
     path('marhala/<int:marhala_id>/subjects/', GetSubjectDataView.as_view(), name='get-subject-data'),
     path('subject-settings/<int:settings_id>/update-setting/', UpdateSubjectSettingView.as_view(), name='update-subject-setting'),
+
+    # Exam fees by setup
+
 ]

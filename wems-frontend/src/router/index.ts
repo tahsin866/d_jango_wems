@@ -128,6 +128,21 @@ const routes = [
       },
 
 
+       {
+        path: '/central/exam/FeeSetups',
+        name: 'CentralExamFeeSetups',
+        component: () => import('@/views/Pages/Admin/setup/CentralExam/FeeSetups.vue'),
+        meta: { title: 'সেন্ট্রাল এক্সাম ফি সেটআপ', requiresAuth: true, role: 'admin' },
+      },
+
+{
+        path: '/central/exam/FeeEdit/:id',
+        name: 'CentralExamFeeEdit',
+        component: () => import('@/views/Pages/Admin/setup/CentralExam/FeeEdit.vue'),
+        meta: { title: 'সেন্ট্রাল এক্সাম ফি সম্পাদনা', requiresAuth: true, role: 'admin' },
+      },
+
+
  {
         path: '/central/exam/edit/:id',
         name: 'CentralExamEdit',
@@ -178,6 +193,9 @@ const routes = [
     redirect: '/admin/setup/list'
   },
 
+// সেন্ট্রাল পরীক্ষা
+
+
   {
     path: '/central-exam/setup',
     redirect: '/admin/central-exam/setup'
@@ -188,6 +206,17 @@ const routes = [
     path: '/central/exam/Create',
     redirect: '/admin/CentralExam/Create'
   },
+
+   {
+    path: '/central/exam/FeeSetups',
+    redirect: '/admin/CentralExamFeeSetups/FeeSetups'
+  },
+
+ {
+    path: '/central/exam/FeeEdit/:id',
+      redirect: (to: { params: { id: string } }) => `/admin/CentralExam/FeeEdit/${to.params.id}`
+  },
+
 
   {
     path: '/central/exam/edit/:id',

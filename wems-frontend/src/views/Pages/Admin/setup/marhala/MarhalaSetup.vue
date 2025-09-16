@@ -81,9 +81,9 @@
               <td class="text-center px-4 py-2">{{ marhala.female }}</td>
               <td class="text-center px-4 py-2">{{ marhala.high }}</td>
               <td class="px-4 py-2 flex gap-2 justify-center">
-                <button class="bg-emerald-600 text-white px-3 py-1 rounded text-xl font-bold hover:bg-emerald-700 transition flex items-center gap-1">
+                <!-- <button class="bg-emerald-600 text-white px-3 py-1 rounded text-xl font-bold hover:bg-emerald-700 transition flex items-center gap-1">
                   <i class="fas fa-eye"></i> বিস্তারিত
-                </button>
+                </button> -->
                 <button
                   @click="editMarhala(marhala)"
                   class="bg-gray-100 text-gray-600 px-3 py-1 rounded text-xl font-bold hover:bg-gray-200 transition flex items-center gap-1">

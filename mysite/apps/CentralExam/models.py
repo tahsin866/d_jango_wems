@@ -15,5 +15,33 @@ class ExamSetup(models.Model):
         verbose_name_plural = 'কেন্দ্রীয় পরীক্ষা সেটআপসমূহ'
         ordering = ['-created_at']  # সর্বশেষ তৈরি আগে
 
+
     def __str__(self):
         return f"{self.exam_name} - {self.bangla_year}"
+
+
+class ExamFee(models.Model):
+    exam_setup = models.ForeignKey(ExamSetup, on_delete=models.CASCADE, related_name='fees', null=True, blank=True)
+    reg_date_from = models.DateField(null=True, blank=True)
+    reg_date_to = models.DateField(null=True, blank=True)
+    reg_regular_fee = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    reg_irregular_jemni = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    reg_irregular_manonnoyon = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    reg_irregular_others = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    late_date_from = models.DateField(null=True, blank=True)
+    late_date_to = models.DateField(null=True, blank=True)
+    late_regular_fee = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    late_irregular_jemni = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    late_irregular_manonnoyon = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    late_irregular_others = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'exam_fees'
+        verbose_name = 'Exam Fee'
+        verbose_name_plural = 'Exam Fees'
+        ordering = ['id']
+
+    def __str__(self):
+        return f"ExamFee ({self.exam_setup_id})"
