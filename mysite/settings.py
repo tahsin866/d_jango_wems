@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'mysite.apps.school',
     'mysite.apps.subject',  # New subject app
     'mysite.apps.CentralExam',  # Central Exam app
+    'mysite.apps.Markaz',  # Markaz app added
 ]
 
 MIDDLEWARE = [
@@ -262,3 +263,6 @@ CACHE_KEY_PREFIX = 'wems'
 CACHE_MARHALA_LIST = f'{CACHE_KEY_PREFIX}:marhala:list'
 CACHE_SUBJECT_LIST = f'{CACHE_KEY_PREFIX}:subject:list'
 CACHE_SUBJECT_SETTINGS = f'{CACHE_KEY_PREFIX}:subject:settings'
+
+# Redis URL configuration
+REDIS_URL = "redis://localhost:6379/0"

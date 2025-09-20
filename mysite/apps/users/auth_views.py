@@ -14,6 +14,7 @@ import jwt
 import json
 from datetime import datetime, timedelta
 import bcrypt
+from .auth_cache import cache_user_auth, get_cached_user_auth
 
 class SecureAuthMixin:
     """Mixin for secure authentication methods"""
@@ -79,6 +80,33 @@ class SecureSigninView(View, SecureAuthMixin):
         return response
 
     def post(self, request):
+        # Redis cache key based on username
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            username = data.get('email') or data.get('phone') or data.get('phone_or_email')
+            password = data.get('password')
+            cache_key = f"user_auth:{username}"
+            cached = get_cached_user_auth(cache_key)
+            if cached:
+                print(f"✅ User authenticated from Redis cache: {username}")
+                token = cached['access_token']
+                dashboard_url = cached['redirect']
+                permissions = cached['permissions']
+                response_data = {
+                    'success': True,
+                    'access_token': token,
+                    'user_type': cached['user_type'],
+                    'user_id': cached['user_id'],
+                    'redirect': dashboard_url,
+                    'permissions': permissions
+                }
+                response = JsonResponse(response_data)
+                response["Access-Control-Allow-Origin"] = "http://localhost:5173"
+                response["Access-Control-Allow-Credentials"] = "true"
+                return response
+        except Exception as e:
+            print(f"Redis cache error: {e}")
+        # ...existing code...
         try:
             print(f"🔐 Secure login attempt received")
             data = json.loads(request.body.decode('utf-8'))
@@ -134,6 +162,8 @@ class SecureSigninView(View, SecureAuthMixin):
             
             print(f"✅ Login successful, redirecting to: {dashboard_url}")
             
+            # Cache the login result in Redis for 1 hour
+            cache_user_auth(cache_key, response_data, expire=3600)
             response = JsonResponse(response_data)
             response["Access-Control-Allow-Origin"] = "http://localhost:5173"
             response["Access-Control-Allow-Credentials"] = "true"

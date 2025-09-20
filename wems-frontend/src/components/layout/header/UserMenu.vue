@@ -73,7 +73,8 @@ import {
   userEmail,
   displayAvatar,
   isAdmin,
-  clearProfile
+  clearProfile,
+  fetchUserProfile
 } from '@/stores/userProfile'
 
 const dropdownOpen = ref(false)
@@ -112,6 +113,7 @@ const handleClickOutside = (event: MouseEvent) => {
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
+  fetchUserProfile() // Add this line
 })
 
 onUnmounted(() => {

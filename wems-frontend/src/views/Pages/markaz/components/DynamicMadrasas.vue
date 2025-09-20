@@ -16,12 +16,20 @@
 
             <AutoComplete
               v-model="row.searchQuery"
-              :suggestions="getSuggestions(row)"
-              @complete="(e) => searchMadrasas(e, row)"
-              @item-select="(evt) => emit('select-option', evt.value as MadrashaType, row)"
+              :suggestions="getSuggestions(row, index)"
+              :optionLabel="'name'"
+              @complete="(e) => searchMadrasas(e, row, index)"
+              @item-select="(evt) => {
+                const elhaq = evt.value.elhaqno || evt.value.ElhaqNo || '';
+                row.searchQuery = elhaq
+                  ? `${evt.value.name} (ইলহাক: ${elhaq})`
+                  : evt.value.name;
+                row.madrasa_id = evt.value.id;
+                emit('select-option', evt.value as MadrashaType, row);
+              }"
               @focus="() => preloadSuggestions(row)"
               :delay="0"
-              :minLength="0"
+              :minLength="1"
               :showEmptyMessage="true"
               emptyMessage="কোন মাদরাসা পাওয়া যায়নি"
               placeholder="মাদরাসার নাম বা ইলহাক নম্বর দিয়ে খুঁজুন"
@@ -29,11 +37,9 @@
             >
               <template #option="{ option }">
                 <div>
-                  <div class="font-medium">{{ option.name }}</div>
-                  <div class="text-sm text-gray-600">ইলহাক: {{ option.ElhaqNo }}</div>
+                  <div class="font-medium">{{ option.name }} <span v-if="option.elhaqno">(ইলহাক: {{ option.elhaqno }})</span></div>
                 </div>
               </template>
-
               <template #empty>
                 <div class="p-2 text-gray-500">কোন মাদরাসা পাওয়া যায়নি</div>
               </template>
@@ -233,7 +239,7 @@ import InputNumber from 'primevue/inputnumber';
 export interface MadrashaType {
   id?: number | string;
   name?: string;
-  ElhaqNo?: string | number;
+  elhaqno?: string | number;
 }
 
 export interface RowType {
@@ -285,7 +291,7 @@ const showKiratField = computed(() => props.markazType === 'কিরাআত')
  * Suggestion cache keyed by row object to avoid recomputing suggestions every keystroke
  */
 type SuggestionCacheEntry = { suggestions?: MadrashaType[] };
-const suggestionCache = ref<WeakMap<RowType, SuggestionCacheEntry>>(new WeakMap());
+const suggestionCache = ref<{ [key: number]: SuggestionCacheEntry }>({});
 
 /**
  * AutoComplete event shape (from PrimeVue typical payload)
@@ -298,46 +304,65 @@ interface AutoCompleteEvent {
 /**
  * Search logic for auto-complete (case-insensitive, supports ElhaqNo search)
  */
-function searchMadrasas(event: AutoCompleteEvent, row: RowType) {
-  const query = (event?.query ?? '').toString().toLowerCase().trim();
+async function searchMadrasas(event: AutoCompleteEvent, row: RowType, index: number) {
+  const query = (event?.query ?? '').toString().trim();
 
-  if (!suggestionCache.value.has(row)) {
-    suggestionCache.value.set(row, {});
+  if (!query) {
+    suggestionCache.value[index] = { suggestions: [] };
+    row.isOpen = true;
+    return;
   }
 
-  const suggestions = props.madrashas.filter((madrasha) => {
-    const name = (madrasha.name ?? '').toString().toLowerCase();
-    const elhaqNo = (madrasha.ElhaqNo ?? '').toString().toLowerCase();
+  try {
+    // Fixed URL - include full backend URL
+    const response = await fetch(`http://127.0.0.1:8000/api/markaz/search-madrasa/?elhaq=${encodeURIComponent(query)}`);
 
-    const normalizedElhaqNo = elhaqNo.replace(/[`'\s]/g, '');
-    const normalizedQuery = query.replace(/[`'\s]/g, '');
+    if (!response.ok) {
+      console.error(`API Error: ${response.status} ${response.statusText}`);
+      throw new Error('API error');
+    }
 
-    if (normalizedElhaqNo.includes(normalizedQuery) && normalizedQuery.length > 0) return true;
+    const data = await response.json();
+    console.log('API response:', data); // Debug log
 
-    // split by spaces and require all words to be present
-    const searchWords = normalizedQuery.split(' ').filter(Boolean);
-    return searchWords.every((word) => name.includes(word));
-  });
+    // Only show suggestions if elhaqno exactly matches input
+    const suggestions = Array.isArray(data)
+      ? data
+          .filter((item: any) => (item.elhaqno || '').toLowerCase() === query.toLowerCase())
+          .map((item: any) => ({
+            name: item.mname,
+            elhaqno: item.elhaqno,
+            id: item.id ?? item.elhaqno,
+          }))
+      : [];
 
-  suggestionCache.value.set(row, { suggestions });
-  row.isOpen = true;
+    console.log('Mapped suggestions:', suggestions); // Debug log
+
+    suggestionCache.value[index] = { suggestions };
+    row.isOpen = true;
+
+  } catch (err) {
+    console.error('Search API Error:', err);
+    suggestionCache.value[index] = { suggestions: [] };
+    row.isOpen = true;
+  }
 }
 
 /**
  * Return suggestions from cache (or empty array)
  */
-function getSuggestions(row: RowType): MadrashaType[] {
-  return suggestionCache.value.get(row)?.suggestions ?? [];
+function getSuggestions(row: RowType, index: number): MadrashaType[] {
+  return suggestionCache.value[index]?.suggestions ?? [];
 }
 
 /**
  * On focus, preload first N suggestions
  */
-function preloadSuggestions(row: RowType) {
-  if (!suggestionCache.value.has(row)) {
-    suggestionCache.value.set(row, {});
-  }
-  suggestionCache.value.set(row, { suggestions: props.madrashas.slice(0, 30) });
+async function preloadSuggestions(row: RowType) {
+  // On focus, do not call API with empty query. Just show empty suggestions.
+  // Use index-based assignment for cache
+  const index = props.rows.findIndex((r: RowType) => r === row);
+  suggestionCache.value[index] = { suggestions: [] };
   row.isOpen = true;
 }
 

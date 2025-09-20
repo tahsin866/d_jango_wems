@@ -168,13 +168,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useSidebar } from '@/composables/useSidebar'
 import ThemeToggler from '@/components/common/ThemeToggler.vue'
 import HeaderLogo from '@/components/layout/header/HeaderLogo.vue'
 import NotificationMenu from '@/components/layout/header/NotificationMenu.vue'
 import UserMenu from '@/components/layout/header/UserMenu.vue'
-import { madrashaName } from '@/stores/userProfile'
+import { madrashaName, fetchUserProfile } from '@/stores/userProfile'
 
 const { toggleSidebar, toggleMobileSidebar, isMobileOpen } = useSidebar()
 
@@ -191,4 +191,8 @@ const handleToggle = () => {
     toggleMobileSidebar()
   }
 }
+
+onMounted(() => {
+  fetchUserProfile()
+})
 </script>

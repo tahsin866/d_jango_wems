@@ -7,6 +7,7 @@ from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 from .models import School
 from .serializers import SchoolCheckSerializer
+from .cache import decrypt_aes_gcm
 import random
 import string
 import base64
@@ -16,21 +17,6 @@ import uuid
 import hashlib
 from datetime import datetime, timedelta
 
-def decrypt_aes_gcm(ciphertext_b64, iv_b64, key_b64):
-    """Decrypt AES-GCM encrypted data"""
-    try:
-        # Decode from base64
-        ciphertext = base64.b64decode(ciphertext_b64)
-        iv = base64.b64decode(iv_b64)
-        key = base64.b64decode(key_b64)
-        
-        # Decrypt
-        aesgcm = AESGCM(key)
-        plaintext = aesgcm.decrypt(iv, ciphertext, None)
-        return plaintext.decode('utf-8')
-    except Exception as e:
-        print(f"Decryption error: {e}")
-        return None
 
 class MadrashaCheckView(APIView):
     permission_classes = [AllowAny]  # Allow unauthenticated access
