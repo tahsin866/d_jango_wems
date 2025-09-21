@@ -85,9 +85,9 @@
               class="h-10 w-10 flex items-center justify-center rounded-full bg-emerald-100 text-emerald-700 font-bold text-lg">
               {{ index + 1 }}
             </div>
-            <div>
+        <div>
               <h3 class="text-lg font-bold text-gray-800">{{ row.examName }}</h3>
-              <p class="text-lg text-gray-500">পরীক্ষা ফি সেটআপ</p>
+              <p class="text-lg text-gray-500">{{ row.examName }}</p>
             </div>
           </div>
           <div class="flex items-center gap-3">
@@ -500,6 +500,7 @@ type ExamSetup = {
 
 type FeeRow = {
   examName: string
+  marhala_id: number
   dateFrom1: string | null
   dateTo1: string | null
   fee1: number | null
@@ -523,13 +524,7 @@ const examSetup = ref<ExamSetup | null>({
 })
 
 const rows = ref<FeeRow[]>([
-  { examName: 'ফযীলত', dateFrom1: null, dateTo1: null, fee1: null, invest1Men: null, invest1Madan: null, invest1Others: null, dateFrom2: null, dateTo2: null, fee2: null, invest2Men: null, invest2Madan: null, invest2Others: null },
-  { examName: 'সানাবিয়া', dateFrom1: null, dateTo1: null, fee1: null, invest1Men: null, invest1Madan: null, invest1Others: null, dateFrom2: null, dateTo2: null, fee2: null, invest2Men: null, invest2Madan: null, invest2Others: null },
-  { examName: 'সানাবিয়া উলইয়া', dateFrom1: null, dateTo1: null, fee1: null, invest1Men: null, invest1Madan: null, invest1Others: null, dateFrom2: null, dateTo2: null, fee2: null, invest2Men: null, invest2Madan: null, invest2Others: null },
-  { examName: 'মুতাওয়াসসিত', dateFrom1: null, dateTo1: null, fee1: null, invest1Men: null, invest1Madan: null, invest1Others: null, dateFrom2: null, dateTo2: null, fee2: null, invest2Men: null, invest2Madan: null, invest2Others: null },
-  { examName: 'ইবতেদাইয়্যাহ', dateFrom1: null, dateTo1: null, fee1: null, invest1Men: null, invest1Madan: null, invest1Others: null, dateFrom2: null, dateTo2: null, fee2: null, invest2Men: null, invest2Madan: null, invest2Others: null },
-  { examName: 'হিফজুল কোরানা', dateFrom1: null, dateTo1: null, fee1: null, invest1Men: null, invest1Madan: null, invest1Others: null, dateFrom2: null, dateTo2: null, fee2: null, invest2Men: null, invest2Madan: null, invest2Others: null },
-  { examName: 'ইলমুল কিরাআত', dateFrom1: null, dateTo1: null, fee1: null, invest1Men: null, invest1Madan: null, invest1Others: null, dateFrom2: null, dateTo2: null, fee2: null, invest2Men: null, invest2Madan: null, invest2Others: null },
+  // Initial rows will be set by fetchMarhalaNames and fetchExamFees
 ])
 
 const expandedCards = ref<{ [key: number]: boolean }>({ 0: true })
@@ -537,6 +532,7 @@ const activeTab = ref<{ [key: number]: string }>({ 0: 'regular' })
 const expandAll = ref<boolean>(false)
 
 const marhalaNames = ref<string[]>([]);
+const marhalaList = ref<{ id: number, name: string }[]>([]);
 
 const formattedTitle = computed(() => {
   if (!examSetup.value) return ''
@@ -669,42 +665,51 @@ async function submitUpdate(feeId, updatedData) {
 const fetchMarhalaNames = async () => {
   const response = await axios.get('http://127.0.0.1:8000/api/marhalas/');
   if (response.data.success) {
-    marhalaNames.value = response.data.data.map(m => m.marhala_name_bn);
-    rows.value = marhalaNames.value.map(name => ({
-      examName: name,
-      dateFrom1: null, dateTo1: null, fee1: null,
-      invest1Men: null, invest1Madan: null, invest1Others: null,
-      dateFrom2: null, dateTo2: null, fee2: null,
-      invest2Men: null, invest2Madan: null, invest2Others: null
-    }));
+    // Save marhala id and name for mapping
+    marhalaList.value = response.data.data.map(m => ({ id: m.id, name: m.marhala_name_bn }));
+    marhalaNames.value = marhalaList.value.map(m => m.name);
   }
 };
 const fetchExamFees = async () => {
-  const response = await axios.get(`http://127.0.0.1:8000/api/central-exam/exam-fees/by-setup/?exam_setup=${examSetup.value?.id}`);
+  const response = await axios.get(`http://127.0.0.1:8000/api/central-exam/exam-fees/by-setup/?exam_setup=${examSetupId.value}`);
   if (response.data.success) {
-    // response.data.data থেকে rows.value সেট করুন
-    rows.value = response.data.data.map(fee => ({
-      examName: '', // মারহালা নাম backend থেকে না এলে, ফাঁকা রাখুন বা mapping করুন
-      dateFrom1: fee.reg_date_from,
-      dateTo1: fee.reg_date_to,
-      fee1: Number(fee.reg_regular_fee),
-      invest1Men: Number(fee.reg_irregular_jemni),
-      invest1Madan: Number(fee.reg_irregular_manonnoyon),
-      invest1Others: Number(fee.reg_irregular_others),
-      dateFrom2: fee.late_date_from,
-      dateTo2: fee.late_date_to,
-      fee2: Number(fee.late_regular_fee),
-      invest2Men: Number(fee.late_irregular_jemni),
-      invest2Madan: Number(fee.late_irregular_manonnoyon),
-      invest2Others: Number(fee.late_irregular_others),
-      id: fee.id // future update-এর জন্য
-    }));
+    // Map marhala name and id from marhalaList
+    rows.value = response.data.data.map(fee => {
+      const marhala = marhalaList.value.find(m => m.id === fee.marhala);
+      return {
+        examName: marhala ? marhala.name : '',
+        marhala_id: fee.marhala,
+        dateFrom1: fee.reg_date_from,
+        dateTo1: fee.reg_date_to,
+        fee1: Number(fee.reg_regular_fee),
+        invest1Men: Number(fee.reg_irregular_jemni),
+        invest1Madan: Number(fee.reg_irregular_manonnoyon),
+        invest1Others: Number(fee.reg_irregular_others),
+        dateFrom2: fee.late_date_from,
+        dateTo2: fee.late_date_to,
+        fee2: Number(fee.late_regular_fee),
+        invest2Men: Number(fee.late_irregular_jemni),
+        invest2Madan: Number(fee.late_irregular_manonnoyon),
+        invest2Others: Number(fee.late_irregular_others),
+        id: fee.id // future update-এর জন্য
+      };
+    });
   }
 };
+
+const getExamSetupIdFromUrl = () => {
+  const path = window.location.pathname;
+  const matches = path.match(/\/FeeEdit\/(\d+)/);
+  return matches ? parseInt(matches[1]) : null;
+};
+
+const examSetupId = ref(getExamSetupIdFromUrl());
 
 onMounted(() => {
   expandedCards.value = { 0: true }
   activeTab.value = { 0: 'regular' }
-  fetchExamFees()
+  fetchMarhalaNames().then(() => {
+    fetchExamFees();
+  });
 });
 </script>

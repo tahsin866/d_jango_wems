@@ -9,14 +9,15 @@ from .models import ExamSetup
 from .serializers import ExamSetupSerializer, ExamFeeSerializer
 
 class ExamFeeListBySetupView(APIView):
-    """একটি পরীক্ষার সব ফি দেখার API (GET)"""
     permission_classes = [AllowAny]
 
     def get(self, request):
         exam_setup_id = request.GET.get('exam_setup')
         if not exam_setup_id:
             return Response({'success': False, 'message': 'exam_setup id আবশ্যক'}, status=status.HTTP_400_BAD_REQUEST)
-        fees = ExamFee.objects.filter(exam_setup_id=exam_setup_id)
+        
+        # select_related যোগ করুন performance এর জন্য
+        fees = ExamFee.objects.filter(exam_setup_id=exam_setup_id).select_related('marhala', 'exam_setup')
         serializer = ExamFeeSerializer(fees, many=True)
         return Response({'success': True, 'data': serializer.data}, status=status.HTTP_200_OK)
 
@@ -195,8 +196,7 @@ class ExamSetupDetailView(APIView):
 
 class ExamSetupUpdateView(APIView):
     """পরীক্ষা সেটআপ আপডেট ভিউ"""
-    permission_classes = [IsAuthenticatedOrReadOnly]
-
+    permission_classes = [AllowAny]
     def put(self, request, exam_id):
         try:
             exam_setup = ExamSetup.objects.get(id=exam_id)
