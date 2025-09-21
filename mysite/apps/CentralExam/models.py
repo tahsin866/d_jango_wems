@@ -22,6 +22,8 @@ class ExamSetup(models.Model):
 
 class ExamFee(models.Model):
     exam_setup = models.ForeignKey(ExamSetup, on_delete=models.CASCADE, related_name='fees', null=True, blank=True)
+    # Add marhala_id ForeignKey
+    marhala = models.ForeignKey('subject.Marhala', on_delete=models.SET_NULL, null=True, blank=True, related_name='exam_fees')
     reg_date_from = models.DateField(null=True, blank=True)
     reg_date_to = models.DateField(null=True, blank=True)
     reg_regular_fee = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)

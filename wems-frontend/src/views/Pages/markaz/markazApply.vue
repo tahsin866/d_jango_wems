@@ -75,13 +75,13 @@ const form = ref<{
 })
 
 const rows = ref([{
-    fazilat: "",
-    sanabiya_ulya: "",
-    sanabiya: "",
-    mutawassita: "",
-    ibtedaiyyah: "",
-    hifzul_quran: "",
-    qirat: "",
+    fazilat: null,
+    sanabiya_ulya: null,
+    sanabiya: null,
+    mutawassita: null,
+    ibtedaiyyah: null,
+    hifzul_quran: null,
+    qirat: null,
     madrasa_Name: "",
     madrasa_id: "",
     searchQuery: "",
@@ -95,25 +95,25 @@ const rows = ref([{
 }])
 
 const addRow = () => {
-  rows.value.push({
-    fazilat: "",
-    sanabiya_ulya: "",
-    sanabiya: "",
-    mutawassita: "",
-    ibtedaiyyah: "",
-    hifzul_quran: "",
-    qirat: "",
-    madrasa_Name: "",
-    madrasa_id: "",
-    searchQuery: "",
-    isOpen: false,
-    files: {
-      noc: null,
-      nocPreview: null,
-      resolution: null,
-      resolutionPreview: null
-    }
-  })
+    rows.value.push({
+        fazilat: null,
+        sanabiya_ulya: null,
+        sanabiya: null,
+        mutawassita: null,
+        ibtedaiyyah: null,
+        hifzul_quran: null,
+        qirat: null,
+        madrasa_Name: "",
+        madrasa_id: "",
+        searchQuery: "",
+        isOpen: false,
+        files: {
+            noc: null,
+            nocPreview: null,
+            resolution: null,
+            resolutionPreview: null
+        }
+    })
 }
 
 const removeRow = (index: number) => {
@@ -344,42 +344,42 @@ const selectOption = (madrasha: any, row: any) => {
 // Remove inertia watch
 watch(() => form.value.markaz_type, (newType) => {
   if (newType === 'দরসিয়াত') {
-    form.value.hifzul_quran = '';
-    form.value.qirat = '';
+    form.value.hifzul_quran = null;
+    form.value.qirat = null;
   } else if (newType === 'তাহফিজুল কোরআন') {
-    form.value.fazilat = '';
-    form.value.sanabiya_ulya = '';
-    form.value.sanabiya = '';
-    form.value.mutawassita = '';
-    form.value.ibtedaiyyah = '';
-    form.value.qirat = '';
+    form.value.fazilat = null;
+    form.value.sanabiya_ulya = null;
+    form.value.sanabiya = null;
+    form.value.mutawassita = null;
+    form.value.ibtedaiyyah = null;
+    form.value.qirat = null;
   } else if (newType === 'কিরাআত') {
-    form.value.fazilat = '';
-    form.value.sanabiya_ulya = '';
-    form.value.sanabiya = '';
-    form.value.mutawassita = '';
-    form.value.ibtedaiyyah = '';
-    form.value.hifzul_quran = '';
+    form.value.fazilat = null;
+    form.value.sanabiya_ulya = null;
+    form.value.sanabiya = null;
+    form.value.mutawassita = null;
+    form.value.ibtedaiyyah = null;
+    form.value.hifzul_quran = null;
   }
 
   rows.value.forEach(row => {
     if (newType === 'দরসিয়াত') {
-      row.hifzul_quran = '';
-      row.qirat = '';
+    row.hifzul_quran = null;
+    row.qirat = null;
     } else if (newType === 'তাহফিজুল কোরআন') {
-      row.fazilat = '';
-      row.sanabiya_ulya = '';
-      row.sanabiya = '';
-      row.mutawassita = '';
-      row.ibtedaiyyah = '';
-      row.qirat = '';
+    row.fazilat = null;
+    row.sanabiya_ulya = null;
+    row.sanabiya = null;
+    row.mutawassita = null;
+    row.ibtedaiyyah = null;
+    row.qirat = null;
     } else if (newType === 'কিরাআত') {
-      row.fazilat = '';
-      row.sanabiya_ulya = '';
-      row.sanabiya = '';
-      row.mutawassita = '';
-      row.ibtedaiyyah = '';
-      row.hifzul_quran = '';
+    row.fazilat = null;
+    row.sanabiya_ulya = null;
+    row.sanabiya = null;
+    row.mutawassita = null;
+    row.ibtedaiyyah = null;
+    row.hifzul_quran = null;
     }
   });
 });
@@ -402,24 +402,24 @@ const submitForm = () => {
   }
 
   if (form.value.markaz_type === 'দরসিয়াত') {
-    if (form.value.fazilat === '' || form.value.fazilat === null) {
+    if (form.value.fazilat === null) {
       loading.value = false;
       formErrors.value = ['ফাযীলাত ফিল্ড পূরণ করুন'];
       return;
     }
-    if (form.value.sanabiya_ulya === '' || form.value.sanabiya_ulya === null) {
+    if (form.value.sanabiya_ulya === null) {
       loading.value = false;
       formErrors.value = ['সানাবিয়া উলইয়া ফিল্ড পূরণ করুন'];
       return;
     }
   } else if (form.value.markaz_type === 'তাহফিজুল কোরআন') {
-    if (form.value.hifzul_quran === '' || form.value.hifzul_quran === null) {
+    if (form.value.hifzul_quran === null) {
       loading.value = false;
       formErrors.value = ['হিফযুল কোরআন ফিল্ড পূরণ করুন'];
       return;
     }
   } else if (form.value.markaz_type === 'কিরাআত') {
-    if (form.value.qirat === '' || form.value.qirat === null) {
+    if (form.value.qirat === null) {
       loading.value = false;
       formErrors.value = ['কিরাআত ফিল্ড পূরণ করুন'];
       return;
@@ -433,19 +433,19 @@ const submitForm = () => {
   }
 
   const invalidRows = rows.value.filter(row => {
-    if (!row.madrasa_id) return true;
-    if (!row.files.noc || !row.files.resolution) return true;
+        if (!row.madrasa_id) return true;
+        if (!row.files.noc || !row.files.resolution) return true;
 
-    if (form.value.markaz_type === 'দরসিয়াত') {
-      if (row.fazilat === '' || row.fazilat === null) return true;
-      if (row.sanabiya_ulya === '' || row.sanabiya_ulya === null) return true;
-    } else if (form.value.markaz_type === 'তাহফিজুল কোরআন') {
-      if (row.hifzul_quran === '' || row.hifzul_quran === null) return true;
-    } else if (form.value.markaz_type === 'কিরাআত') {
-      if (row.qirat === '' || row.qirat === null) return true;
-    }
+        if (form.value.markaz_type === 'দরসিয়াত') {
+            if (row.fazilat === null) return true;
+            if (row.sanabiya_ulya === null) return true;
+        } else if (form.value.markaz_type === 'তাহফিজুল কোরআন') {
+            if (row.hifzul_quran === null) return true;
+        } else if (form.value.markaz_type === 'কিরাআত') {
+            if (row.qirat === null) return true;
+        }
 
-    return false;
+        return false;
   });
 
   if (invalidRows.length > 0) {
@@ -674,25 +674,10 @@ const getStepIcon = (index: number) => {
 };
 
 const handleTabChange = (event: any) => {
-    const targetIndex = event.index;
-
-    if (!canAccessStep.value[targetIndex]) {
-        event.preventDefault();
-
-        let message = '';
-        if (targetIndex === 1 && !isConditionsAccepted.value) {
-            message = 'অনুগ্রহ করে শর্তাবলী পড়ুন এবং সম্মতি দিন';
-        } else if (targetIndex === 2 && !isStep1Valid.value) {
-            message = 'ধরন ও মূল তথ্য প্রদান করুন';
-        } else if (targetIndex === 3 && !isStep2Valid.value) {
-            message = 'সংযুক্ত মাদ্রাসার তথ্য সম্পূর্ণ করুন';
-        }
-
-        // You can use a toast component here
-        return;
+    // Only set step, do not call preventDefault or validate
+    if (event && typeof event.index === 'number') {
+        step.value = event.index;
     }
-
-    step.value = targetIndex;
 };
 
 const goToNextStep = () => {
@@ -902,7 +887,6 @@ onMounted(() => {
                                         icon="pi pi-arrow-right"
                                         iconPos="right"
                                         class="p-button-secondary"
-                                        :disabled="!isStep1Valid"
                                         @click="goToNextStep"
                                     />
                                 </div>
@@ -967,20 +951,18 @@ onMounted(() => {
                                         icon="pi pi-arrow-right"
                                         iconPos="right"
                                         class="p-button-secondary"
-                                        :disabled="!isStep2Valid"
                                         @click="goToNextStep"
                                     />
                                 </div>
                             </div>
                         </TabPanel>
 
-                        <TabPanel :disabled="!canAccessStep[3]">
+                        <TabPanel>
                             <template #header>
-                                <div class="flex items-center" :class="{ 'opacity-50': !canAccessStep[3] }">
+                                <div class="flex items-center">
                                     <i :class="getStepIcon(3)" class="mr-2"></i>
                                     <span class="font-medium">৪. প্রয়োজনীয়তা ও সংযুক্তি</span>
-                                    <i v-if="!canAccessStep[3]" class="pi pi-lock ml-2 text-gray-500"
-                                       v-tooltip.top="!isConditionsAccepted ? 'প্রথমে শর্তাবলী সম্মত হন' : !isStep1Valid ? 'ধরন ও মূল তথ্য সম্পূর্ণ করুন' : 'সংযুক্ত মাদ্রাসার তথ্য সম্পূর্ণ করুন'"></i>
+                                                <!-- Removed lock icon and tooltip for disabled state -->
                                 </div>
                             </template>
                             <div class="p-6">
@@ -1055,13 +1037,8 @@ onMounted(() => {
                                         iconPos="right"
                                         class="p-button-success"
                                         :loading="loading"
-                                        :disabled="!isStep3Valid || loading"
                                         @click="submitForm"
-                                    >
-                                        <span v-if="!isStep3Valid" class="absolute bottom-full mb-1 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
-                                            প্রয়োজনীয়তা ব্যাখ্যা পূরণ করুন
-                                        </span>
-                                    </Button>
+                                    />
                                 </div>
                             </div>
                         </TabPanel>

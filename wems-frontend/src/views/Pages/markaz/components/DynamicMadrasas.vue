@@ -8,26 +8,17 @@
         class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-200"
       >
         <div class="p-6 bg-white border-b border-gray-200">
-          <!-- Improved AutoComplete with Immediate Results -->
           <div class="mb-4 w-full">
             <label class="block font-medium text-sm text-gray-700 mb-2">
               মাদরাসা নির্বাচন করুন <span class="text-red-500">*</span>
             </label>
-
             <AutoComplete
               v-model="row.searchQuery"
-              :suggestions="getSuggestions(row, index)"
+              :suggestions="getSuggestions(index)"
               :optionLabel="'name'"
-              @complete="(e) => searchMadrasas(e, row, index)"
-              @item-select="(evt) => {
-                const elhaq = evt.value.elhaqno || evt.value.ElhaqNo || '';
-                row.searchQuery = elhaq
-                  ? `${evt.value.name} (ইলহাক: ${elhaq})`
-                  : evt.value.name;
-                row.madrasa_id = evt.value.id;
-                emit('select-option', evt.value as MadrashaType, row);
-              }"
-              @focus="() => preloadSuggestions(row)"
+              @complete="(e) => searchMadrasas(e, index)"
+              @item-select="(evt) => handleMadrasaSelect(evt, row, index)"
+              @focus="() => preloadSuggestions(index)"
               :delay="0"
               :minLength="1"
               :showEmptyMessage="true"
@@ -37,14 +28,13 @@
             >
               <template #option="{ option }">
                 <div>
-                  <div class="font-medium">{{ option.name }} <span v-if="option.elhaqno">(ইলহাক: {{ option.elhaqno }})</span></div>
+                  <div class="font-medium">{{ option.name }}</div>
                 </div>
               </template>
               <template #empty>
                 <div class="p-2 text-gray-500">কোন মাদরাসা পাওয়া যায়নি</div>
               </template>
             </AutoComplete>
-
             <div v-if="!row.madrasa_id" class="text-sm text-red-500 mt-1">মাদরাসা নির্বাচন করুন</div>
           </div>
 
@@ -262,9 +252,6 @@ export interface RowType {
   };
 }
 
-/**
- * Props & Emits with types so TS plugins (Volar) can infer correctly
- */
 const props = defineProps<{
   rows: RowType[];
   madrashas: MadrashaType[];
@@ -281,201 +268,161 @@ const emit = defineEmits<{
 }>();
 
 /**
- * Computed helpers for field visibility depending on markaz type
+ * Computed helpers for field visibility
  */
 const showDarsiyatFields = computed(() => props.markazType === 'দরসিয়াত');
 const showHifzField = computed(() => props.markazType === 'তাহফিজুল কোরআন');
 const showKiratField = computed(() => props.markazType === 'কিরাআত');
 
 /**
- * Suggestion cache keyed by row object to avoid recomputing suggestions every keystroke
+ * Cache suggestions for each row separately
  */
-type SuggestionCacheEntry = { suggestions?: MadrashaType[] };
-const suggestionCache = ref<{ [key: number]: SuggestionCacheEntry }>({});
+const suggestionCache = ref<{ [key: number]: MadrashaType[] }>({});
+const isLoading = ref<{ [key: number]: boolean }>({});
 
-/**
- * AutoComplete event shape (from PrimeVue typical payload)
- */
 interface AutoCompleteEvent {
   originalEvent?: Event;
   query?: string;
 }
 
 /**
- * Search logic for auto-complete (case-insensitive, supports ElhaqNo search)
+ * Search madrasas with API call
  */
-async function searchMadrasas(event: AutoCompleteEvent, row: RowType, index: number) {
+async function searchMadrasas(event: AutoCompleteEvent, index: number) {
   const query = (event?.query ?? '').toString().trim();
 
+  // Clear suggestions if query is empty
   if (!query) {
-    suggestionCache.value[index] = { suggestions: [] };
-    row.isOpen = true;
+    suggestionCache.value[index] = [];
     return;
   }
 
+  isLoading.value[index] = true;
+
   try {
-    // Fixed URL - include full backend URL
+    // API call to search
     const response = await fetch(`http://127.0.0.1:8000/api/markaz/search-madrasa/?elhaq=${encodeURIComponent(query)}`);
 
     if (!response.ok) {
-      console.error(`API Error: ${response.status} ${response.statusText}`);
-      throw new Error('API error');
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log('API response:', data); // Debug log
 
-    // Only show suggestions if elhaqno exactly matches input
-    const suggestions = Array.isArray(data)
-      ? data
-          .filter((item: any) => (item.elhaqno || '').toLowerCase() === query.toLowerCase())
-          .map((item: any) => ({
-            name: item.mname,
-            elhaqno: item.elhaqno,
-            id: item.id ?? item.elhaqno,
-          }))
-      : [];
+    // Process and format the data - ensure elhaqno is properly handled
+    const suggestions: MadrashaType[] = Array.isArray(data) ? data.map((item: any) => {
+      const elhaqno = item.elhaqno;
 
-    console.log('Mapped suggestions:', suggestions); // Debug log
+      return {
+        id: item.id || '',
+        name: item.mname || '',
+        // Only set elhaqno if it exists and is not null/undefined/empty
+        elhaqno: (elhaqno !== null && elhaqno !== undefined && elhaqno !== '') ? elhaqno.toString() : null
+      };
+    }).filter(item => item.name) : []; // Filter out items without names
 
-    suggestionCache.value[index] = { suggestions };
-    row.isOpen = true;
+    suggestionCache.value[index] = suggestions;
 
-  } catch (err) {
-    console.error('Search API Error:', err);
-    suggestionCache.value[index] = { suggestions: [] };
-    row.isOpen = true;
+  } catch (error) {
+    console.error('Search error:', error);
+    suggestionCache.value[index] = [];
+  } finally {
+    isLoading.value[index] = false;
   }
 }
 
 /**
- * Return suggestions from cache (or empty array)
+ * Get cached suggestions for a specific row
  */
-function getSuggestions(row: RowType, index: number): MadrashaType[] {
-  return suggestionCache.value[index]?.suggestions ?? [];
+function getSuggestions(index: number): MadrashaType[] {
+  return suggestionCache.value[index] || [];
 }
 
 /**
- * On focus, preload first N suggestions
+ * Load initial suggestions on focus
  */
-async function preloadSuggestions(row: RowType) {
-  // On focus, do not call API with empty query. Just show empty suggestions.
-  // Use index-based assignment for cache
-  const index = props.rows.findIndex((r: RowType) => r === row);
-  suggestionCache.value[index] = { suggestions: [] };
-  row.isOpen = true;
+async function preloadSuggestions(index: number) {
+  // Don't preload, just clear cache
+  suggestionCache.value[index] = [];
 }
 
 /**
- * Robust file select handler: extracts a File from the various event shapes PrimeVue/File input may provide
+ * Handle madrasa selection
  */
-function handleFileSelect(
-  event:
-    | Event
-    | { files?: FileList | File[] }
-    | { originalEvent?: Event; files?: FileList | File[] }
-    | File
-    | Blob,
-  type: 'noc' | 'resolution',
-  index: number
-) {
+function handleMadrasaSelect(evt: any, row: RowType, index: number) {
+  const selectedMadrasha = evt.value as MadrashaType;
+  // Always set only the madrasa name, never any ইলহাক info
+  row.searchQuery = selectedMadrasha.name || '';
+  row.madrasa_id = selectedMadrasha.id;
+  row.selectedMadrasha = {
+    ...selectedMadrasha,
+    name: selectedMadrasha.name || ''
+  };
+
+  // Clear suggestions after selection
+  suggestionCache.value[index] = [];
+
+  // Emit the selection event with clean data
+  emit('select-option', {
+    ...selectedMadrasha,
+    name: selectedMadrasha.name || ''
+  }, row);
+
+  console.log('Selected madrasha (clean):', { ...selectedMadrasha, name: selectedMadrasha.name || '' });
+}
+
+/**
+ * File upload handler
+ */
+function handleFileSelect(event: any, type: 'noc' | 'resolution', index: number) {
   try {
-    // Direct File/Blob
-    if (event instanceof File || event instanceof Blob) {
-      emit('file-upload', event as File, type, index);
-      return;
+    let file: File | null = null;
+
+    // Extract file from various event formats
+    if (event instanceof File) {
+      file = event;
+    } else if (event?.files?.length > 0) {
+      file = event.files[0];
+    } else if (event?.target?.files?.length > 0) {
+      file = event.target.files[0];
+    } else if (event?.originalEvent?.target?.files?.length > 0) {
+      file = event.originalEvent.target.files[0];
     }
 
-    // If it's an object with files property (PrimeVue FileUpload often has event.files)
-    if (event && typeof event === 'object') {
-      // check event.files as FileList or Array
-
-      const filesCandidate = (event as any).files;
-      if (filesCandidate) {
-        const file = (filesCandidate instanceof FileList ? filesCandidate[0] : Array.isArray(filesCandidate) ? filesCandidate[0] : null) as File | null;
-        if (file) {
-          emit('file-upload', file, type, index);
-          return;
-        }
-      }
-
-
-      const original = (event as any).originalEvent;
-      if (original && original.target && (original.target as HTMLInputElement).files) {
-        const filelist = (original.target as HTMLInputElement).files!;
-        if (filelist.length > 0) {
-          emit('file-upload', filelist[0], type, index);
-          return;
-        }
-      }
-
-      // scan for File inside object properties
-      for (const key in event as any) {
-        const value = (event as any)[key];
-        if (value instanceof File) {
-          emit('file-upload', value as File, type, index);
-          return;
-        }
-        if (Array.isArray(value) && value.length > 0 && value[0] instanceof File) {
-          emit('file-upload', value[0] as File, type, index);
-          return;
-        }
-      }
+    if (file) {
+      emit('file-upload', file, type, index);
+    } else {
+      console.warn('No file found in event:', event);
     }
-
-    // As fallback, try to read target.files from DOM Event
-    if (event instanceof Event && event.target) {
-      const target = event.target as HTMLInputElement;
-      if (target.files && target.files.length > 0) {
-        emit('file-upload', target.files[0], type, index);
-        return;
-      }
-    }
-
-    console.warn('No file found in select event', event);
-  } catch (err) {
-    // keep errors visible for debugging
-    // eslint-disable-next-line no-console
-    console.error('Error extracting file from event', err);
+  } catch (error) {
+    console.error('File selection error:', error);
   }
 }
 
 /**
- * Required field names for runtime checking
+ * Check if required field is empty
  */
-type RequiredFieldName =
-  | 'fazilat'
-  | 'sanabiya_ulya'
-  | 'sanabiya'
-  | 'mutawassita'
-  | 'ibtedaiyyah'
-  | 'hifzul_quran'
-  | 'qirat';
+type RequiredFieldName = 'fazilat' | 'sanabiya_ulya' | 'sanabiya' | 'mutawassita' | 'ibtedaiyyah' | 'hifzul_quran' | 'qirat';
 
-/**
- * Returns true when a required field is empty (used to show validation message)
- */
 function isRequiredFieldEmpty(row: RowType, field: RequiredFieldName): boolean {
-  if (!row.madrasa_id) return false; // only validate when madrasa selected
+  if (!row.madrasa_id) return false;
 
   const markazType = props.markazType;
+  const value = (row as any)[field];
 
   if (markazType === 'দরসিয়াত') {
     const required: RequiredFieldName[] = ['fazilat', 'sanabiya_ulya', 'sanabiya', 'mutawassita', 'ibtedaiyyah'];
     if (required.includes(field)) {
-      const val = (row as any)[field];
-      return val === undefined || val === null || val === 0;
+      return !value || value === 0;
     }
   }
 
   if (markazType === 'তাহফিজুল কোরআন' && field === 'hifzul_quran') {
-    const val = row.hifzul_quran;
-    return val === undefined || val === null || val === 0;
+    return !value || value === 0;
   }
 
   if (markazType === 'কিরাআত' && field === 'qirat') {
-    const val = row.qirat;
-    return val === undefined || val === null || val === 0;
+    return !value || value === 0;
   }
 
   return false;

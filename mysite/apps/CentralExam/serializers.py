@@ -35,11 +35,17 @@ class ExamSetupSerializer(serializers.ModelSerializer):
 
 
 class ExamFeeSerializer(serializers.ModelSerializer):
+    from mysite.apps.subject.models import Marhala
+    marhala = serializers.PrimaryKeyRelatedField(queryset=Marhala.objects.all(), required=False, allow_null=True)
+
+    # __init__ override removed; queryset set directly above
+
     class Meta:
         model = ExamFee
         fields = '__all__'
         extra_kwargs = {
             'exam_setup': {'required': False, 'allow_null': True},
+            'marhala': {'required': False, 'allow_null': True},
             'reg_date_from': {'required': False, 'allow_null': True},
             'reg_date_to': {'required': False, 'allow_null': True},
             'reg_regular_fee': {'required': False, 'allow_null': True},
