@@ -47,3 +47,13 @@ class ExamFee(models.Model):
 
     def __str__(self):
         return f"ExamFee ({self.exam_setup_id})"
+    
+    class ExamFee(models.Model):
+        exam_setup = models.ForeignKey(
+        ExamSetup, 
+        on_delete=models.CASCADE, 
+        related_name='fees', 
+        null=False,  # এটা False করুন
+        blank=False  # এটাও False করুন
+    )
+    # বাকি fields...

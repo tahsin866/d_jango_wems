@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'mysite.apps.subject',  # New subject app
     'mysite.apps.CentralExam',  # Central Exam app
     'mysite.apps.Markaz',  # Markaz app added
+    'mysite.apps.admin.registration.overview',  # Registration Overview app
 ]
 
 MIDDLEWARE = [

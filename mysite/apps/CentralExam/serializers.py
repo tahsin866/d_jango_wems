@@ -37,41 +37,18 @@ class ExamSetupSerializer(serializers.ModelSerializer):
 class ExamFeeSerializer(serializers.ModelSerializer):
     from mysite.apps.subject.models import Marhala
     marhala = serializers.PrimaryKeyRelatedField(queryset=Marhala.objects.all(), required=False, allow_null=True)
-
-    # __init__ override removed; queryset set directly above
-
+    
     class Meta:
         model = ExamFee
         fields = '__all__'
         extra_kwargs = {
-            'exam_setup': {'required': False, 'allow_null': True},
+            'exam_setup': {'required': True, 'allow_null': False},  # Required এবং null allow করা যাবে না
             'marhala': {'required': False, 'allow_null': True},
-            'reg_date_from': {'required': False, 'allow_null': True},
-            'reg_date_to': {'required': False, 'allow_null': True},
-            'reg_regular_fee': {'required': False, 'allow_null': True},
-            'reg_irregular_jemni': {'required': False, 'allow_null': True},
-            'reg_irregular_manonnoyon': {'required': False, 'allow_null': True},
-            'reg_irregular_others': {'required': False, 'allow_null': True},
-            'late_date_from': {'required': False, 'allow_null': True},
-            'late_date_to': {'required': False, 'allow_null': True},
-            'late_regular_fee': {'required': False, 'allow_null': True},
-            'late_irregular_jemni': {'required': False, 'allow_null': True},
-            'late_irregular_manonnoyon': {'required': False, 'allow_null': True},
-            'late_irregular_others': {'required': False, 'allow_null': True},
+            'exam_name': {'required': False},  # এটা optional করা হলো
         }
-        extra_kwargs = {
-            'exam_setup': {'required': True},
-            'exam_name': {'required': True},
-            'reg_date_from': {'required': False, 'allow_null': True},
-            'reg_date_to': {'required': False, 'allow_null': True},
-            'reg_regular_fee': {'required': False, 'allow_null': True},
-            'reg_irregular_jemni': {'required': False, 'allow_null': True},
-            'reg_irregular_manonnoyon': {'required': False, 'allow_null': True},
-            'reg_irregular_others': {'required': False, 'allow_null': True},
-            'late_date_from': {'required': False, 'allow_null': True},
-            'late_date_to': {'required': False, 'allow_null': True},
-            'late_regular_fee': {'required': False, 'allow_null': True},
-            'late_irregular_jemni': {'required': False, 'allow_null': True},
-            'late_irregular_manonnoyon': {'required': False, 'allow_null': True},
-            'late_irregular_others': {'required': False, 'allow_null': True},
-        }
+
+    def validate_exam_setup(self, value):
+        """exam_setup validation"""
+        if not value:
+            raise serializers.ValidationError("পরীক্ষা সেটআপ অবশ্যই নির্বাচন করতে হবে")
+        return value

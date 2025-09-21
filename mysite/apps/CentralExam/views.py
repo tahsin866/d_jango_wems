@@ -74,7 +74,6 @@ class ExamFeeUpdateView(APIView):
         )
 
 class ExamFeeBulkCreateView(APIView):
-    """একাধিক ফি ইনসার্ট করার API (bulk insert)"""
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -84,26 +83,40 @@ class ExamFeeBulkCreateView(APIView):
                 {'success': False, 'message': 'fees ফিল্ডটি আবশ্যক এবং array হতে হবে'},
                 status=status.HTTP_400_BAD_REQUEST
             )
+        
+        # Debug: Print received data
+        print("Received fees data:")
+        for i, fee in enumerate(fees):
+            print(f"Fee {i+1}: exam_setup = {fee.get('exam_setup')}")
+        
         errors = []
         created_fees = []
+        
         with transaction.atomic():
             for fee in fees:
+                # Check if exam_setup exists
+                if not fee.get('exam_setup'):
+                    errors.append({'exam_setup': ['এই ফিল্ডটি আবশ্যক']})
+                    continue
+                    
                 serializer = ExamFeeSerializer(data=fee)
                 if serializer.is_valid():
                     created_fee = serializer.save()
                     created_fees.append(ExamFeeSerializer(created_fee).data)
                 else:
                     errors.append(serializer.errors)
+                    
         if errors:
             return Response(
                 {'success': False, 'errors': errors, 'message': 'কিছু ফি ইনসার্ট হয়নি'},
                 status=status.HTTP_400_BAD_REQUEST
             )
+            
         return Response(
             {'success': True, 'data': created_fees, 'message': 'সব ফি সফলভাবে সংরক্ষণ হয়েছে'},
             status=status.HTTP_201_CREATED
         )
-
+    
 class ExamSetupCreateView(APIView):
     """কেন্দ্রীয় পরীক্ষা সেটআপ তৈরি ভিউ"""
     permission_classes = [AllowAny]

@@ -47,6 +47,9 @@ urlpatterns = [
     path('api/clear-sidebar-cache/', clear_sidebar_cache),
     # Markaz APIs
     path('api/markaz/', include('mysite.apps.Markaz.urls')),
+
+    # Registration Overview API
+    path('api/admin/registration/overview/', include('mysite.apps.admin.registration.overview.urls')),
 ]
 
 # Add media files serving in development

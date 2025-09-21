@@ -93,12 +93,12 @@
       </div>
 
       <!-- Data Table -->
-      <div class="bg-white dark:bg-slate-800 rounded-lg shadow border border-gray-200 dark:border-slate-700 overflow-x-auto">
+      <div class="bg-white dark:bg-slate-800 rounded-lg shadow border border-gray-200 dark:border-slate-700">
         <div v-if="isLoading" class="flex items-center justify-center p-16">
           <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div>
         </div>
-        <template v-else>
-          <table class="w-full border-collapse">
+        <div class="overflow-x-auto max-w-full">
+          <table class="min-w-max w-full border-collapse">
             <thead class="bg-gray-100 dark:bg-slate-900 text-gray-800 dark:text-gray-200 text-md uppercase tracking-wider">
               <tr>
                 <th class="py-3 px-4 text-left font-semibold whitespace-nowrap">মারহালা</th>
@@ -115,20 +115,39 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
-              <tr v-for="marhala in displayedMarhalas" :key="marhala.id"
-                class="hover:bg-gray-50 dark:hover:bg-slate-700 transition">
+              <tr
+                v-for="marhala in displayedMarhalas"
+                :key="marhala.id"
+                class="hover:bg-gray-50 dark:hover:bg-slate-700 transition"
+              >
                 <td class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
                   {{ marhala.marhala_name_bn }}
                 </td>
                 <td class="px-4 py-3 whitespace-nowrap">{{ marhala.id }}</td>
-                <td class="px-4 py-3 whitespace-nowrap">NA</td>
-                <td class="px-4 py-3 whitespace-nowrap">NA</td>
-                <td class="px-4 py-3 whitespace-nowrap font-semibold text-gray-900 dark:text-gray-100">NA</td>
-                <td class="px-4 py-3 whitespace-nowrap">NA</td>
-                <td class="px-4 py-3 whitespace-nowrap">NA</td>
-                <td class="px-4 py-3 whitespace-nowrap font-semibold text-gray-900 dark:text-gray-100">NA</td>
-                <td class="px-4 py-3 whitespace-nowrap">NA</td>
-                <td class="px-4 py-3 whitespace-nowrap">NA</td>
+                <td class="px-4 py-3 whitespace-nowrap">
+                  {{ getFeeField(marhala.id, 'reg_date_from') }}
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap">
+                  {{ getFeeField(marhala.id, 'reg_date_to') }}
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap font-semibold text-gray-900 dark:text-gray-100">
+                  {{ getFeeField(marhala.id, 'reg_regular_fee', true) }}
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap">
+                  {{ getFeeField(marhala.id, 'late_date_from') }}
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap">
+                  {{ getFeeField(marhala.id, 'late_date_to') }}
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap font-semibold text-gray-900 dark:text-gray-100">
+                  {{ getFeeField(marhala.id, 'late_regular_fee', true) }}
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap font-semibold text-gray-900 dark:text-gray-100">
+                  {{ getFeeField(marhala.id, 'reg_irregular_jemni', true) }}
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap font-semibold text-gray-900 dark:text-gray-100">
+                  {{ getFeeField(marhala.id, 'late_irregular_jemni', true) }}
+                </td>
                 <td class="px-4 py-3 whitespace-nowrap">
                   <div class="flex gap-2">
                     <RouterLink
@@ -148,87 +167,72 @@
               </tr>
             </tbody>
           </table>
-          <!-- Empty State -->
-          <div v-if="displayedMarhalas.length === 0" class="py-16 flex flex-col items-center justify-center">
-            <svg class="w-16 h-16 text-gray-200 dark:text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
-                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
-            <h3 class="mt-2 text-base font-medium text-gray-900 dark:text-gray-100">কোন রেকর্ড পাওয়া যায়নি</h3>
-            <p class="mt-1 text-xl text-gray-500 dark:text-gray-400">আপনার অনুসন্ধানের সাথে মিলে এমন কোন তথ্য নেই।</p>
-          </div>
-          <!-- Pagination -->
-          <div class="border-t border-gray-100 dark:border-slate-700">
-            <div class="px-4 py-4 flex items-center justify-between">
-              <div class="flex items-center">
-                <span class="text-lg text-gray-700 dark:text-gray-300 mr-2">প্রতি পৃষ্ঠায়:</span>
-                <select v-model="rowsPerPage" class="border border-gray-300 rounded-md text-lg p-1 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-slate-900 dark:border-slate-700">
-                  <option v-for="option in [5, 10, 20, 50]" :key="option" :value="option">{{ option }}</option>
-                </select>
-                <span class="ml-4 text-lg text-gray-700 dark:text-gray-300">
-                  {{ (currentPage - 1) * rowsPerPage + 1 }} - {{ Math.min(currentPage * rowsPerPage, totalRecords) }} / {{ totalRecords }}
-                </span>
+        </div>
+        <!-- Empty State -->
+        <div v-if="displayedMarhalas.length === 0" class="py-16 flex flex-col items-center justify-center">
+          <svg class="w-16 h-16 text-gray-200 dark:text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          <h3 class="mt-2 text-base font-medium text-gray-900 dark:text-gray-100">কোন রেকর্ড পাওয়া যায়নি</h3>
+          <p class="mt-1 text-xl text-gray-500 dark:text-gray-400">আপনার অনুসন্ধানের সাথে মিলে এমন কোন তথ্য নেই।</p>
+        </div>
+        <!-- Pagination -->
+        <div class="border-t border-gray-100 dark:border-slate-700">
+          <div class="px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center">
+              <span class="text-lg text-gray-700 dark:text-gray-300 mr-2">প্রতি পৃষ্ঠায়:</span>
+              <select v-model="rowsPerPage" class="border border-gray-300 rounded-md text-lg p-1 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-slate-900 dark:border-slate-700">
+                <option v-for="option in [5, 10, 20, 50]" :key="option" :value="option">{{ option }}</option>
+              </select>
+              <span class="ml-4 text-lg text-gray-700 dark:text-gray-300">
+                {{ (currentPage - 1) * rowsPerPage + 1 }} - {{ Math.min(currentPage * rowsPerPage, totalRecords) }} / {{ totalRecords }}
+              </span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button @click="currentPage = 1" :disabled="currentPage === 1"
+                class="p-2 border rounded-md"
+                :class="currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-slate-900/10'">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+              </button>
+              <button @click="currentPage = Math.max(1, currentPage - 1)" :disabled="currentPage === 1"
+                class="p-2 border rounded-md"
+                :class="currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-slate-900/10'">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <div class="hidden md:flex">
+                <template v-for="page in getPageNumbers()" :key="page">
+                  <button v-if="page !== '...'" @click="typeof page === 'number' && (currentPage = page)"
+                    class="px-3 py-1 border rounded-md transition-colors"
+                    :class="currentPage === page ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-slate-900/10'">
+                    {{ page }}
+                  </button>
+                  <span v-else class="px-3 py-1 border border-gray-200 rounded-md bg-white text-gray-700 dark:bg-slate-900/10">
+                    ...
+                  </span>
+                </template>
               </div>
-              <div class="flex items-center space-x-2">
-                <button
-                  @click="currentPage = 1"
-                  :disabled="currentPage === 1"
-                  class="p-2 border rounded-md"
-                  :class="currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-slate-900/10'"
-                >
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7m0 0l7-7m-7 7h18" />
-                  </svg>
-                </button>
-                <button
-                  @click="currentPage = Math.max(1, currentPage - 1)"
-                  :disabled="currentPage === 1"
-                  class="p-2 border rounded-md"
-                  :class="currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-slate-900/10'"
-                >
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-                <div class="hidden md:flex">
-                  <template v-for="page in getPageNumbers()" :key="page">
-                    <button
-                      v-if="page !== '...'"
-                      @click="typeof page === 'number' && (currentPage = page)"
-                      class="px-3 py-1 border rounded-md transition-colors"
-                      :class="currentPage === page ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-slate-900/10'"
-                    >
-                      {{ page }}
-                    </button>
-                    <span v-else class="px-3 py-1 border border-gray-200 rounded-md bg-white text-gray-700 dark:bg-slate-900/10">
-                      ...
-                    </span>
-                  </template>
-                </div>
-                <button
-                  @click="currentPage = Math.min(totalPages, currentPage + 1)"
-                  :disabled="currentPage === totalPages"
-                  class="p-2 border rounded-md"
-                  :class="currentPage === totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-slate-900/10'"
-                >
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-                <button
-                  @click="currentPage = totalPages"
-                  :disabled="currentPage === totalPages"
-                  class="p-2 border rounded-md"
-                  :class="currentPage === totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-slate-900/10'"
-                >
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-                  </svg>
-                </button>
-              </div>
+              <button @click="currentPage = Math.min(totalPages, currentPage + 1)" :disabled="currentPage === totalPages"
+                class="p-2 border rounded-md"
+                :class="currentPage === totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-slate-900/10'">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+              <button @click="currentPage = totalPages" :disabled="currentPage === totalPages"
+                class="p-2 border rounded-md"
+                :class="currentPage === totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-slate-900/10'">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                </svg>
+              </button>
             </div>
           </div>
-        </template>
+        </div>
       </div>
     </div>
   </div>
@@ -240,6 +244,7 @@ import { RouterLink } from 'vue-router'
 import axios from 'axios'
 
 const marhalaData = ref<{ id: string | number, marhala_name_bn: string }[]>([])
+const registrationOverview = ref<any[]>([])
 const examName = ref<string>('লোড হচ্ছে...')
 const globalFilterValue = ref<string>('')
 const currentPage = ref<number>(1)
@@ -248,7 +253,6 @@ const totalPages = ref<number>(1)
 const isLoading = ref<boolean>(true)
 const displayedMarhalas = ref<{ id: string | number, marhala_name_bn: string }[]>([])
 
-// API call function for marhala list
 const fetchMarhalaData = async () => {
   isLoading.value = true
   try {
@@ -256,10 +260,9 @@ const fetchMarhalaData = async () => {
       withCredentials: true,
       headers: { 'Content-Type': 'application/json' }
     })
-    // Use only marhala_name_bn and id for table display
     if (response.data.success && response.data.data.length > 0) {
       marhalaData.value = response.data.data.map((item: any) => ({
-        id: typeof item.id === 'string' && item.id.includes(':') ? item.id.split(':').pop() : item.id,
+        id: String(item.id), // always string for matching
         marhala_name_bn: item.marhala_name_bn
       }))
       examName.value = 'মারহালা API'
@@ -275,7 +278,18 @@ const fetchMarhalaData = async () => {
   isLoading.value = false
 }
 
-// Table pagination/filter logic
+const fetchRegistrationOverview = async () => {
+  try {
+    const res = await axios.get('/api/admin/registration/overview/')
+    registrationOverview.value = res.data.map((item: any) => ({
+      ...item,
+      id: String(item.id) // always string for matching
+    }))
+  } catch (err) {
+    registrationOverview.value = []
+  }
+}
+
 const updateDisplayedData = () => {
   let data = [...marhalaData.value]
   if (globalFilterValue.value) {
@@ -313,24 +327,44 @@ watch(currentPage, () => {
 
 onMounted(() => {
   fetchMarhalaData()
+  fetchRegistrationOverview()
 })
+
+// Helper: Find fee/date for marhalaId using id match
+function getFeeField(marhala_id: string | number, field: string, isMoney = false) {
+  const row = registrationOverview.value.find((r: any) => String(r.id) === String(marhala_id))
+  if (!row || row[field] === undefined || row[field] === null) return 'NA'
+  if (isMoney) return `৳ ${formatNumber(row[field])}`
+  if (field.includes('date')) return formatDate(row[field])
+  return row[field]
+}
+
+const formatDate = (dateString?: string | null) => {
+  if (!dateString) return 'N/A'
+  try {
+    const date = new Date(dateString)
+    if (Number.isNaN(date.getTime())) return dateString
+    return new Intl.DateTimeFormat('bn-BD', { year: 'numeric', month: 'short', day: 'numeric' }).format(date)
+  } catch {
+    return dateString
+  }
+}
+
+const formatNumber = (num: number | string | undefined | null) => {
+  if (num === undefined || num === null) return '0'
+  const n = Number(num)
+  if (!Number.isFinite(n)) return String(num)
+  return new Intl.NumberFormat('bn-BD', { maximumFractionDigits: 2 }).format(n)
+}
 
 const getCurrentDate = () => {
   const date = new Date()
-  return new Intl.DateTimeFormat('bn-BD', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  }).format(date)
+  return new Intl.DateTimeFormat('bn-BD', { year: 'numeric', month: 'long', day: 'numeric' }).format(date)
 }
 
 const getCurrentTime = () => {
   const date = new Date()
-  return new Intl.DateTimeFormat('bn-BD', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-  }).format(date)
+  return new Intl.DateTimeFormat('bn-BD', { hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(date)
 }
 
 const getPageNumbers = (): (number | string)[] => {
@@ -358,11 +392,6 @@ const getPageNumbers = (): (number | string)[] => {
   return pages
 }
 
-const getOldRegistrationPath = () => {
-  return '/student/old/verify'
-}
-
-const getRegistrationTablePath = () => {
-  return '/registrationTable'
-}
+const getOldRegistrationPath = () => '/student/old/verify'
+const getRegistrationTablePath = () => '/registrationTable'
 </script>

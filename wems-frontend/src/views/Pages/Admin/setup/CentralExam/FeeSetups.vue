@@ -38,7 +38,11 @@
             </div>
             <div class="px-4 py-2 bg-white rounded-lg shadow-sm border border-emerald-100">
               <div class="text-xs text-gray-500">কেন্দ্রীয় পরীক্ষা</div>
-              <div class="text-lg font-bold text-gray-800">{{ examSetup?.exam_name || 'N/A' }}</div>
+              <select v-model="selectedExamSetupId" @change="onExamSetupChange" class="text-lg font-bold text-gray-800 bg-white border border-emerald-200 rounded px-2 py-1">
+                <option v-for="setup in examSetupList" :key="setup.id" :value="setup.id">
+                  {{ setup.exam_name }} ({{ setup.english_year }})
+                </option>
+              </select>
             </div>
             <div class="px-4 py-2 bg-white rounded-lg shadow-sm border border-emerald-100">
               <div class="text-xs text-gray-500">শিক্ষাবর্ষ</div>
@@ -449,6 +453,7 @@
 <script setup lang="ts">
 
 import { ref, computed, onMounted } from 'vue'
+import { watch } from 'vue'
 import axios from 'axios'
 
 type ExamSetup = {
@@ -461,6 +466,7 @@ type ExamSetup = {
 
 type FeeRow = {
   examName: string
+  marhala_id: number
   dateFrom1: string | null
   dateTo1: string | null
   fee1: number | null
@@ -475,23 +481,31 @@ type FeeRow = {
   invest2Others: number | null
 }
 
-const examSetup = ref<ExamSetup | null>({
-  id: 1,
-  exam_name: '৪৬ তম কেন্দ্রীয় পরীক্ষা',
-  arabic_year: '১৪৪৬',
-  bangla_year: '১৪৩০',
-  english_year: '২০২৫'
-})
+const examSetupList = ref<ExamSetup[]>([])
+const selectedExamSetupId = ref<number | null>(null)
+const examSetup = ref<ExamSetup | null>(null)
+async function fetchExamSetupList() {
+  const response = await axios.get('http://127.0.0.1:8000/api/central-exam/exam-setups/list/');
+  if (response.data && Array.isArray(response.data)) {
+    examSetupList.value = response.data;
+    if (examSetupList.value.length > 0) {
+      selectedExamSetupId.value = examSetupList.value[0].id;
+      examSetup.value = examSetupList.value[0];
+    }
+  }
+}
 
-const rows = ref<FeeRow[]>([
-  { examName: 'ফযীলত', dateFrom1: null, dateTo1: null, fee1: null, invest1Men: null, invest1Madan: null, invest1Others: null, dateFrom2: null, dateTo2: null, fee2: null, invest2Men: null, invest2Madan: null, invest2Others: null },
-  { examName: 'সানাবিয়া', dateFrom1: null, dateTo1: null, fee1: null, invest1Men: null, invest1Madan: null, invest1Others: null, dateFrom2: null, dateTo2: null, fee2: null, invest2Men: null, invest2Madan: null, invest2Others: null },
-  { examName: 'সানাবিয়া উলইয়া', dateFrom1: null, dateTo1: null, fee1: null, invest1Men: null, invest1Madan: null, invest1Others: null, dateFrom2: null, dateTo2: null, fee2: null, invest2Men: null, invest2Madan: null, invest2Others: null },
-  { examName: 'মুতাওয়াসসিত', dateFrom1: null, dateTo1: null, fee1: null, invest1Men: null, invest1Madan: null, invest1Others: null, dateFrom2: null, dateTo2: null, fee2: null, invest2Men: null, invest2Madan: null, invest2Others: null },
-  { examName: 'ইবতেদাইয়্যাহ', dateFrom1: null, dateTo1: null, fee1: null, invest1Men: null, invest1Madan: null, invest1Others: null, dateFrom2: null, dateTo2: null, fee2: null, invest2Men: null, invest2Madan: null, invest2Others: null },
-  { examName: 'হিফজুল কোরানা', dateFrom1: null, dateTo1: null, fee1: null, invest1Men: null, invest1Madan: null, invest1Others: null, dateFrom2: null, dateTo2: null, fee2: null, invest2Men: null, invest2Madan: null, invest2Others: null },
-  { examName: 'ইলমুল কিরাআত', dateFrom1: null, dateTo1: null, fee1: null, invest1Men: null, invest1Madan: null, invest1Others: null, dateFrom2: null, dateTo2: null, fee2: null, invest2Men: null, invest2Madan: null, invest2Others: null },
-])
+function onExamSetupChange() {
+  const found = examSetupList.value.find(s => s.id === selectedExamSetupId.value)
+  examSetup.value = found || null;
+  console.log('Selected exam setup:', examSetup.value);
+}
+
+watch(selectedExamSetupId, () => {
+  onExamSetupChange();
+});
+
+const rows = ref<FeeRow[]>([])
 
 const expandedCards = ref<{ [key: number]: boolean }>({ 0: true })
 const activeTab = ref<{ [key: number]: string }>({ 0: 'regular' })
@@ -613,8 +627,9 @@ function downloadExcel() {
 async function submit() {
   // Prepare payload for bulk insert
   const fees = rows.value.map(row => ({
-    exam_setup: examSetup.value?.id,
+    exam_setup: selectedExamSetupId.value,
     exam_name: row.examName,
+    marhala: row.marhala_id, // মারহালার আইডি পাঠানো হচ্ছে
     reg_date_from: row.dateFrom1,
     reg_date_to: row.dateTo1,
     reg_regular_fee: row.fee1,
@@ -628,6 +643,7 @@ async function submit() {
     late_irregular_manonnoyon: row.invest2Madan,
     late_irregular_others: row.invest2Others
   }));
+  console.log('Submitting fees:', fees);
   try {
     const response = await axios.post('http://127.0.0.1:8000/api/central-exam/exam-fees/bulk-create/', { fees });
     if (response.data.success) {
@@ -644,20 +660,26 @@ async function submit() {
 const fetchMarhalaNames = async () => {
   const response = await axios.get('http://127.0.0.1:8000/api/marhalas/');
   if (response.data.success) {
-    marhalaNames.value = response.data.data.map(m => m.marhala_name_bn);
-    rows.value = marhalaNames.value.map(name => ({
-      examName: name,
+    // মারহালার নাম ও আইডি দুইটাই নাও
+    const marhalas = response.data.data;
+    marhalaNames.value = marhalas.map((m: { marhala_name_bn: string }) => m.marhala_name_bn);
+    rows.value = marhalas.map((m: { marhala_name_bn: string, id: number }) => ({
+      examName: m.marhala_name_bn,
+      marhala_id: m.id, // মারহালার আইডি
       dateFrom1: null, dateTo1: null, fee1: null,
       invest1Men: null, invest1Madan: null, invest1Others: null,
       dateFrom2: null, dateTo2: null, fee2: null,
       invest2Men: null, invest2Madan: null, invest2Others: null
     }));
+    expandedCards.value = { 0: true }
+    activeTab.value = { 0: 'regular' }
   }
 };
 
 onMounted(() => {
   expandedCards.value = { 0: true }
   activeTab.value = { 0: 'regular' }
-  fetchMarhalaNames()
+  fetchExamSetupList();
+  fetchMarhalaNames();
 });
 </script>
