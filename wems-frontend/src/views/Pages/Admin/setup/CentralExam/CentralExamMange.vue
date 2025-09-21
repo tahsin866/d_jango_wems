@@ -8,7 +8,7 @@
       </div>
       <RouterLink
         to="/central/exam/Create"
-        class="inline-flex items-center bg-blue-600 text-white text-lg font-semibold px-6 py-3 rounded-lg shadow hover:bg-blue-700 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-300"
+        class="inline-flex items-center bg-blue-600 text-white text-lg font-semibold px-6 py-3 rounded-sm shadow hover:bg-blue-700 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-300"
       >
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -27,14 +27,14 @@
             v-model="searchQuery"
             @keyup.enter="fetchExamSetups"
             placeholder="পরীক্ষার নাম দিয়ে অনুসন্ধান করুন..."
-            class="w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-transparent"
+            class="w-64 px-4 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-blue-300 focus:border-transparent"
           />
         </div>
         <div class="flex flex-col">
           <label class="text-gray-700 font-medium mb-1">কেন্দ্রীয় পরীক্ষার তালিকা</label>
           <select
             v-model="selectedClass"
-            class="w-48 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-transparent"
+            class="w-48 px-4 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-blue-300 focus:border-transparent"
           >
             <option value="">সকল পরীক্ষা</option>
             <option v-for="exam in availableExamNames" :key="exam" :value="exam">{{ exam }}</option>
@@ -44,7 +44,7 @@
           <label class="text-gray-700 font-medium mb-1">ইয়ার</label>
           <select
             v-model="selectedYear"
-            class="w-32 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-transparent"
+            class="w-32 px-4 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-blue-300 focus:border-transparent"
           >
             <option value="">সকল বছর</option>
             <option v-for="year in availableYears" :key="year" :value="year">{{ year }}</option>
@@ -54,7 +54,7 @@
           <label class="text-gray-700 font-medium mb-1">ইংরেজি বর্ষ</label>
           <select
             v-model="selectedStatus"
-            class="w-32 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-transparent"
+            class="w-32 px-4 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-blue-300 focus:border-transparent"
           >
             <option value="">সকল অবস্থা</option>
             <option value="active">সক্রিয়</option>
@@ -64,7 +64,7 @@
         </div>
         <button
           @click="clearFilters"
-          class="ml-auto bg-red-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-red-700 transition-colors duration-200 flex items-center"
+          class="ml-auto bg-red-600 text-white px-6 py-2 rounded-sm font-medium hover:bg-red-700 transition-colors duration-200 flex items-center"
         >
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -73,7 +73,7 @@
         </button>
         <button
           @click="fetchExamSetups"
-          class="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200 flex items-center"
+          class="bg-blue-600 text-white px-6 py-2 rounded-sm font-medium hover:bg-blue-700 transition-colors duration-200 flex items-center"
         >
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -195,14 +195,14 @@
                     <button
                       v-if="searchQuery || selectedYear || selectedStatus || selectedClass"
                       @click="clearFilters"
-                      class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                      class="bg-blue-600 text-white px-4 py-2 rounded-sm hover:bg-blue-700 transition-colors duration-200"
                     >
                       সব ফিল্টার মুছুন
                     </button>
                     <RouterLink
                       v-else
                       to="/central/exam/create"
-                      class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                      class="bg-blue-600 text-white px-4 py-2 rounded-sm hover:bg-blue-700 transition-colors duration-200"
                     >
                       নতুন পরীক্ষা তৈরি করুন
                     </RouterLink>
@@ -317,7 +317,7 @@ const allExamData = ref<ExamSetup[]>([])
 const fetchAllExamsForFilters = async () => {
   try {
     const response = await axios.get('http://127.0.0.1:8000/api/central-exam/exam-setups/list/')
-    allExamData.value = response.data
+    allExamData.value = response.data.data || []
   } catch (error) {
     console.error('Error fetching all exams for filters:', error)
   }
@@ -353,7 +353,7 @@ const fetchExamSetups = async () => {
     if (selectedClass.value) params.append('exam_name', selectedClass.value)
     const url = `http://127.0.0.1:8000/api/central-exam/exam-setups/list/${params.toString() ? '?' + params.toString() : ''}`
     const response = await axios.get(url)
-    examList.value = response.data
+    examList.value = response.data.data || []
   } catch (error) {
     console.error('Error fetching exam setups:', error)
   } finally {

@@ -598,13 +598,47 @@ class UpdateSubjectSettingView(APIView):
 
 
 class ExamFeeListBySetupView(APIView):
-    """একটি পরীক্ষার সব ফি দেখার API (GET)"""
+    """
+    নির্দিষ্ট exam_setup এর সব ExamFee লিস্ট রিটার্ন করবে।
+    প্রথমবার ডাটাবেস থেকে নেবে, এরপর Redis cache থেকে সার্ভ করবে।
+    """
     permission_classes = [AllowAny]
 
     def get(self, request):
         exam_setup_id = request.GET.get('exam_setup')
+
+        # validate exam_setup id
         if not exam_setup_id:
-            return Response({'success': False, 'message': 'exam_setup id আবশ্যক'}, status=status.HTTP_400_BAD_REQUEST)
-        fees = ExamFee.objects.filter(exam_setup_id=exam_setup_id)
+            return Response(
+                {'success': False, 'message': 'exam_setup id আবশ্যক'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Redis cache key
+        cache_key = f"exam_fee_list_{exam_setup_id}"
+        cached_data = cache.get(cache_key)
+
+        if cached_data:
+            return Response(
+                {'success': True, 'data': json.loads(cached_data), 'source': 'cache'},
+                status=status.HTTP_200_OK
+            )
+
+        # DB থেকে ডাটা নিন
+        fees = ExamFee.objects.filter(exam_setup_id=exam_setup_id).select_related('marhala', 'exam_setup')
+
+        if not fees.exists():
+            return Response(
+                {'success': False, 'data': [], 'message': 'কোনো ফি পাওয়া যায়নি'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
         serializer = ExamFeeSerializer(fees, many=True)
-        return Response({'success': True, 'data': serializer.data}, status=status.HTTP_200_OK)
+
+        # Redis cache এ সেট করুন ৩০ মিনিটের জন্য
+        cache.set(cache_key, json.dumps(serializer.data), timeout=60 * 30)
+
+        return Response(
+            {'success': True, 'data': serializer.data, 'source': 'database'},
+            status=status.HTTP_200_OK
+        )
