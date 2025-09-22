@@ -7,16 +7,20 @@ class ExamSetupSerializer(serializers.ModelSerializer):
         fields = ['id', 'exam_name']
 
 class RegistrationOverviewSerializer(serializers.ModelSerializer):
-    marhala_name_bn = serializers.CharField(source='exam_setup.marhala_name_bn', read_only=True)
+    marhala_name_bn = serializers.CharField(source='marhala.marhala_name_bn', read_only=True)
     exam_setup = ExamSetupSerializer(read_only=True)
     exam_setup_id = serializers.PrimaryKeyRelatedField(
         queryset=ExamSetup.objects.all(), source='exam_setup', write_only=True
+    )
+    from mysite.apps.subject.models import Marhala
+    marhala_id = serializers.PrimaryKeyRelatedField(
+        queryset=Marhala.objects.all(), source='marhala', write_only=True
     )
 
     class Meta:
         model = RegistrationOverview
         fields = [
-            'id', 'marhala_name_bn', 'exam_setup', 'exam_setup_id',
+            'id', 'marhala_name_bn', 'marhala_id', 'exam_setup', 'exam_setup_id',
             'reg_date_from', 'reg_date_to', 'reg_regular_fee',
             'reg_irregular_jemni', 'reg_irregular_manonnoyon', 'reg_irregular_others',
             'late_date_from', 'late_date_to', 'late_regular_fee',

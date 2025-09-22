@@ -435,7 +435,7 @@
             </svg>
             সব রিসেট করুন
           </button>
-          <button @click="submit"
+          <button @click="submitWithValidation"
             class="inline-flex items-center px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-500 border border-transparent rounded-lg text-white hover:from-emerald-700 hover:to-teal-600 focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition duration-150 shadow-md">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
               stroke="currentColor">
@@ -455,6 +455,11 @@
 import { ref, computed, onMounted } from 'vue'
 import { watch } from 'vue'
 import axios from 'axios'
+
+
+
+// const rows = ref([]); // Your fee rows data
+// const selectedExamSetupId = ref(null); // Latest exam_setup id
 
 type ExamSetup = {
   id: number
@@ -624,12 +629,17 @@ function resetForm() {
 function downloadExcel() {
   alert('এক্সেল ডাউনলোড ফাংশন বাস্তবায়ন করা হবে।')
 }
+
+
 async function submit() {
-  // Prepare payload for bulk insert
+  if (!selectedExamSetupId.value) {
+    alert('কোনো কেন্দ্রীয় পরীক্ষা পাওয়া যায়নি!');
+    return;
+  }
+
   const fees = rows.value.map(row => ({
     exam_setup: selectedExamSetupId.value,
-    exam_name: row.examName,
-    marhala: row.marhala_id, // মারহালার আইডি পাঠানো হচ্ছে
+    marhala: row.marhala_id,
     reg_date_from: row.dateFrom1,
     reg_date_to: row.dateTo1,
     reg_regular_fee: row.fee1,
@@ -643,20 +653,68 @@ async function submit() {
     late_irregular_manonnoyon: row.invest2Madan,
     late_irregular_others: row.invest2Others
   }));
-  console.log('Submitting fees:', fees);
+
   try {
     const response = await axios.post('http://127.0.0.1:8000/api/central-exam/exam-fees/bulk-create/', { fees });
+
     if (response.data.success) {
-      alert('পরীক্ষার ফি সফলভাবে সংরক্ষণ করা হয়েছে!');
+      alert(`সফলভাবে সংরক্ষণ হয়েছে! ${response.data.message}`);
     } else {
-      alert('সংরক্ষণে সমস্যা হয়েছে: ' + (response.data.message || 'Unknown error'));
-      console.error(response.data.errors);
+      let errorMessage = 'সংরক্ষণে সমস্যা হয়েছে:\n\n';
+      if (response.data.errors && Array.isArray(response.data.errors)) {
+        response.data.errors.forEach((error, index) => {
+          errorMessage += `আইটেম ${error.index + 1}: `;
+          if (error.errors) {
+            Object.keys(error.errors).forEach(field => {
+              errorMessage += `${field}: ${error.errors[field].join(', ')}\n`;
+            });
+          }
+        });
+      }
+      alert(errorMessage);
     }
   } catch (error) {
-    alert('API তে সমস্যা হয়েছে!');
-    console.error(error);
+    console.error('API Error:', error);
+    if (error.response && error.response.data) {
+      alert(`API Error: ${error.response.data.message || 'অজানা সমস্যা'}`);
+    } else {
+      alert('নেটওয়ার্ক সমস্যা! আবার চেষ্টা করুন।');
+    }
   }
 }
+
+// ভ্যালিডেশন চেক করার জন্য একটি helper function যোগ করুন:
+function validateBeforeSubmit() {
+  const errors = [];
+
+  // কেন্দ্রীয় পরীক্ষা সিলেক্ট করার validation আর নেই
+
+  rows.value.forEach((row, index) => {
+    const rowErrors = [];
+
+    if (!row.marhala_id) {
+      rowErrors.push('মারহালা আইডি নেই');
+    }
+
+    // Optional: অন্যান্য required fields চেক করুন
+    if (row.dateFrom1 && row.dateTo1 && new Date(row.dateFrom1) > new Date(row.dateTo1)) {
+      rowErrors.push('নিয়মিত ফি এর শুরুর তারিখ শেষের তারিখের চেয়ে বড় হতে পারে না');
+    }
+
+    if (row.dateFrom2 && row.dateTo2 && new Date(row.dateFrom2) > new Date(row.dateTo2)) {
+      rowErrors.push('বিলম্ব ফি এর শুরুর তারিখ শেষের তারিখের চেয়ে বড় হতে পারে না');
+    }
+
+    if (rowErrors.length > 0) {
+      errors.push(`মারহালা ${index + 1} (${row.examName}): ${rowErrors.join(', ')}`);
+    }
+  });
+
+  return errors;
+}
+
+
+
 const fetchMarhalaNames = async () => {
   const response = await axios.get('http://127.0.0.1:8000/api/marhalas/');
   if (response.data.success) {
@@ -676,10 +734,45 @@ const fetchMarhalaNames = async () => {
   }
 };
 
+
+
+async function submitWithValidation() {
+  const validationErrors = validateBeforeSubmit();
+
+  if (validationErrors.length > 0) {
+    console.error('Validation errors:', validationErrors);
+    return;
+  }
+
+  // আসল submit function কল করুন
+  await submit();
+}
+
+
+
+
+onMounted(async () => {
+  try {
+    const response = await axios.get('http://127.0.0.1:8000/api/central-exam/exam-setups/latest/');
+    if (response.data && response.data.success && response.data.data && response.data.data.id) {
+      selectedExamSetupId.value = response.data.data.id;
+      console.log('Latest Exam Setup ID:', selectedExamSetupId.value);
+    } else {
+      alert('কোনো কেন্দ্রীয় পরীক্ষা পাওয়া যায়নি!');
+    }
+  } catch (error) {
+    console.error('Failed to fetch latest exam setup:', error);
+    alert('সর্বশেষ কেন্দ্রীয় পরীক্ষা আইডি ফেচ করতে সমস্যা হয়েছে!');
+  }
+});
+
+
+
 onMounted(() => {
   expandedCards.value = { 0: true }
   activeTab.value = { 0: 'regular' }
   fetchExamSetupList();
   fetchMarhalaNames();
 });
+
 </script>

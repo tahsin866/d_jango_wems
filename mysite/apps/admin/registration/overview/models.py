@@ -8,6 +8,14 @@ class RegistrationOverview(models.Model):
         db_column='exam_setup_id',
         related_name='registration_overviews'
     )
+    marhala = models.ForeignKey(
+        'subject.Marhala',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column='marhala_id',
+        related_name='registration_overviews'
+    )
     reg_date_from = models.DateField()
     reg_date_to = models.DateField()
     reg_regular_fee = models.DecimalField(max_digits=10, decimal_places=2)

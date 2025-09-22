@@ -9,6 +9,7 @@ from .views import (
     ExamFeeUpdateView,
     ExamFeeDetailView,
     ExamFeeListBySetupView,
+    LatestExamSetupAPIView,   # ✅ নতুন ভিউ ইম্পোর্ট করুন
 )
 
 urlpatterns = [
@@ -17,6 +18,7 @@ urlpatterns = [
     path('exam-setups/<int:exam_id>/', ExamSetupDetailView.as_view(), name='exam_setup_detail'),
     path('exam-setups/<int:exam_id>/update/', ExamSetupUpdateView.as_view(), name='exam_setup_update'),
     path('exam-setups/<int:exam_id>/delete/', ExamSetupDeleteView.as_view(), name='exam_setup_delete'),
+    path('exam-setups/latest/', LatestExamSetupAPIView.as_view(), name='exam_setup_latest'),  # ✅ নতুন URL
     path('exam-fees/bulk-create/', ExamFeeBulkCreateView.as_view(), name='exam-fee-bulk-create'),
     path('exam-fees/<int:fee_id>/update/', ExamFeeUpdateView.as_view(), name='exam-fee-update'),
     path('exam-fees/<int:fee_id>/', ExamFeeDetailView.as_view(), name='exam-fee-detail'),

@@ -184,6 +184,8 @@ class ExamFeeUpdateView(APIView):
             status=status.HTTP_400_BAD_REQUEST
         )
 
+# views.py - SIMPLIFIED BULK CREATE VIEW
+
 class ExamFeeBulkCreateView(APIView):
     permission_classes = [AllowAny]
 
@@ -191,77 +193,113 @@ class ExamFeeBulkCreateView(APIView):
         try:
             fees = request.data.get('fees')
             if not fees or not isinstance(fees, list):
-                return Response(
-                    {
-                        'success': False,
-                        'data': {},
-                        'errors': {'fees': ['fees ফিল্ডটি আবশ্যক এবং array হতে হবে']},
-                        'message': 'fees ফিল্ডটি আবশ্যক এবং array হতে হবে'
-                    },
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                return Response({
+                    'success': False,
+                    'data': {},
+                    'errors': {'fees': ['fees ফিল্ডটি আবশ্যক এবং array হতে হবে']},
+                    'message': 'fees ফিল্ডটি আবশ্যক এবং array হতে হবে'
+                }, status=status.HTTP_400_BAD_REQUEST)
 
             created_fees = []
             errors = []
 
-            # Production-friendly approach:
-            # - validate and save each fee individually inside its own atomic block
-            # - collect successes and per-item errors
-            for idx, fee in enumerate(fees):
-                # basic presence check for foreign key to avoid IntegrityError
-                if not fee.get('exam_setup'):
-                    errors.append({'index': idx, 'errors': {'exam_setup': ['এই ফিল্ডটি আবশ্যক']}})
-                    continue
+            # Check if any exam_setup exists before loop
+            latest_exam = ExamSetup.objects.order_by('-id').first()
+            if not latest_exam:
+                return Response({
+                    'success': False,
+                    'data': [],
+                    'errors': [{'exam_setup': ['কোনো কেন্দ্রীয় পরীক্ষা পাওয়া যায়নি']}],
+                    'message': 'কোনো কেন্দ্রীয় পরীক্ষা পাওয়া যায়নি',
+                    'summary': {
+                        'total_items': len(fees),
+                        'successful': 0,
+                        'failed': len(fees)
+                    }
+                }, status=status.HTTP_400_BAD_REQUEST)
 
-                serializer = ExamFeeSerializer(data=fee)
+            for idx, fee_data in enumerate(fees):
+                print(f"[DEBUG] Processing fee {idx}: {fee_data}")
+                # Auto set latest exam_setup id if missing
+                if not fee_data.get('exam_setup'):
+                    fee_data['exam_setup'] = latest_exam.id
+
+                # ✅ Direct serializer validation - কোন manipulation নেই
+                serializer = ExamFeeSerializer(data=fee_data)
                 if not serializer.is_valid():
-                    errors.append({'index': idx, 'errors': serializer.errors})
+                    print(f"[DEBUG] Serializer validation failed: {serializer.errors}")
+                    errors.append({
+                        'index': idx, 
+                        'errors': serializer.errors,
+                        'item_data': fee_data
+                    })
                     continue
 
+                # ✅ Database save
                 try:
                     with transaction.atomic():
                         created_fee = serializer.save()
                         created_fees.append(ExamFeeSerializer(created_fee).data)
-                except Exception as e:
-                    # record the exception for this item, but continue processing others
-                    errors.append({'index': idx, 'errors': {'detail': [str(e)]}})
+                        print(f"[DEBUG] Successfully saved fee {idx}")
+                except Exception as save_error:
+                    print(f"[DEBUG] Save error for fee {idx}: {save_error}")
+                    errors.append({
+                        'index': idx, 
+                        'errors': {'database_error': [str(save_error)]},
+                        'item_data': fee_data
+                    })
 
-            # If some items failed, return multi-status like response with both created and errors
-            if errors and created_fees:
+            # ✅ Response handling
+            if errors and not created_fees:
                 return Response({
                     'success': False,
+                    'data': [],
+                    'errors': errors,
+                    'message': f'কোনো ফি সংরক্ষণ হয়নি - {len(errors)}টি সমস্যা পাওয়া গেছে',
+                    'summary': {
+                        'total_items': len(fees),
+                        'successful': 0,
+                        'failed': len(errors)
+                    }
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            if errors and created_fees:
+                return Response({
+                    'success': False,  # Partial success = False
                     'data': created_fees,
                     'errors': errors,
-                    'message': 'কিছু ফি ইনসার্ট হয়নি। সফল ও ব্যর্থ উভয় ফলাফল দেওয়া হলো।'
+                    'message': f'{len(created_fees)}টি সফল, {len(errors)}টি ব্যর্থ',
+                    'summary': {
+                        'total_items': len(fees),
+                        'successful': len(created_fees),
+                        'failed': len(errors)
+                    }
                 }, status=status.HTTP_207_MULTI_STATUS)
 
-            if errors and not created_fees:
-                return Response(
-                    {
-                        'success': False,
-                        'data': [],
-                        'errors': errors,
-                        'message': 'কোনো ফি ইনসার্ট হয়নি'
-                    },
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+            return Response({
+                'success': True,
+                'data': created_fees,
+                'errors': [],
+                'message': f'সব {len(created_fees)}টি ফি সফলভাবে সংরক্ষণ হয়েছে',
+                'summary': {
+                    'total_items': len(fees),
+                    'successful': len(created_fees),
+                    'failed': 0
+                }
+            }, status=status.HTTP_201_CREATED)
 
-            return Response(
-                {
-                    'success': True,
-                    'data': created_fees,
-                    'errors': [],
-                    'message': 'সব ফি সফলভাবে সংরক্ষণ হয়েছে'
-                },
-                status=status.HTTP_201_CREATED
-            )
         except Exception as e:
+            print(f"[ERROR] Unexpected error in bulk create: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            
             return Response({
                 'success': False,
                 'data': {},
-                'errors': {'detail': [str(e)]},
-                'message': 'সার্ভার এরর'
+                'errors': {'server_error': [str(e)]},
+                'message': f'সার্ভার এরর: {str(e)}'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class ExamSetupCreateView(APIView):
     """কেন্দ্রীয় পরীক্ষা সেটআপ তৈরি ভিউ"""
@@ -460,3 +498,15 @@ class ExamSetupDeleteView(APIView):
                 'errors': {'detail': [str(e)]},
                 'message': 'সার্ভার এরর'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class LatestExamSetupAPIView(APIView):
+    permission_classes = [AllowAny]
+    
+    def get(self, request):
+        
+        latest_exam = ExamSetup.objects.order_by('-id').first()
+        if latest_exam:
+            data = ExamSetupSerializer(latest_exam).data
+            return Response({'success': True, 'data': data, 'errors': [], 'message': 'Latest exam setup found.'})
+        return Response({'success': False, 'data': {}, 'errors': ['No exam setup found.'], 'message': 'No exam setup found.'}, status=404)
