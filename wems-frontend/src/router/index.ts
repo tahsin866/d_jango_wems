@@ -244,6 +244,8 @@ const routes = [
 
 
 
+
+
   // User Routes (User Layout)
   {
     path: '/user',
@@ -325,7 +327,7 @@ const routes = [
         meta: { title: 'Old Student List', requiresAuth: true, role: 'user' },
       },
       {
-        path: 'student/old/verify',
+        path: 'student/old/verify/:marhala_id',
         name: 'VerifyOldStudents',
         component: () => import('@/views/Pages/registraion/verifyOldStudents.vue'),
         meta: { title: 'Verify Old Students', requiresAuth: true, role: 'user' },
@@ -428,10 +430,15 @@ const routes = [
     path: '/oldStudentList',
     redirect: '/user/student/old/list'
   },
+
+
   {
-    path: '/student/old/verify',
-    redirect: '/user/student/old/verify'
+    path: '/student/old/verify/:marhala_id',
+      redirect: (to: { params: { marhala_id: string } }) => `/user/student/old/verify/${to.params.marhala_id}`
   },
+
+
+
   {
     path: '/student/old/registration/form',
     redirect: '/user/student/old/registration/form'

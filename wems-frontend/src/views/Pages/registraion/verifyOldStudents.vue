@@ -303,6 +303,8 @@
 <script setup lang="ts">
 
 import { ref, onMounted, computed, watch } from 'vue';
+import { useRoute } from 'vue-router'
+import axios from 'axios'
 
 type Student = {
   id: number;
@@ -527,6 +529,18 @@ onMounted(async () => {
   } catch {
     // no-op for fake mode
   }
+
+  const route = useRoute()
+  const marhalaId = route.params.marhala_id
+  const marhalaName = ref('')
+
+  onMounted(async () => {
+    if (marhalaId) {
+      // API endpoint আপনার backend অনুযায়ী দিন
+      const res = await axios.get(`/api/marhala/${marhalaId}/`)
+      marhalaName.value = res.data.name_bn // name_bn বা আপনার model field
+    }
+  })
 });
 
 /* --- Functions for UI behavior --- */

@@ -447,49 +447,12 @@
 </template>
 
 <script setup lang="ts">
-// সব ফি একসাথে আপডেট করার ফাংশন
-async function updateAllFees() {
-  let successCount = 0;
-  let failCount = 0;
-  for (const row of rows.value) {
-    if (row.id) {
-      // examName বাদ দিয়ে শুধু valid ফিল্ড পাঠান
-      const payload = {
-        exam_setup: row.exam_setup,
-        reg_date_from: row.dateFrom1,
-        reg_date_to: row.dateTo1,
-        reg_regular_fee: row.fee1,
-        reg_irregular_jemni: row.invest1Men,
-        reg_irregular_manonnoyon: row.invest1Madan,
-        reg_irregular_others: row.invest1Others,
-        late_date_from: row.dateFrom2,
-        late_date_to: row.dateTo2,
-        late_regular_fee: row.fee2,
-        late_irregular_jemni: row.invest2Men,
-        late_irregular_manonnoyon: row.invest2Madan,
-        late_irregular_others: row.invest2Others
-      };
-      try {
-        const response = await axios.put(
-          `http://127.0.0.1:8000/api/central-exam/exam-fees/${row.id}/update/`,
-          payload
-        );
-        if (response.data.success) {
-          successCount++;
-        } else {
-          failCount++;
-        }
-      } catch (error) {
-        failCount++;
-      }
-    }
-  }
-  alert(`সফলভাবে আপডেট হয়েছে: ${successCount} | ব্যর্থ: ${failCount}`);
-}
-
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 
+// ---------------------------
+// Types
+// ---------------------------
 type ExamSetup = {
   id: number
   exam_name: string
@@ -513,8 +476,12 @@ type FeeRow = {
   invest2Men: number | null
   invest2Madan: number | null
   invest2Others: number | null
+  id?: number // future update-এর জন্য
 }
 
+// ---------------------------
+// State
+// ---------------------------
 const examSetup = ref<ExamSetup | null>({
   id: 1,
   exam_name: '৪৬ তম কেন্দ্রীয় পরীক্ষা',
@@ -523,57 +490,74 @@ const examSetup = ref<ExamSetup | null>({
   english_year: '২০২৫'
 })
 
-const rows = ref<FeeRow[]>([
-  // Initial rows will be set by fetchMarhalaNames and fetchExamFees
-])
-
+const rows = ref<FeeRow[]>([]) // Initial rows will be set dynamically
 const expandedCards = ref<{ [key: number]: boolean }>({ 0: true })
 const activeTab = ref<{ [key: number]: string }>({ 0: 'regular' })
 const expandAll = ref<boolean>(false)
 
-const marhalaNames = ref<string[]>([]);
-const marhalaList = ref<{ id: number, name: string }[]>([]);
+const marhalaNames = ref<string[]>([])
+const marhalaList = ref<{ id: number, name: string }[]>([])
 
+// ---------------------------
+// Computed
+// ---------------------------
 const formattedTitle = computed(() => {
   if (!examSetup.value) return ''
   return `${examSetup.value.exam_name} ${examSetup.value.arabic_year} হিজরি/${examSetup.value.bangla_year} বঙ্গাব্দ/${examSetup.value.english_year} ইসাব্দ`
 })
 
+// ---------------------------
+// Utils
+// ---------------------------
 const getCurrentDate = () => {
   const date = new Date()
   return date.toLocaleDateString('bn-BD', { year: 'numeric', month: 'long', day: 'numeric' })
 }
+
 const getCurrentTime = () => {
   const date = new Date()
   return date.toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' })
 }
+
 function isCardFilled(row: FeeRow): boolean {
   return !!(row.dateFrom1 && row.dateTo1 && row.fee1 &&
-    row.dateFrom2 && row.dateTo2 && row.fee2)
+            row.dateFrom2 && row.dateTo2 && row.fee2)
 }
+
 function filledCards(): number {
   return rows.value.filter(row => isCardFilled(row)).length
 }
+
 function formatAmount(amount: number | null): string {
   if (!amount) return '0'
   return new Intl.NumberFormat('bn-BD').format(amount)
 }
+
 function calculateDateDifference(start: string | null, end: string | null): string {
   if (!start || !end) return 'নির্ধারিত নয়'
+
   const startDate = new Date(start)
   const endDate = new Date(end)
+
   if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return 'অবৈধ তারিখ'
   if (endDate < startDate) return 'অবৈধ সময়কাল'
+
   const diffTime = Math.abs(endDate.getTime() - startDate.getTime())
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
   return `${diffDays} দিন`
 }
+
+// ---------------------------
+// Actions
+// ---------------------------
 function toggleCard(index: number) {
   expandedCards.value[index] = !expandedCards.value[index]
   if (!activeTab.value[index]) {
     activeTab.value[index] = 'regular'
   }
 }
+
 function toggleExpand() {
   expandAll.value = !expandAll.value
   rows.value.forEach((_, index) => {
@@ -583,6 +567,7 @@ function toggleExpand() {
     }
   })
 }
+
 function copyToAllCards(sourceRow: FeeRow) {
   if (confirm('আপনি কি নিশ্চিত যে এই কার্ডের ডাটা সমস্ত কার্ডে কপি করতে চান?')) {
     rows.value = rows.value.map(row => ({
@@ -602,6 +587,7 @@ function copyToAllCards(sourceRow: FeeRow) {
     }))
   }
 }
+
 function resetSingleCard(index: number) {
   if (confirm('আপনি কি নিশ্চিত যে এই কার্ডের ডাটা রিসেট করতে চান?')) {
     rows.value[index] = {
@@ -621,6 +607,7 @@ function resetSingleCard(index: number) {
     }
   }
 }
+
 function resetForm() {
   if (confirm('আপনি কি নিশ্চিত যে সমস্ত ডাটা রিসেট করতে চান?')) {
     rows.value = rows.value.map(row => ({
@@ -642,40 +629,29 @@ function resetForm() {
     activeTab.value = { 0: 'regular' }
   }
 }
+
 function downloadExcel() {
   alert('এক্সেল ডাউনলোড ফাংশন বাস্তবায়ন করা হবে।')
 }
-async function submitUpdate(feeId, updatedData) {
-  try {
-    const response = await axios.put(
-      `http://127.0.0.1:8000/api/central-exam/exam-fees/${feeId}/update/`,
-      updatedData
-    );
-    if (response.data.success) {
-      alert('ফি সফলভাবে আপডেট হয়েছে!');
-    } else {
-      alert('আপডেটে সমস্যা: ' + (response.data.message || 'Unknown error'));
-      console.error(response.data.errors);
-    }
-  } catch (error) {
-    alert('API তে সমস্যা হয়েছে!');
-    console.error(error);
+
+// ---------------------------
+// API Calls
+// ---------------------------
+const fetchMarhalaNames = async () => {
+  const response = await axios.get('http://127.0.0.1:8000/api/marhalas/')
+  if (response.data.success) {
+    marhalaList.value = response.data.data.map(m => ({ id: m.id, name: m.marhala_name_bn }))
+    marhalaNames.value = marhalaList.value.map(m => m.name)
   }
 }
-const fetchMarhalaNames = async () => {
-  const response = await axios.get('http://127.0.0.1:8000/api/marhalas/');
-  if (response.data.success) {
-    // Save marhala id and name for mapping
-    marhalaList.value = response.data.data.map(m => ({ id: m.id, name: m.marhala_name_bn }));
-    marhalaNames.value = marhalaList.value.map(m => m.name);
-  }
-};
+
 const fetchExamFees = async () => {
-  const response = await axios.get(`http://127.0.0.1:8000/api/central-exam/exam-fees/by-setup/?exam_setup=${examSetupId.value}`);
+  const response = await axios.get(
+    `http://127.0.0.1:8000/api/central-exam/exam-fees/by-setup/?exam_setup=${examSetupId.value}`
+  )
   if (response.data.success) {
-    // Map marhala name and id from marhalaList
     rows.value = response.data.data.map(fee => {
-      const marhala = marhalaList.value.find(m => m.id === fee.marhala);
+      const marhala = marhalaList.value.find(m => m.id === fee.marhala)
       return {
         examName: marhala ? marhala.name : '',
         marhala_id: fee.marhala,
@@ -691,25 +667,72 @@ const fetchExamFees = async () => {
         invest2Men: Number(fee.late_irregular_jemni),
         invest2Madan: Number(fee.late_irregular_manonnoyon),
         invest2Others: Number(fee.late_irregular_others),
-        id: fee.id // future update-এর জন্য
-      };
-    });
+        id: fee.id
+      }
+    })
   }
-};
+}
 
 const getExamSetupIdFromUrl = () => {
-  const path = window.location.pathname;
-  const matches = path.match(/\/FeeEdit\/(\d+)/);
-  return matches ? parseInt(matches[1]) : null;
-};
+  const path = window.location.pathname
+  const matches = path.match(/\/FeeEdit\/(\d+)/)
+  return matches ? parseInt(matches[1]) : null
+}
 
-const examSetupId = ref(getExamSetupIdFromUrl());
+const examSetupId = ref(getExamSetupIdFromUrl())
 
+// ---------------------------
+// Update All Fees
+// ---------------------------
+async function updateAllFees() {
+  let successCount = 0
+  let failCount = 0
+
+  for (const row of rows.value) {
+    if (row.id) {
+      const payload = {
+        exam_setup: examSetupId.value,
+        reg_date_from: row.dateFrom1,
+        reg_date_to: row.dateTo1,
+        reg_regular_fee: row.fee1,
+        reg_irregular_jemni: row.invest1Men,
+        reg_irregular_manonnoyon: row.invest1Madan,
+        reg_irregular_others: row.invest1Others,
+        late_date_from: row.dateFrom2,
+        late_date_to: row.dateTo2,
+        late_regular_fee: row.fee2,
+        late_irregular_jemni: row.invest2Men,
+        late_irregular_manonnoyon: row.invest2Madan,
+        late_irregular_others: row.invest2Others
+      }
+
+      try {
+        const response = await axios.put(
+          `http://127.0.0.1:8000/api/central-exam/exam-fees/${row.id}/update/`,
+          payload
+        )
+        if (response.data.success) {
+          successCount++
+        } else {
+          failCount++
+        }
+      } catch {
+        failCount++
+      }
+    }
+  }
+
+  alert(`সফলভাবে আপডেট হয়েছে: ${successCount} | ব্যর্থ: ${failCount}`)
+}
+
+// ---------------------------
+// Lifecycle
+// ---------------------------
 onMounted(() => {
   expandedCards.value = { 0: true }
   activeTab.value = { 0: 'regular' }
   fetchMarhalaNames().then(() => {
-    fetchExamFees();
-  });
-});
+    fetchExamFees()
+  })
+})
 </script>

@@ -172,11 +172,9 @@
                       <input
                         id="englishYear"
                         v-model="form.englishYear"
-                        type="number"
+                        type="text"
                         required
-                        min="2020"
-                        max="2030"
-                        placeholder="২০২৫"
+                        placeholder="২০২৫ বা 2025"
                         :class="[
                           'w-full text-xl px-4 py-3 border rounded-lg transition-all duration-200 focus:outline-none focus:ring-2',
                           errors.englishYear
@@ -324,8 +322,12 @@ const validateForm = (): boolean => {
     errors.englishYear = 'ইংরেজি সন আবশ্যক'
     isValid = false
   } else {
-    const year = parseInt(form.englishYear.toString())
-    if (year < 2020 || year > 2030) {
+    // Accept Bangla or English digits
+    const englishYearStr = form.englishYear.toString().trim()
+    // Convert Bangla digits to English digits
+    const banglaToEnglishDigits = (str: string) => str.replace(/[০-৯]/g, d => String('০১২৩৪৫৬৭৮৯'.indexOf(d)))
+    const yearNum = parseInt(banglaToEnglishDigits(englishYearStr))
+    if (isNaN(yearNum) || yearNum < 2020 || yearNum > 2030) {
       errors.englishYear = 'ইংরেজি সন ২০২০-২০৩০ এর মধ্যে হতে হবে'
       isValid = false
     }
@@ -366,11 +368,14 @@ const handleSubmit = async (): Promise<void> => {
   isSubmitting.value = true
 
   try {
+    // Convert Bangla digits to English digits before sending
+    const banglaToEnglishDigits = (str: string) => str.replace(/[০-৯]/g, d => String('০১২৩৪৫৬৭৮৯'.indexOf(d)))
+    const englishYearNum = parseInt(banglaToEnglishDigits(form.englishYear.toString()))
     const response = await axios.post<ApiResponse>('http://127.0.0.1:8000/api/central-exam/exam-setups/', {
       exam_name: form.examName,
       arabic_year: form.arabicYear,
       bangla_year: form.banglaYear,
-      english_year: parseInt(form.englishYear.toString())
+      english_year: englishYearNum
     })
 
     if (response.status === 201 && response.data.success) {

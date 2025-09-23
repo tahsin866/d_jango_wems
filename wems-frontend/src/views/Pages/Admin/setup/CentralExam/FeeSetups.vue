@@ -451,16 +451,16 @@
 </template>
 
 <script setup lang="ts">
-
-import { ref, computed, onMounted } from 'vue'
-import { watch } from 'vue'
+/* ------------------------------
+ * Imports
+ * ------------------------------ */
+import { ref, computed, onMounted, watch } from 'vue'
 import axios from 'axios'
 
 
-
-// const rows = ref([]); // Your fee rows data
-// const selectedExamSetupId = ref(null); // Latest exam_setup id
-
+/* ------------------------------
+ * Types
+ * ------------------------------ */
 type ExamSetup = {
   id: number
   exam_name: string
@@ -486,78 +486,81 @@ type FeeRow = {
   invest2Others: number | null
 }
 
+
+/* ------------------------------
+ * State Variables
+ * ------------------------------ */
 const examSetupList = ref<ExamSetup[]>([])
 const selectedExamSetupId = ref<number | null>(null)
 const examSetup = ref<ExamSetup | null>(null)
-async function fetchExamSetupList() {
-  const response = await axios.get('http://127.0.0.1:8000/api/central-exam/exam-setups/list/');
-  if (response.data && Array.isArray(response.data)) {
-    examSetupList.value = response.data;
-    if (examSetupList.value.length > 0) {
-      selectedExamSetupId.value = examSetupList.value[0].id;
-      examSetup.value = examSetupList.value[0];
-    }
-  }
-}
-
-function onExamSetupChange() {
-  const found = examSetupList.value.find(s => s.id === selectedExamSetupId.value)
-  examSetup.value = found || null;
-  console.log('Selected exam setup:', examSetup.value);
-}
-
-watch(selectedExamSetupId, () => {
-  onExamSetupChange();
-});
 
 const rows = ref<FeeRow[]>([])
+const marhalaNames = ref<string[]>([])
 
 const expandedCards = ref<{ [key: number]: boolean }>({ 0: true })
 const activeTab = ref<{ [key: number]: string }>({ 0: 'regular' })
 const expandAll = ref<boolean>(false)
 
-const marhalaNames = ref<string[]>([]);
 
+/* ------------------------------
+ * Computed Properties
+ * ------------------------------ */
 const formattedTitle = computed(() => {
   if (!examSetup.value) return ''
   return `${examSetup.value.exam_name} ${examSetup.value.arabic_year} হিজরি/${examSetup.value.bangla_year} বঙ্গাব্দ/${examSetup.value.english_year} ইসাব্দ`
 })
 
+
+/* ------------------------------
+ * Utility Functions
+ * ------------------------------ */
 const getCurrentDate = () => {
   const date = new Date()
   return date.toLocaleDateString('bn-BD', { year: 'numeric', month: 'long', day: 'numeric' })
 }
+
 const getCurrentTime = () => {
   const date = new Date()
   return date.toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' })
 }
-function isCardFilled(row: FeeRow): boolean {
-  return !!(row.dateFrom1 && row.dateTo1 && row.fee1 &&
-    row.dateFrom2 && row.dateTo2 && row.fee2)
-}
-function filledCards(): number {
-  return rows.value.filter(row => isCardFilled(row)).length
-}
+
 function formatAmount(amount: number | null): string {
   if (!amount) return '0'
   return new Intl.NumberFormat('bn-BD').format(amount)
 }
+
 function calculateDateDifference(start: string | null, end: string | null): string {
   if (!start || !end) return 'নির্ধারিত নয়'
   const startDate = new Date(start)
   const endDate = new Date(end)
   if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return 'অবৈধ তারিখ'
   if (endDate < startDate) return 'অবৈধ সময়কাল'
+
   const diffTime = Math.abs(endDate.getTime() - startDate.getTime())
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
   return `${diffDays} দিন`
 }
+
+
+/* ------------------------------
+ * Card Handling Functions
+ * ------------------------------ */
+function isCardFilled(row: FeeRow): boolean {
+  return !!(row.dateFrom1 && row.dateTo1 && row.fee1 &&
+            row.dateFrom2 && row.dateTo2 && row.fee2)
+}
+
+function filledCards(): number {
+  return rows.value.filter(row => isCardFilled(row)).length
+}
+
 function toggleCard(index: number) {
   expandedCards.value[index] = !expandedCards.value[index]
   if (!activeTab.value[index]) {
     activeTab.value[index] = 'regular'
   }
 }
+
 function toggleExpand() {
   expandAll.value = !expandAll.value
   rows.value.forEach((_, index) => {
@@ -567,6 +570,11 @@ function toggleExpand() {
     }
   })
 }
+
+
+/* ------------------------------
+ * Copy & Reset Functions
+ * ------------------------------ */
 function copyToAllCards(sourceRow: FeeRow) {
   if (confirm('আপনি কি নিশ্চিত যে এই কার্ডের ডাটা সমস্ত কার্ডে কপি করতে চান?')) {
     rows.value = rows.value.map(row => ({
@@ -586,55 +594,80 @@ function copyToAllCards(sourceRow: FeeRow) {
     }))
   }
 }
+
 function resetSingleCard(index: number) {
   if (confirm('আপনি কি নিশ্চিত যে এই কার্ডের ডাটা রিসেট করতে চান?')) {
     rows.value[index] = {
       ...rows.value[index],
-      dateFrom1: null,
-      dateTo1: null,
-      fee1: null,
-      invest1Men: null,
-      invest1Madan: null,
-      invest1Others: null,
-      dateFrom2: null,
-      dateTo2: null,
-      fee2: null,
-      invest2Men: null,
-      invest2Madan: null,
-      invest2Others: null
+      dateFrom1: null, dateTo1: null, fee1: null,
+      invest1Men: null, invest1Madan: null, invest1Others: null,
+      dateFrom2: null, dateTo2: null, fee2: null,
+      invest2Men: null, invest2Madan: null, invest2Others: null
     }
   }
 }
+
 function resetForm() {
   if (confirm('আপনি কি নিশ্চিত যে সমস্ত ডাটা রিসেট করতে চান?')) {
     rows.value = rows.value.map(row => ({
       ...row,
-      dateFrom1: null,
-      dateTo1: null,
-      fee1: null,
-      invest1Men: null,
-      invest1Madan: null,
-      invest1Others: null,
-      dateFrom2: null,
-      dateTo2: null,
-      fee2: null,
-      invest2Men: null,
-      invest2Madan: null,
-      invest2Others: null
+      dateFrom1: null, dateTo1: null, fee1: null,
+      invest1Men: null, invest1Madan: null, invest1Others: null,
+      dateFrom2: null, dateTo2: null, fee2: null,
+      invest2Men: null, invest2Madan: null, invest2Others: null
     }))
     expandedCards.value = { 0: true }
     activeTab.value = { 0: 'regular' }
   }
 }
-function downloadExcel() {
-  alert('এক্সেল ডাউনলোড ফাংশন বাস্তবায়ন করা হবে।')
+
+
+/* ------------------------------
+ * API Calls
+ * ------------------------------ */
+async function fetchExamSetupList() {
+  const response = await axios.get('http://127.0.0.1:8000/api/central-exam/exam-setups/list/')
+  if (response.data && Array.isArray(response.data)) {
+    examSetupList.value = response.data
+    if (examSetupList.value.length > 0) {
+      selectedExamSetupId.value = examSetupList.value[0].id
+      examSetup.value = examSetupList.value[0]
+    }
+  }
+}
+
+function onExamSetupChange() {
+  const found = examSetupList.value.find(s => s.id === selectedExamSetupId.value)
+  examSetup.value = found || null
+  console.log('Selected exam setup:', examSetup.value)
+}
+
+const fetchMarhalaNames = async () => {
+  const response = await axios.get('http://127.0.0.1:8000/api/marhalas/')
+  if (response.data.success) {
+    const marhalas = response.data.data
+    marhalaNames.value = marhalas.map((m: { marhala_name_bn: string }) => m.marhala_name_bn)
+    rows.value = marhalas.map((m: { marhala_name_bn: string, id: number }) => ({
+      examName: m.marhala_name_bn,
+      marhala_id: m.id,
+      dateFrom1: null, dateTo1: null, fee1: null,
+      invest1Men: null, invest1Madan: null, invest1Others: null,
+      dateFrom2: null, dateTo2: null, fee2: null,
+      invest2Men: null, invest2Madan: null, invest2Others: null
+    }))
+    expandedCards.value = { 0: true }
+    activeTab.value = { 0: 'regular' }
+  }
 }
 
 
+/* ------------------------------
+ * Submit & Validation
+ * ------------------------------ */
 async function submit() {
   if (!selectedExamSetupId.value) {
-    alert('কোনো কেন্দ্রীয় পরীক্ষা পাওয়া যায়নি!');
-    return;
+    alert('কোনো কেন্দ্রীয় পরীক্ষা পাওয়া যায়নি!')
+    return
   }
 
   const fees = rows.value.map(row => ({
@@ -652,127 +685,105 @@ async function submit() {
     late_irregular_jemni: row.invest2Men,
     late_irregular_manonnoyon: row.invest2Madan,
     late_irregular_others: row.invest2Others
-  }));
+  }))
 
   try {
-    const response = await axios.post('http://127.0.0.1:8000/api/central-exam/exam-fees/bulk-create/', { fees });
+    const response = await axios.post(
+      'http://127.0.0.1:8000/api/central-exam/exam-fees/bulk-create/',
+      { fees }
+    )
 
     if (response.data.success) {
-      alert(`সফলভাবে সংরক্ষণ হয়েছে! ${response.data.message}`);
+      alert(`সফলভাবে সংরক্ষণ হয়েছে! ${response.data.message}`)
     } else {
-      let errorMessage = 'সংরক্ষণে সমস্যা হয়েছে:\n\n';
+      let errorMessage = 'সংরক্ষণে সমস্যা হয়েছে:\n\n'
       if (response.data.errors && Array.isArray(response.data.errors)) {
         response.data.errors.forEach((error, index) => {
-          errorMessage += `আইটেম ${error.index + 1}: `;
+          errorMessage += `আইটেম ${error.index + 1}: `
           if (error.errors) {
             Object.keys(error.errors).forEach(field => {
-              errorMessage += `${field}: ${error.errors[field].join(', ')}\n`;
-            });
+              errorMessage += `${field}: ${error.errors[field].join(', ')}\n`
+            })
           }
-        });
+        })
       }
-      alert(errorMessage);
+      alert(errorMessage)
     }
   } catch (error) {
-    console.error('API Error:', error);
+    console.error('API Error:', error)
     if (error.response && error.response.data) {
-      alert(`API Error: ${error.response.data.message || 'অজানা সমস্যা'}`);
+      alert(`API Error: ${error.response.data.message || 'অজানা সমস্যা'}`)
     } else {
-      alert('নেটওয়ার্ক সমস্যা! আবার চেষ্টা করুন।');
+      alert('নেটওয়ার্ক সমস্যা! আবার চেষ্টা করুন।')
     }
   }
 }
 
-// ভ্যালিডেশন চেক করার জন্য একটি helper function যোগ করুন:
 function validateBeforeSubmit() {
-  const errors = [];
-
-  // কেন্দ্রীয় পরীক্ষা সিলেক্ট করার validation আর নেই
+  const errors = []
 
   rows.value.forEach((row, index) => {
-    const rowErrors = [];
+    const rowErrors = []
 
     if (!row.marhala_id) {
-      rowErrors.push('মারহালা আইডি নেই');
+      rowErrors.push('মারহালা আইডি নেই')
     }
 
-    // Optional: অন্যান্য required fields চেক করুন
     if (row.dateFrom1 && row.dateTo1 && new Date(row.dateFrom1) > new Date(row.dateTo1)) {
-      rowErrors.push('নিয়মিত ফি এর শুরুর তারিখ শেষের তারিখের চেয়ে বড় হতে পারে না');
+      rowErrors.push('নিয়মিত ফি এর শুরুর তারিখ শেষের তারিখের চেয়ে বড় হতে পারে না')
     }
 
     if (row.dateFrom2 && row.dateTo2 && new Date(row.dateFrom2) > new Date(row.dateTo2)) {
-      rowErrors.push('বিলম্ব ফি এর শুরুর তারিখ শেষের তারিখের চেয়ে বড় হতে পারে না');
+      rowErrors.push('বিলম্ব ফি এর শুরুর তারিখ শেষের তারিখের চেয়ে বড় হতে পারে না')
     }
 
     if (rowErrors.length > 0) {
-      errors.push(`মারহালা ${index + 1} (${row.examName}): ${rowErrors.join(', ')}`);
+      errors.push(`মারহালা ${index + 1} (${row.examName}): ${rowErrors.join(', ')}`)
     }
-  });
+  })
 
-  return errors;
+  return errors
 }
-
-
-
-const fetchMarhalaNames = async () => {
-  const response = await axios.get('http://127.0.0.1:8000/api/marhalas/');
-  if (response.data.success) {
-    // মারহালার নাম ও আইডি দুইটাই নাও
-    const marhalas = response.data.data;
-    marhalaNames.value = marhalas.map((m: { marhala_name_bn: string }) => m.marhala_name_bn);
-    rows.value = marhalas.map((m: { marhala_name_bn: string, id: number }) => ({
-      examName: m.marhala_name_bn,
-      marhala_id: m.id, // মারহালার আইডি
-      dateFrom1: null, dateTo1: null, fee1: null,
-      invest1Men: null, invest1Madan: null, invest1Others: null,
-      dateFrom2: null, dateTo2: null, fee2: null,
-      invest2Men: null, invest2Madan: null, invest2Others: null
-    }));
-    expandedCards.value = { 0: true }
-    activeTab.value = { 0: 'regular' }
-  }
-};
-
-
 
 async function submitWithValidation() {
-  const validationErrors = validateBeforeSubmit();
+  const validationErrors = validateBeforeSubmit()
 
   if (validationErrors.length > 0) {
-    console.error('Validation errors:', validationErrors);
-    return;
+    console.error('Validation errors:', validationErrors)
+    return
   }
 
-  // আসল submit function কল করুন
-  await submit();
+  await submit()
 }
 
 
-
-
+/* ------------------------------
+ * Lifecycle
+ * ------------------------------ */
 onMounted(async () => {
   try {
-    const response = await axios.get('http://127.0.0.1:8000/api/central-exam/exam-setups/latest/');
+    const response = await axios.get('http://127.0.0.1:8000/api/central-exam/exam-setups/latest/')
     if (response.data && response.data.success && response.data.data && response.data.data.id) {
-      selectedExamSetupId.value = response.data.data.id;
-      console.log('Latest Exam Setup ID:', selectedExamSetupId.value);
+      selectedExamSetupId.value = response.data.data.id
+      console.log('Latest Exam Setup ID:', selectedExamSetupId.value)
     } else {
-      alert('কোনো কেন্দ্রীয় পরীক্ষা পাওয়া যায়নি!');
+      alert('কোনো কেন্দ্রীয় পরীক্ষা পাওয়া যায়নি!')
     }
   } catch (error) {
-    console.error('Failed to fetch latest exam setup:', error);
-    alert('সর্বশেষ কেন্দ্রীয় পরীক্ষা আইডি ফেচ করতে সমস্যা হয়েছে!');
+    console.error('Failed to fetch latest exam setup:', error)
+    alert('সর্বশেষ কেন্দ্রীয় পরীক্ষা আইডি ফেচ করতে সমস্যা হয়েছে!')
   }
-});
-
-
+})
 
 onMounted(() => {
   expandedCards.value = { 0: true }
   activeTab.value = { 0: 'regular' }
-  fetchExamSetupList();
-  fetchMarhalaNames();
-});
+  fetchExamSetupList()
+  fetchMarhalaNames()
+})
+
+watch(selectedExamSetupId, () => {
+  onExamSetupChange()
+})
 
 </script>

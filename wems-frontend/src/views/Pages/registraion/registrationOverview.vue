@@ -122,7 +122,7 @@
                   class="hover:bg-gray-50 dark:hover:bg-slate-700 transition"
                 >
                   <td class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
-                    <span>{{ row.id }}</span>
+                    <!-- <span>{{ row.id }}</span> -->
                     <br>
                     <span class="text-gray-500 text-xl">{{ row.marhala_name_bn }}</span>
                   </td>
@@ -154,6 +154,7 @@
                   <td class="px-4 py-3 whitespace-nowrap">
                     <div class="flex gap-2">
                       <RouterLink
+
                         :to="getOldRegistrationPath(row)"
                         class="inline-flex items-center px-3 py-1.5 bg-emerald-600 rounded text-md text-white hover:bg-emerald-700 transition shadow-sm"
                       >
@@ -255,13 +256,24 @@ const rowsPerPage = ref<number>(10)
 const totalPages = ref<number>(1)
 const isLoading = ref<boolean>(true)
 const displayedRows = ref<any[]>([])
+const latestExamSetupId = ref<number|null>(null)
 
 const fetchOverview = async () => {
   isLoading.value = true
   try {
-    const response = await axios.get('http://localhost:8000/api/admin/registration/overview');
-    registrationOverview.value = response.data;
-    examName.value = registrationOverview.value.length > 0 ? registrationOverview.value[0].exam_setup.exam_name : 'পরীক্ষা API';
+    // Step 1: Get latest exam_setup
+    const latestSetupRes = await axios.get('/api/central-exam/exam-setups/latest/');
+    const latestSetup = latestSetupRes.data?.data
+    if (latestSetup && latestSetup.id) {
+      latestExamSetupId.value = latestSetup.id
+      examName.value = latestSetup.exam_name || 'পরীক্ষা';
+      // Step 2: Get exam_fees for latest exam_setup
+      const feesRes = await axios.get(`/api/admin/registration/overview?exam_setup_id=${latestSetup.id}`)
+      registrationOverview.value = feesRes.data
+    } else {
+      registrationOverview.value = []
+      examName.value = 'কোনো পরীক্ষার সেটআপ নেই'
+    }
     updateDisplayedData();
   } catch {
     registrationOverview.value = [];
@@ -372,9 +384,11 @@ const getPageNumbers = (): (number | string)[] => {
 
 // Dummy router methods — replace with your logic
 function getOldRegistrationPath(row: any) {
-  // You can use row.id or other props to generate path
-  return `/registration/old/${row.id}`
+  // Always use marhala_id only
+  return `/student/old/verify/${row.marhala_id}`;
 }
+
+
 function getRegistrationTablePath(row: any) {
   return `/registration/table/${row.id}`
 }

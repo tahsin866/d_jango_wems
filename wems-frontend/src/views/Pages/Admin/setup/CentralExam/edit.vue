@@ -254,11 +254,16 @@
 <script setup lang="ts">
 defineOptions({ name: 'CentralExamCreate' })
 
+// ---------------------------
+// Imports
+// ---------------------------
 import { ref, computed, reactive, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios, { AxiosError } from 'axios'
 
+// ---------------------------
 // Types
+// ---------------------------
 interface ExamForm {
   examName: string
   arabicYear: string
@@ -273,19 +278,26 @@ interface ValidationErrors {
   englishYear?: string
 }
 
+// ---------------------------
 // Router setup
+// ---------------------------
 const route = useRoute()
 const router = useRouter()
 const examId = ref(route.params.id as string)
 
+// ---------------------------
 // State
+// ---------------------------
 const isSubmitting = ref<boolean>(false)
 const isLoading = ref<boolean>(false)
+
 const showMessage = ref<boolean>(false)
 const message = ref<string>('')
 const messageType = ref<'success' | 'error'>('success')
 
+// ---------------------------
 // Form data
+// ---------------------------
 const form = reactive<ExamForm>({
   examName: '',
   arabicYear: '',
@@ -293,10 +305,14 @@ const form = reactive<ExamForm>({
   englishYear: ''
 })
 
+// ---------------------------
 // Validation errors
+// ---------------------------
 const errors = reactive<ValidationErrors>({})
 
+// ---------------------------
 // Computed
+// ---------------------------
 const isFormValid = computed((): boolean => {
   return !!(
     form.examName.trim() &&
@@ -306,7 +322,9 @@ const isFormValid = computed((): boolean => {
   )
 })
 
-// Methods
+// ---------------------------
+// Methods: Validation
+// ---------------------------
 const validateForm = (): boolean => {
   // Clear previous errors
   Object.keys(errors).forEach(key => {
@@ -344,6 +362,9 @@ const validateForm = (): boolean => {
   return isValid
 }
 
+// ---------------------------
+// Methods: Notification
+// ---------------------------
 const showNotification = (msg: string, type: 'success' | 'error'): void => {
   message.value = msg
   messageType.value = type
@@ -355,13 +376,17 @@ const showNotification = (msg: string, type: 'success' | 'error'): void => {
   }, 5000)
 }
 
-// Load exam data
+// ---------------------------
+// Methods: API Calls
+// ---------------------------
 const loadExamData = async (): Promise<void> => {
   if (!examId.value) return
 
   isLoading.value = true
   try {
-    const response = await axios.get(`http://127.0.0.1:8000/api/central-exam/exam-setups/${examId.value}/`)
+    const response = await axios.get(
+      `http://127.0.0.1:8000/api/central-exam/exam-setups/${examId.value}/`
+    )
 
     if (response.data.success) {
       const data = response.data.data
@@ -380,6 +405,9 @@ const loadExamData = async (): Promise<void> => {
   }
 }
 
+// ---------------------------
+// Methods: Form Actions
+// ---------------------------
 const resetForm = (): void => {
   form.examName = ''
   form.arabicYear = ''
@@ -401,15 +429,19 @@ const handleSubmit = async (): Promise<void> => {
   isSubmitting.value = true
 
   try {
-    const response = await axios.put(`http://127.0.0.1:8000/api/central-exam/exam-setups/${examId.value}/update/`, {
-      exam_name: form.examName,
-      arabic_year: form.arabicYear,
-      bangla_year: form.banglaYear,
-      english_year: parseInt(form.englishYear.toString())
-    })
+    const response = await axios.put(
+      `http://127.0.0.1:8000/api/central-exam/exam-setups/${examId.value}/update/`,
+      {
+        exam_name: form.examName,
+        arabic_year: form.arabicYear,
+        bangla_year: form.banglaYear,
+        english_year: parseInt(form.englishYear.toString())
+      }
+    )
 
     if (response.status === 200) {
       showNotification('পরীক্ষা সেটাপ সফলভাবে আপডেট করা হয়েছে!', 'success')
+
       // Navigate back to list after successful update
       setTimeout(() => {
         router.push('/admin/central-exam/list')
@@ -430,10 +462,12 @@ const handleSubmit = async (): Promise<void> => {
         const serverErrors = error.response.data.errors
         if (typeof serverErrors === 'object') {
           Object.keys(serverErrors).forEach(key => {
-            const fieldName = key === 'exam_name' ? 'examName' :
-                            key === 'arabic_year' ? 'arabicYear' :
-                            key === 'bangla_year' ? 'banglaYear' :
-                            key === 'english_year' ? 'englishYear' : key
+            const fieldName =
+              key === 'exam_name' ? 'examName' :
+              key === 'arabic_year' ? 'arabicYear' :
+              key === 'bangla_year' ? 'banglaYear' :
+              key === 'english_year' ? 'englishYear' : key
+
             errors[fieldName as keyof ValidationErrors] = Array.isArray(serverErrors[key])
               ? serverErrors[key][0]
               : serverErrors[key]
@@ -449,8 +483,11 @@ const handleSubmit = async (): Promise<void> => {
   }
 }
 
-// Load data on component mount
+// ---------------------------
+// Lifecycle
+// ---------------------------
 onMounted(() => {
   loadExamData()
 })
 </script>
+

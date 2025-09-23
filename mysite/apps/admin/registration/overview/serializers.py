@@ -14,7 +14,7 @@ class RegistrationOverviewSerializer(serializers.ModelSerializer):
     )
     from mysite.apps.subject.models import Marhala
     marhala_id = serializers.PrimaryKeyRelatedField(
-        queryset=Marhala.objects.all(), source='marhala', write_only=True
+        read_only=True, source='marhala'
     )
 
     class Meta:
