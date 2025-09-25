@@ -21,12 +21,16 @@ class AdminCategory(models.Model):
         return self.name
 
 class User(models.Model):
+    last_login = models.DateTimeField(null=True, blank=True)
+
     STATUS_CHOICES = [
         ('active', 'Active'),
         ('inactive', 'Inactive'),
         ('disabled', 'Disabled'),
     ]
-    
+
+        # Remove last_login property to avoid setter error
+
     name = models.CharField(max_length=100)
     phone = models.CharField(max_length=20, blank=True)
     email = models.CharField(max_length=100, blank=True)
@@ -118,9 +122,67 @@ class RolePermission(models.Model):
     class Meta:
         db_table = 'role_permissions'
 
-class UserRole(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    role = models.ForeignKey(Role, on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'user_roles'
+
+# ------------------ Custom User Activity Models ------------------
+
+class UserLoginHistory(models.Model):
+    STATUS_CHOICES = [
+        ('success', 'Success'),
+        ('failed', 'Failed'),
+    ]
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='login_histories')
+    login_time = models.DateTimeField(auto_now_add=True)
+    logout_time = models.DateTimeField(null=True, blank=True)
+    ip_address = models.CharField(max_length=50, blank=True, null=True)
+    device = models.CharField(max_length=255, blank=True, null=True)
+    browser = models.CharField(max_length=255, blank=True, null=True)
+    location = models.CharField(max_length=255, blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+
+    class Meta:
+        db_table = 'user_login_history'
+
+class UserFailedAttempts(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='failed_attempts')
+    attempt_time = models.DateTimeField(auto_now_add=True)
+    ip_address = models.CharField(max_length=50, blank=True, null=True)
+    reason = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        db_table = 'user_failed_attempts'
+
+class UserActivityLog(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='activity_logs')
+    action = models.CharField(max_length=255)
+    request_path = models.TextField(blank=True, null=True)
+    meta_data = models.JSONField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'user_activity_log'
+
+class UserSessions(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sessions')
+    session_token = models.CharField(max_length=255, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    ip_address = models.CharField(max_length=50, blank=True, null=True)
+    device = models.CharField(max_length=255, blank=True, null=True)
+    browser = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        db_table = 'user_sessions'
+
+class UserTokens(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tokens')
+    token = models.TextField()
+    issued_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+    revoked = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = 'user_tokens'

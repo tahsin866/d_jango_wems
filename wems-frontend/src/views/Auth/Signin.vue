@@ -161,6 +161,7 @@ const submit = async () => {
       password: form.value.password,
     });
 
+
     if (response.data.success) {
       localStorage.setItem('token', response.data.access_token);
 
@@ -170,6 +171,20 @@ const submit = async () => {
         localStorage.setItem('user_type', decoded.user_type);
         localStorage.setItem('user_id', decoded.user_id);
         localStorage.setItem('permissions', JSON.stringify(decoded.permissions || []));
+      }
+
+      // Login history API call
+      try {
+        await axios.post('/users/login-history/create/', {
+          user: response.data.user_id,
+          status: 'success',
+          ip_address: window?.location?.hostname || '',
+          device: navigator?.platform || '',
+          browser: navigator?.userAgent || '',
+          location: '',
+        });
+      } catch (e) {
+        // Ignore error, don't block login
       }
 
       const userType = response.data.user_type;

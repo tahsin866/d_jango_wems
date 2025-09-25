@@ -1,7 +1,31 @@
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 from django.db import transaction
-from .models import Module, Menu, User, UserType, UserInformation
+from .models import Module, Menu, User, UserType, UserInformation, UserLoginHistory, UserFailedAttempts, UserActivityLog, UserSessions, UserTokens
+class UserLoginHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserLoginHistory
+        fields = ['id', 'user', 'login_time', 'logout_time', 'ip_address', 'device', 'browser', 'location', 'status']
+
+class UserFailedAttemptsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserFailedAttempts
+        fields = ['id', 'user', 'attempt_time', 'ip_address', 'reason']
+
+class UserActivityLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserActivityLog
+        fields = ['id', 'user', 'action', 'request_path', 'meta_data', 'created_at']
+
+class UserSessionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserSessions
+        fields = ['id', 'user', 'session_token', 'created_at', 'expires_at', 'is_active', 'ip_address', 'device', 'browser']
+
+class UserTokensSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserTokens
+        fields = ['id', 'user', 'token', 'issued_at', 'expires_at', 'revoked']
 from mysite.apps.school.models import School
 
 class MenuSerializer(serializers.ModelSerializer):

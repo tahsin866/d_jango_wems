@@ -8,16 +8,22 @@ from mysite.apps.school.models import School
 from mysite.apps.Markaz.serializers import SchoolSelectSerializer, MarkazApplicationSerializer, MainMadrasaInfoSerializer, AssociatedMadrasaSerializer, AttachmentSerializer
 from .models import MarkazApplication, MainMadrasaInfo, AssociatedMadrasa, Attachment
 from django.db import transaction
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
 class MarkazApplicationCreateView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     def post(self, request):
+        user = request.user
+        # Check user type
+        if not hasattr(user, 'user_type') or str(user.user_type.name).lower() != 'madrasha':
+            return Response({'success': False, 'error': 'Only madrasha users can insert data.'}, status=status.HTTP_403_FORBIDDEN)
         data = request.data
         try:
             with transaction.atomic():
-                # Create MarkazApplication
-                markaz_app_serializer = MarkazApplicationSerializer(data=data.get('markaz_application'))
+                # Create MarkazApplication with actual user id
+                markaz_app_data = data.get('markaz_application') or {}
+                markaz_app_data['user'] = user.id
+                markaz_app_serializer = MarkazApplicationSerializer(data=markaz_app_data)
                 markaz_app_serializer.is_valid(raise_exception=True)
                 markaz_app = markaz_app_serializer.save()
 

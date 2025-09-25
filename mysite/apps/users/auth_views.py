@@ -5,16 +5,87 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db import connection
+from django.conf import settings
+
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from django.conf import settings
+from rest_framework.views import APIView
+
 import jwt
 import json
 from datetime import datetime, timedelta
 import bcrypt
+import secrets
+
+from .serializers import (
+    UserLoginHistorySerializer,
+    UserFailedAttemptsSerializer,
+    UserActivityLogSerializer,
+    UserSessionsSerializer,
+    UserTokensSerializer
+)
 from .auth_cache import cache_user_auth, get_cached_user_auth
+from .models import User, UserLoginHistory, UserSessions, UserTokens, UserFailedAttempts
+
+def get_user_id_from_request(request):
+    user_id = request.session.get('user_id')
+    if not user_id:
+        token = request.headers.get('Authorization')
+        if token and token.startswith('Bearer '):
+            token = token[7:]
+            try:
+                payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+                user_id = payload.get('user_id')
+            except Exception:
+                user_id = None
+    return user_id
+
+# Helper functions to create user activity records
+def _create_login_history(user, request, status):
+    ip_address = request.META.get('REMOTE_ADDR', '')
+    device = request.META.get('HTTP_USER_AGENT', '')
+    browser = request.META.get('HTTP_USER_AGENT', '')
+    UserLoginHistory.objects.create(
+        user=user,
+        ip_address=ip_address,
+        device=device,
+        browser=browser,
+        status=status
+    )
+
+def _create_user_session(user, request):
+    ip_address = request.META.get('REMOTE_ADDR', '')
+    device = request.META.get('HTTP_USER_AGENT', '')
+    browser = request.META.get('HTTP_USER_AGENT', '')
+    session_token = secrets.token_hex(32)
+    expires_at = datetime.utcnow() + timedelta(hours=24)
+    UserSessions.objects.create(
+        user=user,
+        session_token=session_token,
+        ip_address=ip_address,
+        device=device,
+        browser=browser,
+        expires_at=expires_at
+    )
+    return session_token
+
+def _create_user_token(user, token):
+    expires_at = datetime.utcnow() + timedelta(hours=24)
+    UserTokens.objects.create(
+        user=user,
+        token=token,
+        expires_at=expires_at
+    )
+
+def _create_failed_attempt(user, request):
+    ip_address = request.META.get('REMOTE_ADDR', '')
+    UserFailedAttempts.objects.create(
+        user=user,
+        ip_address=ip_address,
+        reason='Invalid credentials'
+    )
 
 class SecureAuthMixin:
     """Mixin for secure authentication methods"""
@@ -80,90 +151,57 @@ class SecureSigninView(View, SecureAuthMixin):
         return response
 
     def post(self, request):
-        # Redis cache key based on username
         try:
             data = json.loads(request.body.decode('utf-8'))
             username = data.get('email') or data.get('phone') or data.get('phone_or_email')
             password = data.get('password')
-            cache_key = f"user_auth:{username}"
-            cached = get_cached_user_auth(cache_key)
-            if cached:
-                print(f"✅ User authenticated from Redis cache: {username}")
-                token = cached['access_token']
-                dashboard_url = cached['redirect']
-                permissions = cached['permissions']
-                response_data = {
-                    'success': True,
-                    'access_token': token,
-                    'user_type': cached['user_type'],
-                    'user_id': cached['user_id'],
-                    'redirect': dashboard_url,
-                    'permissions': permissions
-                }
-                response = JsonResponse(response_data)
-                response["Access-Control-Allow-Origin"] = "http://localhost:5173"
-                response["Access-Control-Allow-Credentials"] = "true"
-                return response
-        except Exception as e:
-            print(f"Redis cache error: {e}")
-        # ...existing code...
-        try:
-            print(f"🔐 Secure login attempt received")
-            data = json.loads(request.body.decode('utf-8'))
-            username = data.get('email') or data.get('phone') or data.get('phone_or_email')
-            password = data.get('password')
-            
-            print(f"👤 Login attempt for: {username}")
             
             if not username or not password:
-                print("❌ Missing username or password")
                 return self.error_response('Email/Phone and password are required', 400)
             
-            # Authenticate user
             user_data = self.authenticate_user(username, password)
+            
             if not user_data:
-                print(f"❌ Authentication failed for: {username}")
+                try:
+                    user = User.objects.get(email=username)
+                    _create_failed_attempt(user, request)
+                except User.DoesNotExist:
+                    pass # User not found, do nothing
                 return self.error_response('Invalid credentials', 401)
             
-            print(f"✅ User authenticated: {user_data['user_type']}")
-            
-            # Check user status
+            user = User.objects.get(id=user_data['user_id'])
+
             if user_data['status'] != 'active':
-                print(f"❌ Account not active: {user_data['status']}")
+                _create_login_history(user, request, 'failed')
                 return self.error_response('Account is not active', 403)
             
-            # Get user permissions
+            _create_login_history(user, request, 'success')
+            session_token = _create_user_session(user, request)
+            
             permissions = self.get_user_permissions(user_data['user_id'], user_data['user_type'])
             user_data['permissions'] = permissions
             
-            print(f"🔑 User permissions loaded: {len(permissions)} items")
-            
-            # Create Django user session
-            user = authenticate(request, username=username, password=password)
-            if user:
-                login(request, user)
-                print(f"📱 Django session created for user: {user.id}")
-            
-            # Generate secure token
             token = self.generate_secure_token(user_data)
-            print(f"🎫 JWT token generated")
+            _create_user_token(user, token)
+
+            user.backend = 'django.contrib.auth.backends.ModelBackend'
+            login(request, user)
             
-            # Determine dashboard URL based on user type
             dashboard_url = self.get_dashboard_url(user_data['user_type'])
             
             response_data = {
                 'success': True,
                 'access_token': token,
+                'session_token': session_token,
                 'user_type': user_data['user_type'],
                 'user_id': user_data['user_id'],
                 'redirect': dashboard_url,
                 'permissions': len(permissions)
             }
             
-            print(f"✅ Login successful, redirecting to: {dashboard_url}")
-            
-            # Cache the login result in Redis for 1 hour
+            cache_key = f"user_auth:{username}"
             cache_user_auth(cache_key, response_data, expire=3600)
+            
             response = JsonResponse(response_data)
             response["Access-Control-Allow-Origin"] = "http://localhost:5173"
             response["Access-Control-Allow-Credentials"] = "true"
@@ -190,7 +228,6 @@ class SecureSigninView(View, SecureAuthMixin):
             
             user_id, email, phone, db_password, user_type, status, name, admin_category = row
             
-            # Verify password
             password_valid = False
             if db_password.startswith('pbkdf2_'):
                 from django.contrib.auth.hashers import check_password
@@ -215,22 +252,16 @@ class SecureSigninView(View, SecureAuthMixin):
     
     def get_dashboard_url(self, user_type):
         """Get appropriate dashboard URL based on user type"""
-        print(f"🎯 Determining dashboard URL for user_type: '{user_type}'")
-        
         admin_types = ['Master Admin', 'Super Admin', 'Board Admin', 'Admin']
         
         if user_type in admin_types:
-            print(f"✅ Admin user detected, redirecting to /AdminDashboard")
             return '/AdminDashboard'
         elif user_type == 'madrasha' or user_type == 'Madrasah':
-            print(f"✅ Madrasa user detected, redirecting to /dashboard")
             return '/dashboard'
         else:
-            print(f"⚠️ Unknown user_type '{user_type}', defaulting to /dashboard")
             return '/dashboard'
     
     def error_response(self, message, status_code):
-        """Create error response with proper CORS headers"""
         response = JsonResponse({'success': False, 'error': message}, status=status_code)
         response["Access-Control-Allow-Origin"] = "http://localhost:5173"
         response["Access-Control-Allow-Credentials"] = "true"
@@ -252,13 +283,11 @@ class SecureLogoutView(View):
 def get_user_profile(request):
     """Get authenticated user profile with security checks"""
     try:
-        # Get user ID from session
         user_id = request.session.get('user_id')
         
         if not user_id:
             return Response({'error': 'Not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
         
-        # Get user data from database
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT u.id, u.name, u.email, u.phone, ut.name as user_type, 
@@ -276,7 +305,6 @@ def get_user_profile(request):
             
             user_id, name, email, phone, user_type, photo, admin_designation, admin_category = row
             
-            # Build photo URL
             photo_url = None
             if photo:
                 photo_url = f"{request.scheme}://{request.get_host()}/media/{photo}"
@@ -316,7 +344,6 @@ def validate_route_access(request):
             return Response({'valid': False, 'error': 'Token and route required'}, 
                           status=status.HTTP_400_BAD_REQUEST)
         
-        # Validate token
         mixin = SecureAuthMixin()
         payload = mixin.validate_token(token)
         
@@ -326,14 +353,12 @@ def validate_route_access(request):
         
         user_type = payload.get('user_type')
         
-        # Layout-based route validation
         admin_layout_routes = ['/AdminDashboard', '/user/setup', '/marhala/setup', '/subject/setup']
         user_layout_routes = ['/dashboard', '/markaz/', '/student/', '/registr', '/payment', '/subject/list']
         
         admin_types = ['Master Admin', 'Super Admin', 'Board Admin', 'Admin']
         is_admin = user_type in admin_types
         
-        # Check admin layout access
         if any(route.startswith(admin_route) for admin_route in admin_layout_routes):
             if not is_admin:
                 return Response({
@@ -343,7 +368,6 @@ def validate_route_access(request):
                     'user_type': user_type
                 }, status=status.HTTP_403_FORBIDDEN)
         
-        # Check user layout access
         elif any(route.startswith(user_route) for user_route in user_layout_routes):
             if is_admin:
                 return Response({

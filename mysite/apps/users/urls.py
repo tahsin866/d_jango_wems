@@ -1,7 +1,9 @@
 from django.urls import path
 from .views import ModuleListAPIView, get_user_modules_menus, debug_session, test_modules
 from .signup_views import UserSignupView
-from .auth_views import validate_route_access
+from .auth_views import (
+    validate_route_access,
+)
 from .profile_views import get_user_profile, update_user_profile, upload_profile_photo, get_profile_fallback
 
 urlpatterns = [
