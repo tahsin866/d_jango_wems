@@ -337,7 +337,7 @@ const filteredOptions = computed(() => (row: any) => {
 const selectOption = (madrasha: any, row: any) => {
     row.madrasa_Name = madrasha.name;
     row.madrasa_id = madrasha.id;
-    row.searchQuery = `${madrasha.name} (ইলহাক: ${madrasha.ElhaqNo})`;
+    // The child component now handles setting the searchQuery text, this just handles the data
     row.isOpen = false;
 };
 
@@ -432,21 +432,47 @@ const submitForm = () => {
     return;
   }
 
-  const invalidRows = rows.value.filter(row => {
-        if (!row.madrasa_id) return true;
-        if (!row.files.noc || !row.files.resolution) return true;
 
-        if (form.value.markaz_type === 'দরসিয়াত') {
-            if (row.fazilat === null) return true;
-            if (row.sanabiya_ulya === null) return true;
-        } else if (form.value.markaz_type === 'তাহফিজুল কোরআন') {
-            if (row.hifzul_quran === null) return true;
-        } else if (form.value.markaz_type === 'কিরাআত') {
-            if (row.qirat === null) return true;
-        }
+const invalidRows = rows.value.filter(row => {
+  // Common required fields
+  if (!row.madrasa_id) return true;
+  if (!row.files.noc || !row.files.resolution) return true;
 
-        return false;
-  });
+  // Darsiyat: All fields must be non-null/non-undefined and > 0
+  if (form.value.markaz_type === 'দরসিয়াত') {
+    if (
+      !isValidNumber(row.fazilat) ||
+      !isValidNumber(row.sanabiya_ulya) ||
+      !isValidNumber(row.sanabiya) ||
+      !isValidNumber(row.mutawassita) ||
+      !isValidNumber(row.ibtedaiyyah)
+    ) {
+      return true;
+    }
+  } else if (form.value.markaz_type === 'তাহফিজুল কোরআন') {
+    if (!isValidNumber(row.hifzul_quran)) {
+      return true;
+    }
+  } else if (form.value.markaz_type === 'কিরাআত') {
+    if (!isValidNumber(row.qirat)) {
+      return true;
+    }
+  }
+
+  return false;
+});
+
+// Helper function
+function isValidNumber(val: any) {
+  return val !== null && val !== undefined && Number(val) > 0;
+}
+
+
+
+
+
+
+
 
   if (invalidRows.length > 0) {
     loading.value = false;
@@ -481,18 +507,18 @@ const submitForm = () => {
     // }
 
     // Prepare main madrasa info
-    const mainMadrasaInfo = {
-        madrasa: form.value.user_id, // or main madrasa id if available
-        fazilat: form.value.fazilat,
-        sanabiya_ulya: form.value.sanabiya_ulya,
-        sanabiya: form.value.sanabiya,
-        mutawassita: form.value.mutawassita,
-        ibtedaiyyah: form.value.ibtedaiyyah,
-        hifzul_quran: form.value.hifzul_quran,
-        qirat: form.value.qirat,
-        noc_file_path: form.value.noc_file ? form.value.noc_file.name : '',
-        resolution_file_path: form.value.resolution_file ? form.value.resolution_file.name : ''
-    };
+  const mainMadrasaInfo = {
+    madrasa: form.value.school_id, // School টেবিলের আইডি
+    fazilat: form.value.fazilat,
+    sanabiya_ulya: form.value.sanabiya_ulya,
+    sanabiya: form.value.sanabiya,
+    mutawassita: form.value.mutawassita,
+    ibtedaiyyah: form.value.ibtedaiyyah,
+    hifzul_quran: form.value.hifzul_quran,
+    qirat: form.value.qirat,
+    noc_file_path: form.value.noc_file ? form.value.noc_file.name : '',
+    resolution_file_path: form.value.resolution_file ? form.value.resolution_file.name : ''
+  };
 
     // Prepare associated madrasas
     const associatedMadrasas = rows.value.map(row => ({
@@ -601,16 +627,22 @@ const isStep2Valid = computed(() => {
     if (!rows?.value || rows.value.length === 0) return false;
 
     return rows.value.every(row => {
+      // মাদরাসা আইডি এবং ফাইল চেক
       if (!row.madrasa_id) return false;
       if (!row.files?.noc || !row.files?.resolution) return false;
 
+      // মারকায টাইপ অনুযায়ী ভ্যালিডেশন
       if (form?.value.markaz_type === 'দরসিয়াত') {
-        return row.fazilat !== '' && row.fazilat !== null &&
-               row.sanabiya_ulya !== '' && row.sanabiya_ulya !== null;
+        // শূন্য সহ যেকোনো ধনাত্মক সংখ্যা গ্রহণযোগ্য
+        return (row.fazilat !== null && row.fazilat !== undefined) &&
+               (row.sanabiya_ulya !== null && row.sanabiya_ulya !== undefined) &&
+               (row.sanabiya !== null && row.sanabiya !== undefined) &&
+               (row.mutawassita !== null && row.mutawassita !== undefined) &&
+               (row.ibtedaiyyah !== null && row.ibtedaiyyah !== undefined);
       } else if (form?.value.markaz_type === 'তাহফিজুল কোরআন') {
-        return row.hifzul_quran !== '' && row.hifzul_quran !== null;
+        return (row.hifzul_quran !== null && row.hifzul_quran !== undefined);
       } else if (form?.value.markaz_type === 'কিরাআত') {
-        return row.qirat !== '' && row.qirat !== null;
+        return (row.qirat !== null && row.qirat !== undefined);
       }
 
       return false;
@@ -620,6 +652,7 @@ const isStep2Valid = computed(() => {
     return false;
   }
 });
+
 
 const isStep3Valid = computed(() => {
   try {
@@ -713,339 +746,311 @@ onMounted(() => {
 </script>
 
 <template>
-
-    <div
-    style="font-family: 'SolaimanLipi', sans-serif;
- "
-
-    class="min-h-screen bg-gray-50 mt-8">
-        <!-- Header Banner -->
-        <div class="bg-gray-800 shadow-md">
-            <div class=" mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div class="flex flex-col md:flex-row justify-between items-center">
-                    <div class="flex items-center mb-4 md:mb-0">
-                        <div class="bg-gray-700 p-3 rounded-lg mr-4">
-                            <i class="pi pi-building text-white text-3xl"></i>
-                        </div>
-                        <div>
-                            <h1 class="text-2xl font-bold text-white">মারকাযের আবেদন ফরম</h1>
-                            <p class="text-gray-300">পরীক্ষা: {{ form.exam_name || 'লোড হচ্ছে...' }}</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center bg-gray-700 rounded-lg px-4 py-2 text-white">
-                        <div class="mr-4 border-r border-gray-500 pr-4">
-                            <div class="text-sm">তারিখ ও সময়</div>
-                            <div class="font-medium">{{ getCurrentDateTime() }}</div>
-                        </div>
-                        <div>
-                            <div class="text-sm">ইউজার</div>
-                            <div class="font-medium">{{ getCurrentUser() }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+  <div
+    style="font-family: 'SolaimanLipi', sans-serif;"
+    class="min-h-screen bg-gray-100"
+  >
+    <!-- AdminLTE Banner/Header -->
+    <div class="bg-gray-800 border-b border-gray-900 shadow-lg py-8 px-8 flex flex-col md:flex-row items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div class="bg-gray-900 p-4 rounded-lg flex items-center justify-center">
+          <i class="fas fa-university text-indigo-300 text-3xl"></i>
         </div>
-
-        <!-- Progress Tracker -->
-        <div class=" mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-            <Card class="mb-6 shadow-sm border border-gray-200">
-                <template #content>
-                    <div class="flex flex-col">
-                        <div class="flex justify-between items-center mb-2">
-                            <h3 class="text-lg font-medium text-gray-700">আবেদন অগ্রগতি</h3>
-                            <span class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-medium">{{ getStepCompletionPercentage }}% সম্পন্ন</span>
-                        </div>
-                        <ProgressBar :value="getStepCompletionPercentage" class="h-2 mb-4"></ProgressBar>
-
-                        <div class="hidden md:flex justify-between mt-2">
-                            <div
-                                v-for="(stepLabel, index) in stepLabels"
-                                :key="index"
-                                class="flex flex-col items-center w-1/4 transition-all duration-300"
-                                :class="{
-                                    'opacity-50': !canAccessStep[index] && index !== step
-                                }"
-                            >
-                                <div class="flex items-center justify-center h-10 w-10 rounded-full mb-2"
-                                    :class="[
-                                        step === index ? 'bg-gray-200 text-gray-800' :
-                                        ((index === 0 && isConditionsAccepted) ||
-                                         (index === 1 && isStep1Valid) ||
-                                         (index === 2 && isStep2Valid) ||
-                                         (index === 3 && isStep3Valid)) ? 'bg-gray-200 text-gray-800' : 'bg-gray-100 text-gray-500'
-                                    ]">
-                                    <i :class="[stepLabel.icon, 'text-lg']"></i>
-                                </div>
-                                <span class="text-sm font-medium text-gray-700">{{ stepLabel.label }}</span>
-                            </div>
-                        </div>
-                    </div>
-                </template>
-            </Card>
+        <div>
+          <h1 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">মারকাযের আবেদন ফরম</h1>
+          <p class="text-gray-200 mt-2 font-medium text-base">পরীক্ষা: {{ form.exam_name || 'লোড হচ্ছে...' }}</p>
         </div>
-
-        <!-- Main Content -->
-        <div class=" mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-            <Card class="shadow-md border border-gray-200">
-                <template #content>
-                    <TabView v-model:activeIndex="step" :scrollable="true" @tab-change="handleTabChange">
-                        <!-- Conditions Tab -->
-                        <TabPanel>
-                            <template #header>
-                                <div class="flex items-center">
-                                    <i :class="getStepIcon(0)" class="mr-2"></i>
-                                    <span class="font-medium">১. শর্তাবলী</span>
-                                </div>
-                            </template>
-                            <div class="p-6">
-                                <MarkazConditions @continue="handleConditionsAccepted" />
-
-                                <!-- Special message when conditions are not agreed -->
-                                <div v-if="!conditionsAgreed" class="mt-6 p-4 bg-gray-100 border-l-4 border-gray-500 rounded-r">
-                                    <div class="flex items-center">
-                                        <div class="flex-shrink-0">
-                                            <i class="pi pi-exclamation-triangle text-gray-600 text-xl"></i>
-                                        </div>
-                                        <div class="ml-3">
-                                            <p class="text-sm font-medium text-gray-600">
-                                                শর্তাবলী সম্মত হলে চেকবক্সে টিক দিন এবং পরবর্তী ধাপে যেতে "পরবর্তী ধাপে যান" বাটনে ক্লিক করুন।
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Next button -->
-                                <div class="flex justify-end p-4 bg-gray-50 rounded-b-lg border-t border-gray-200 mt-4">
-                                    <Button
-                                        label="পরবর্তী ধাপে যান"
-                                        icon="pi pi-arrow-right"
-                                        iconPos="right"
-                                        class="p-button-secondary"
-                                        :disabled="!conditionsAgreed"
-                                        @click="goToNextStep"
-                                    />
-                                </div>
-                            </div>
-                        </TabPanel>
-
-                        <TabPanel :disabled="!canAccessStep[1]">
-                            <template #header>
-                                <div class="flex items-center" :class="{ 'opacity-50': !canAccessStep[1] }">
-                                    <i :class="getStepIcon(1)" class="mr-2"></i>
-                                    <span class="font-medium">২. ধরন ও মূল তথ্য</span>
-                                    <i v-if="!canAccessStep[1]" class="pi pi-lock ml-2 text-gray-500" v-tooltip.top="'প্রথমে শর্তাবলী সম্মত হন'"></i>
-                                </div>
-                            </template>
-                            <div class="p-6">
-                                <h3 class="text-xl font-bold text-gray-700 mb-6 pb-2 border-b border-gray-200">
-                                    মারকাযের ধরণ ও মূল তথ্য
-                                </h3>
-
-                                <div class="bg-gray-100 border-l-4 border-gray-500 p-4 mb-6 rounded-r-md">
-                                    <div class="flex">
-                                        <div class="flex-shrink-0">
-                                            <i class="pi pi-info-circle text-gray-600"></i>
-                                        </div>
-                                        <div class="ml-3">
-                                            <p class="text-sm text-gray-600">
-                                                নিম্নে আপনার মারকাযের ধরণ নির্বাচন করুন এবং প্রয়োজনীয় তথ্য পূরণ করুন। সমস্ত তারকাচিহ্নিত (*) ক্ষেত্র পূরণ করা আবশ্যক।
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="bg-white rounded-lg p-5 mb-8 border border-gray-200 shadow-sm">
-                                    <h4 class="text-lg font-medium text-gray-700 mb-4">মারকায ধরণ নির্বাচন</h4>
-                                    <CategorySelect
-                                        :modelValue="form.markaz_type"
-                                        @update:modelValue="form.markaz_type = $event"
-                                    />
-                                </div>
-
-                                <div class="bg-white rounded-lg p-5 border border-gray-200 shadow-sm">
-                                    <h4 class="text-lg font-medium text-gray-700 mb-4">মূল মাদ্রাসার তথ্য</h4>
-                                    <MainMadrasaInfo
-                                        :form="form"
-                                        :nocFile="nocFileForMadrahsa"
-                                        :nocPreview="nocPreviewForMadrahsa"
-                                        :resolutionFile="resolutionFileForMadrahsa"
-                                        :resolutionPreview="resolutionPreviewForMadrahsa"
-                                        @file-upload="(file, type) => handleFileUploadForMadrahsa(file, type)"
-                                        @remove-file="removeFileForMadrahsa"
-                                    />
-                                </div>
-
-                                <div class="flex justify-between p-4 bg-gray-50 rounded-b-lg border-t border-gray-200 mt-6">
-                                    <Button
-                                        label="পূর্ববর্তী ধাপ"
-                                        icon="pi pi-arrow-left"
-                                        class="p-button-outlined"
-                                        @click="step = 0"
-                                    />
-                                    <Button
-                                        label="পরবর্তী ধাপ"
-                                        icon="pi pi-arrow-right"
-                                        iconPos="right"
-                                        class="p-button-secondary"
-                                        @click="goToNextStep"
-                                    />
-                                </div>
-                            </div>
-                        </TabPanel>
-
-                        <TabPanel :disabled="!canAccessStep[2]">
-                            <template #header>
-                                <div class="flex items-center" :class="{ 'opacity-50': !canAccessStep[2] }">
-                                    <i :class="getStepIcon(2)" class="mr-2"></i>
-                                    <span class="font-medium">৩. সংযুক্ত মাদ্রাসা</span>
-                                    <i v-if="!canAccessStep[2]" class="pi pi-lock ml-2 text-gray-500"
-                                       v-tooltip.top="!isConditionsAccepted ? 'প্রথমে শর্তাবলী সম্মত হন' : 'ধরন ও মূল তথ্য সম্পূর্ণ করুন'"></i>
-                                </div>
-                            </template>
-                            <div class="p-6">
-                                <h3 class="text-xl font-bold text-gray-700 mb-6 pb-2 border-b border-gray-200">
-                                    সংযুক্ত মাদ্রাসার তথ্য
-                                </h3>
-
-                                <div class="bg-gray-100 border-l-4 border-gray-500 p-4 mb-6 rounded-r-md">
-                                    <div class="flex">
-                                        <div class="flex-shrink-0">
-                                            <i class="pi pi-exclamation-triangle text-gray-600"></i>
-                                        </div>
-                                        <div class="ml-3">
-                                            <p class="text-sm text-gray-600">
-                                                সংযুক্ত মাদ্রাসা যোগ করতে মাদ্রাসার নাম বা ইলহাক নম্বর দিয়ে অনুসন্ধান করুন। প্রতিটি মাদ্রাসার জন্য প্রয়োজনীয় তথ্য পূরণ করুন।
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="bg-white rounded-lg p-5 border border-gray-200 shadow-sm">
-                                    <div class="flex justify-between items-center mb-4">
-                                        <h4 class="text-lg font-medium text-gray-700">সংযুক্ত মাদ্রাসা সমূহ</h4>
-                                        <Badge :value="rows.length" class="bg-gray-600"></Badge>
-                                    </div>
-
-                                    <DynamicMadrasas
-                                        :rows="rows"
-                                        :madrashas="madrashas"
-                                        :filteredOptions="filteredOptions"
-                                        :markazType="form.markaz_type"
-                                        @add-row="addRow"
-                                        @remove-row="removeRow"
-                                        @file-upload="handleFileUpload"
-                                        @remove-file="removeFile"
-                                        @select-option="selectOption"
-                                    />
-                                </div>
-
-                                <div class="flex justify-between p-4 bg-gray-50 rounded-b-lg border-t border-gray-200 mt-6">
-                                    <Button
-                                        label="পূর্ববর্তী ধাপ"
-                                        icon="pi pi-arrow-left"
-                                        class="p-button-outlined"
-                                        @click="step = 1"
-                                    />
-                                    <Button
-                                        label="পরবর্তী ধাপ"
-                                        icon="pi pi-arrow-right"
-                                        iconPos="right"
-                                        class="p-button-secondary"
-                                        @click="goToNextStep"
-                                    />
-                                </div>
-                            </div>
-                        </TabPanel>
-
-                        <TabPanel>
-                            <template #header>
-                                <div class="flex items-center">
-                                    <i :class="getStepIcon(3)" class="mr-2"></i>
-                                    <span class="font-medium">৪. প্রয়োজনীয়তা ও সংযুক্তি</span>
-                                                <!-- Removed lock icon and tooltip for disabled state -->
-                                </div>
-                            </template>
-                            <div class="p-6">
-                                <h3 class="text-xl font-bold text-gray-700 mb-6 pb-2 border-b border-gray-200">
-                                    প্রয়োজনীয়তা ও প্রমাণক সংযুক্তি
-                                </h3>
-
-                                <div class="bg-gray-100 border-l-4 border-gray-500 p-4 mb-6 rounded-r-md">
-                                    <div class="flex">
-                                        <div class="flex-shrink-0">
-                                            <i class="pi pi-check-circle text-gray-600"></i>
-                                        </div>
-                                        <div class="ml-3">
-                                            <p class="text-sm text-gray-600">
-                                                মারকাজ চাওয়ার প্রয়োজনীয়তা বর্ণনা করুন। প্রয়োজনীয়তা ব্যাখ্যা অবশ্যই পূরণ করুন। ফাইল সংযুক্তি ঐচ্ছিক, তবে যদি থাকে PDF, JPG, বা PNG ফরম্যাটে আপলোড করুন।
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="bg-white rounded-lg p-5 mb-6 border border-gray-200 shadow-sm">
-                                    <h4 class="text-lg font-medium text-gray-700 mb-4">মারকাজ প্রয়োজনীয়তা <span class="text-red-500">*</span></h4>
-                                    <RequirementsSection
-                                        :modelValue="form.requirements"
-                                        @update:modelValue="form.requirements = $event"
-                                    />
-                                    <p class="text-sm text-gray-500 mt-2">মারকাজ চাওয়ার প্রয়োজনীয়তা বিস্তারিত ব্যাখ্যা করুন। এই ক্ষেত্রটি পূরণ করা বাধ্যতামূলক।</p>
-                                </div>
-
-                                <div class="bg-white rounded-lg p-5 border border-gray-200 shadow-sm">
-                                    <h4 class="text-lg font-medium text-gray-700 mb-4">প্রমাণক সংযুক্তি (ঐচ্ছিক)</h4>
-                                    <AttachmentSection
-                                        :muhtamimFile="muhtamimFile"
-                                        :muhtamimPreview="muhtamimPreview"
-                                        :presidentFile="presidentFile"
-                                        :presidentPreview="presidentPreview"
-                                        :committeeFile="committeeFile"
-                                        :committeePreview="committeePreview"
-                                        @file-upload="handleFileUploadMumtahin"
-                                        @remove-file="removeFileMumtahin"
-                                    />
-                                    <div class="mt-4 p-3 bg-gray-100 rounded-md">
-                                        <p class="text-sm text-gray-600">
-                                            <i class="pi pi-info-circle mr-1"></i>
-                                            ফাইল সংযুক্তি ঐচ্ছিক। প্রয়োজনীয়তা ব্যাখ্যা পূরণ করলেই আবেদন জমা দেওয়া যাবে।
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <!-- Display form errors if any -->
-                                <div v-if="formErrors.length > 0" class="p-4 bg-gray-100 border border-red-200 rounded-md mb-4">
-                                    <h4 class="font-medium text-red-700 mb-2">
-                                        <i class="pi pi-exclamation-circle mr-2"></i>নিম্নলিখিত সমস্যা সমাধান করুন:
-                                    </h4>
-                                    <ul class="list-disc pl-5">
-                                        <li v-for="(error, key) in formErrors" :key="key" class="text-red-600 text-sm">
-                                            {{ error }}
-                                        </li>
-                                    </ul>
-                                </div>
-
-                                <div class="flex justify-between p-4 bg-gray-50 rounded-b-lg border-t border-gray-200 mt-6">
-                                    <Button
-                                        label="পূর্ববর্তী ধাপ"
-                                        icon="pi pi-arrow-left"
-                                        class="p-button-outlined"
-                                        @click="step = 2"
-                                    />
-                                    <Button
-                                        label="আবেদন জমা দিন"
-                                        icon="pi pi-check"
-                                        iconPos="right"
-                                        class="p-button-success"
-                                        :loading="loading"
-                                        @click="submitForm"
-                                    />
-                                </div>
-                            </div>
-                        </TabPanel>
-                    </TabView>
-                </template>
-            </Card>
+      </div>
+      <div class="flex items-center bg-gray-700 rounded-lg px-6 py-3 text-white mt-6 md:mt-0">
+        <div class="mr-6 border-r border-gray-500 pr-6">
+          <div class="text-sm">তারিখ ও সময়</div>
+          <div class="font-bold">{{ getCurrentDateTime() }}</div>
         </div>
+        <div>
+          <div class="text-sm">ইউজার</div>
+          <div class="font-bold">{{ getCurrentUser() }}</div>
+        </div>
+      </div>
     </div>
 
+    <!-- Progress Tracker -->
+    <div class=" mx-auto pt-8 px-4">
+      <div class="bg-white border border-gray-300 rounded shadow-lg mb-8">
+        <div class="px-8 py-6">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+            <h3 class="text-lg font-bold text-gray-700">
+              <i class="fas fa-tasks mr-2 text-indigo-400"></i>
+              আবেদন অগ্রগতি
+            </h3>
+            <span class="bg-gray-100 text-gray-800 px-4 py-1 rounded-full text-sm font-bold">
+              {{ getStepCompletionPercentage }}% সম্পন্ন
+            </span>
+          </div>
+          <div class="my-4">
+            <div class="relative w-full bg-gray-200 rounded-full h-3">
+              <div
+                class="absolute top-0 left-0 h-3 rounded-full transition-all duration-500"
+                :class="getStepCompletionPercentage === 100 ? 'bg-green-500' : 'bg-indigo-500'"
+                :style="{ width: getStepCompletionPercentage + '%' }"
+              ></div>
+            </div>
+          </div>
+          <div class="hidden md:flex justify-between pt-4">
+            <div
+              v-for="(stepLabel, index) in stepLabels"
+              :key="index"
+              class="flex flex-col items-center w-1/4"
+              :class="{ 'opacity-50': !canAccessStep[index] && index !== step }"
+            >
+              <div
+                class="flex items-center justify-center h-10 w-10 rounded-full mb-2 border border-gray-300"
+                :class="[
+                  step === index
+                    ? 'bg-indigo-100 text-indigo-700 shadow'
+                    : ((index === 0 && isConditionsAccepted) ||
+                       (index === 1 && isStep1Valid) ||
+                       (index === 2 && isStep2Valid) ||
+                       (index === 3 && isStep3Valid))
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-gray-100 text-gray-500'
+                ]"
+              >
+                <i :class="[stepLabel.icon, 'text-lg']"></i>
+              </div>
+              <span class="text-sm font-bold text-gray-700">{{ stepLabel.label }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Box -->
+    <div class=" mx-auto pb-12 px-4">
+      <div class="bg-white border border-gray-300 rounded shadow-lg">
+        <div class="px-8 py-8">
+          <TabView v-model:activeIndex="step" :scrollable="true" @tab-change="handleTabChange">
+            <!-- Conditions Tab -->
+            <TabPanel>
+              <template #header>
+                <div class="flex items-center">
+                  <i :class="getStepIcon(0)" class="mr-2"></i>
+                  <span class="font-bold">১. শর্তাবলী</span>
+                </div>
+              </template>
+              <div>
+                <MarkazConditions @continue="handleConditionsAccepted" />
+                <div v-if="!conditionsAgreed" class="mt-6 p-4 bg-yellow-100 border-l-4 border-yellow-500 rounded-r shadow">
+                  <div class="flex items-center">
+                    <i class="fas fa-exclamation-triangle text-yellow-600 text-xl"></i>
+                    <span class="ml-3 text-sm font-semibold text-yellow-700">
+                      শর্তাবলী সম্মত হলে চেকবক্সে টিক দিন এবং পরবর্তী ধাপে যান।
+                    </span>
+                  </div>
+                </div>
+                <div class="flex justify-end p-4 bg-gray-50 rounded-b-lg border-t border-gray-200 mt-4">
+                  <Button
+                    label="পরবর্তী ধাপে যান"
+                    icon="pi pi-arrow-right"
+                    iconPos="right"
+                    class="p-button-secondary"
+                    :disabled="!conditionsAgreed"
+                    @click="goToNextStep"
+                  />
+                </div>
+              </div>
+            </TabPanel>
+
+            <TabPanel :disabled="!canAccessStep[1]">
+              <template #header>
+                <div class="flex items-center" :class="{ 'opacity-50': !canAccessStep[1] }">
+                  <i :class="getStepIcon(1)" class="mr-2"></i>
+                  <span class="font-bold">২. ধরন ও মূল তথ্য</span>
+                  <i v-if="!canAccessStep[1]" class="fas fa-lock ml-2 text-gray-400"></i>
+                </div>
+              </template>
+              <div>
+                <h3 class="text-xl font-bold text-gray-700 mb-6 pb-2 border-b border-gray-200">
+                  মারকাযের ধরণ ও মূল তথ্য
+                </h3>
+                <div class="bg-gray-100 border-l-4 border-indigo-400 p-4 mb-6 rounded-r-md shadow">
+                  <div class="flex items-center">
+                    <i class="fas fa-info-circle text-indigo-400"></i>
+                    <span class="ml-3 text-sm text-gray-800">
+                      আপনার মারকাযের ধরণ নির্বাচন করুন এবং প্রয়োজনীয় তথ্য পূরণ করুন। সমস্ত তারকাচিহ্নিত (*) ক্ষেত্র পূরণ করা আবশ্যক।
+                    </span>
+                  </div>
+                </div>
+                <div class="bg-white rounded-lg p-5 mb-8 border border-gray-200 shadow">
+                  <h4 class="text-lg font-bold text-gray-700 mb-4">মারকায ধরণ নির্বাচন</h4>
+                  <CategorySelect
+                    :modelValue="form.markaz_type"
+                    @update:modelValue="form.markaz_type = $event"
+                  />
+                </div>
+                <div class="bg-white rounded-lg p-5 border border-gray-200 shadow">
+                  <h4 class="text-lg font-bold text-gray-700 mb-4">মূল মাদ্রাসার তথ্য</h4>
+                  <MainMadrasaInfo
+                    :form="form"
+                    :nocFile="nocFileForMadrahsa"
+                    :nocPreview="nocPreviewForMadrahsa"
+                    :resolutionFile="resolutionFileForMadrahsa"
+                    :resolutionPreview="resolutionPreviewForMadrahsa"
+                    @file-upload="(file, type) => handleFileUploadForMadrahsa(file, type)"
+                    @remove-file="removeFileForMadrahsa"
+                  />
+                </div>
+                <div class="flex justify-between p-4 bg-gray-50 rounded-b-lg border-t border-gray-200 mt-6">
+                  <Button
+                    label="পূর্ববর্তী ধাপ"
+                    icon="pi pi-arrow-left"
+                    class="p-button-outlined"
+                    @click="step = 0"
+                  />
+                  <Button
+                    label="পরবর্তী ধাপ"
+                    icon="pi pi-arrow-right"
+                    iconPos="right"
+                    class="p-button-secondary"
+                    @click="goToNextStep"
+                  />
+                </div>
+              </div>
+            </TabPanel>
+
+            <TabPanel :disabled="!canAccessStep[2]">
+              <template #header>
+                <div class="flex items-center" :class="{ 'opacity-50': !canAccessStep[2] }">
+                  <i :class="getStepIcon(2)" class="mr-2"></i>
+                  <span class="font-bold">৩. সংযুক্ত মাদ্রাসা</span>
+                  <i v-if="!canAccessStep[2]" class="fas fa-lock ml-2 text-gray-400"></i>
+                </div>
+              </template>
+              <div>
+                <h3 class="text-xl font-bold text-gray-700 mb-6 pb-2 border-b border-gray-200">
+                  সংযুক্ত মাদ্রাসার তথ্য
+                </h3>
+                <div class="bg-gray-100 border-l-4 border-blue-400 p-4 mb-6 rounded-r-md shadow">
+                  <div class="flex items-center">
+                    <i class="fas fa-exclamation-triangle text-blue-400"></i>
+                    <span class="ml-3 text-sm text-gray-800">
+                      সংযুক্ত মাদ্রাসা যোগ করতে মাদ্রাসার নাম বা ইলহাক নম্বর দিয়ে অনুসন্ধান করুন। প্রতিটি মাদ্রাসার জন্য প্রয়োজনীয় তথ্য পূরণ করুন।
+                    </span>
+                  </div>
+                </div>
+                <div class="bg-white rounded-lg p-5 border border-gray-200 shadow">
+                  <div class="flex justify-between items-center mb-4">
+                    <h4 class="text-lg font-bold text-gray-700">সংযুক্ত মাদ্রাসা সমূহ</h4>
+                    <span class="bg-gray-600 text-white rounded-full px-3 py-1 text-xs font-bold">{{ rows.length }}</span>
+                  </div>
+                  <DynamicMadrasas
+                    :rows="rows"
+                    :madrashas="madrashas"
+                    :filteredOptions="filteredOptions"
+                    :markazType="form.markaz_type"
+                    @add-row="addRow"
+                    @remove-row="removeRow"
+                    @file-upload="handleFileUpload"
+                    @remove-file="removeFile"
+                    @select-option="selectOption"
+                  />
+                </div>
+                <div class="flex justify-between p-4 bg-gray-50 rounded-b-lg border-t border-gray-200 mt-6">
+                  <Button
+                    label="পূর্ববর্তী ধাপ"
+                    icon="pi pi-arrow-left"
+                    class="p-button-outlined"
+                    @click="step = 1"
+                  />
+                  <Button
+                    label="পরবর্তী ধাপ"
+                    icon="pi pi-arrow-right"
+                    iconPos="right"
+                    class="p-button-secondary"
+                    @click="goToNextStep"
+                  />
+                </div>
+              </div>
+            </TabPanel>
+
+            <TabPanel>
+              <template #header>
+                <div class="flex items-center">
+                  <i :class="getStepIcon(3)" class="mr-2"></i>
+                  <span class="font-bold">৪. প্রয়োজনীয়তা ও সংযুক্তি</span>
+                </div>
+              </template>
+              <div>
+                <h3 class="text-xl font-bold text-gray-700 mb-6 pb-2 border-b border-gray-200">
+                  প্রয়োজনীয়তা ও প্রমাণক সংযুক্তি
+                </h3>
+                <div class="bg-gray-100 border-l-4 border-green-400 p-4 mb-6 rounded-r-md shadow">
+                  <div class="flex items-center">
+                    <i class="fas fa-check-circle text-green-400"></i>
+                    <span class="ml-3 text-sm text-gray-800">
+                      মারকাজ চাওয়ার প্রয়োজনীয়তা বর্ণনা করুন। ফাইল সংযুক্তি ঐচ্ছিক।
+                    </span>
+                  </div>
+                </div>
+                <div class="bg-white rounded-lg p-5 mb-6 border border-gray-200 shadow">
+                  <h4 class="text-lg font-bold text-gray-700 mb-4">মারকাজ প্রয়োজনীয়তা <span class="text-red-500">*</span></h4>
+                  <RequirementsSection
+                    :modelValue="form.requirements"
+                    @update:modelValue="form.requirements = $event"
+                  />
+                  <p class="text-sm text-gray-500 mt-2">
+                    এই ক্ষেত্রটি পূরণ করা বাধ্যতামূলক।
+                  </p>
+                </div>
+                <div class="bg-white rounded-lg p-5 border border-gray-200 shadow">
+                  <h4 class="text-lg font-bold text-gray-700 mb-4">প্রমাণক সংযুক্তি (ঐচ্ছিক)</h4>
+                  <AttachmentSection
+                    :muhtamimFile="muhtamimFile"
+                    :muhtamimPreview="muhtamimPreview"
+                    :presidentFile="presidentFile"
+                    :presidentPreview="presidentPreview"
+                    :committeeFile="committeeFile"
+                    :committeePreview="committeePreview"
+                    @file-upload="handleFileUploadMumtahin"
+                    @remove-file="removeFileMumtahin"
+                  />
+                  <div class="mt-4 p-3 bg-gray-100 rounded-md">
+                    <p class="text-sm text-gray-600">
+                      <i class="fas fa-info-circle mr-2"></i>
+                      ফাইল সংযুক্তি ঐচ্ছিক। প্রয়োজনীয়তা ব্যাখ্যা পূরণ করলেই আবেদন জমা দেওয়া যাবে।
+                    </p>
+                  </div>
+                </div>
+                <div v-if="formErrors.length > 0" class="p-4 bg-red-50 border border-red-300 rounded-md mb-4">
+                  <h4 class="font-bold text-red-700 mb-2">
+                    <i class="fas fa-exclamation-circle mr-2"></i>নিম্নলিখিত সমস্যা সমাধান করুন:
+                  </h4>
+                  <ul class="list-disc pl-5">
+                    <li v-for="(error, key) in formErrors" :key="key" class="text-red-700 text-sm">
+                      {{ error }}
+                    </li>
+                  </ul>
+                </div>
+                <div class="flex justify-between p-4 bg-gray-50 rounded-b-lg border-t border-gray-200 mt-6">
+                  <Button
+                    label="পূর্ববর্তী ধাপ"
+                    icon="pi pi-arrow-left"
+                    class="p-button-outlined"
+                    @click="step = 2"
+                  />
+                  <Button
+                    label="আবেদন জমা দিন"
+                    icon="pi pi-check"
+                    iconPos="right"
+                    class="p-button-success"
+                    :loading="loading"
+                    @click="submitForm"
+                  />
+                </div>
+              </div>
+            </TabPanel>
+          </TabView>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>

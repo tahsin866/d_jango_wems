@@ -15,6 +15,9 @@ class MarkazApplication(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        db_table = 'markaz_applications'
+
 class MainMadrasaInfo(models.Model):
     markaz_application = models.ForeignKey(MarkazApplication, on_delete=models.CASCADE)
     madrasa = models.ForeignKey(School, on_delete=models.SET_NULL, null=True)
@@ -27,6 +30,9 @@ class MainMadrasaInfo(models.Model):
     qirat = models.IntegerField(blank=True, null=True)
     noc_file_path = models.CharField(max_length=256, blank=True, null=True)
     resolution_file_path = models.CharField(max_length=256, blank=True, null=True)
+
+    class Meta:
+        db_table = 'main_madrasa_infos'
 
 class AssociatedMadrasa(models.Model):
     markaz_application = models.ForeignKey(MarkazApplication, on_delete=models.CASCADE)
@@ -41,11 +47,17 @@ class AssociatedMadrasa(models.Model):
     noc_file_path = models.CharField(max_length=256, blank=True, null=True)
     resolution_file_path = models.CharField(max_length=256, blank=True, null=True)
 
+    class Meta:
+        db_table = 'associated_madrasas'
+
 class Attachment(models.Model):
     markaz_application = models.ForeignKey(MarkazApplication, on_delete=models.CASCADE)
     type = models.CharField(max_length=32)
     file_path = models.CharField(max_length=256)
     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'attachments'
 
 class MarkazApplicationAudit(models.Model):
     markaz_application = models.ForeignKey(MarkazApplication, on_delete=models.CASCADE)

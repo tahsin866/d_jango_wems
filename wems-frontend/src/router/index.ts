@@ -326,12 +326,15 @@ const routes = [
         component: () => import('@/views/Pages/registraion/oldStudentList.vue'),
         meta: { title: 'Old Student List', requiresAuth: true, role: 'user' },
       },
+      
       {
         path: 'student/old/verify/:marhala_id',
         name: 'VerifyOldStudents',
         component: () => import('@/views/Pages/registraion/verifyOldStudents.vue'),
         meta: { title: 'Verify Old Students', requiresAuth: true, role: 'user' },
       },
+
+
       {
         path: 'student/old/registration/form',
         name: 'OldStudentReg',

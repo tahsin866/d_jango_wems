@@ -1,37 +1,35 @@
 <template>
-  <div
-style="font-family: 'SolaimanLipi', sans-serif;"
-  class="py-12 bg-gray-50">
+  <div style="font-family: 'SolaimanLipi', sans-serif;" class="py-12 bg-[#f4f6f9]">
     <div class="mx-auto px-4 sm:px-8">
-      <div class="bg-white shadow-lg rounded-1xl border border-gray-200">
+      <div class="bg-white shadow-lg rounded border border-[#d2d6de]">
         <!-- Header with Stats -->
-        <div class="border-b border-gray-100 px-8 py-8">
+        <div class="border-b border-[#d2d6de] px-8 py-8">
           <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div class="flex items-center gap-3">
-              <div class="h-10 w-10 rounded-md bg-gray-100 flex items-center justify-center text-gray-700">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="h-12 w-12 rounded bg-[#3c8dbc]/10 flex items-center justify-center text-[#3c8dbc]">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
               </div>
               <div>
-                <h2 class="text-3xl font-bold text-gray-900 mb-1">বিষয় তালিকা</h2>
-                <p class="text-gray-500 text-base font-medium">সকল বিষয়ের তথ্য এবং ব্যবস্থাপনা</p>
+                <h2 class="text-2xl font-bold text-[#222d32] mb-1">বিষয় তালিকা</h2>
+                <p class="text-gray-500 text-base">সকল বিষয়ের তথ্য এবং ব্যবস্থাপনা</p>
               </div>
             </div>
             <div class="flex flex-wrap gap-4">
-              <div class="text-center px-5 py-3 bg-gray-50 rounded-lg shadow-sm border border-gray-100">
-                <div class="text-2xl font-bold text-gray-800">{{ filteredSubjects.length }}</div>
-                <div class="text-xl text-gray-500">মোট বিষয়</div>
+              <div class="text-center px-5 py-3 bg-[#f4f6f9] rounded shadow-sm border border-[#d2d6de]">
+                <div class="text-xl font-bold text-[#222d32]">{{ filteredSubjects.length }}</div>
+                <div class="text-base text-gray-500">মোট বিষয়</div>
               </div>
-              <div class="text-center px-5 py-3 bg-gray-50 rounded-lg shadow-sm border border-gray-100">
-                <div class="text-2xl font-bold text-gray-800">{{ getActiveCount }}</div>
-                <div class="text-xl text-gray-500">সক্রিয় বিষয়</div>
+              <div class="text-center px-5 py-3 bg-[#f4f6f9] rounded shadow-sm border border-[#d2d6de]">
+                <div class="text-xl font-bold text-[#222d32]">{{ getActiveCount }}</div>
+                <div class="text-base text-gray-500">সক্রিয় বিষয়</div>
               </div>
               <router-link
                 :to="route('subjects_for_Admin.subject_setup_list')"
-                class="inline-flex items-center px-5 py-2 border border-gray-400 rounded-md font-semibold text-base text-gray-800 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400 transition shadow-sm"
+                class="inline-flex items-center px-5 py-2 border border-[#3c8dbc] rounded font-semibold text-base text-[#3c8dbc] bg-white hover:bg-[#e9ecef] transition shadow-sm"
               >
-                <svg class="w-5 h-5 mr-2 -ml-1 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 mr-2 -ml-1 text-[#3c8dbc]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
                 নতুন বিষয় সেটাপ
@@ -41,22 +39,22 @@ style="font-family: 'SolaimanLipi', sans-serif;"
         </div>
         <div class="px-8 pb-10 pt-6">
           <!-- Search and Filters Card -->
-          <div class="bg-gray-50 rounded-lg border border-gray-100 shadow-sm overflow-hidden mb-8 px-8 py-8">
+          <div class="bg-[#f4f6f9] rounded border border-[#d2d6de] shadow-sm overflow-hidden mb-8 px-8 py-8">
             <div class="flex flex-wrap gap-6 items-end">
               <div class="w-full md:w-1/5">
-                <label class="block text-xl font-medium text-gray-700 mb-1">অনুসন্ধান</label>
+                <label class="block text-base font-semibold text-[#222d32] mb-1">অনুসন্ধান</label>
                 <input
                   type="text"
                   v-model="searchTerm"
                   placeholder="বিষয় / কোড লিখুন"
-                  class="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-400 focus:border-gray-400 py-2 px-3"
+                  class="block w-full border border-[#d2d6de] rounded focus:ring-2 focus:ring-[#3c8dbc] focus:border-[#3c8dbc] py-2 px-3 bg-white"
                 />
               </div>
               <div class="w-full md:w-1/5">
-                <label class="block text-xl font-medium text-gray-700 mb-1">মারকাযের ধরন</label>
+                <label class="block text-base font-semibold text-[#222d32] mb-1">মারকাযের ধরন</label>
                 <select
                   v-model="markazType"
-                  class="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-400 focus:border-gray-400 py-2 px-3 bg-white"
+                  class="block w-full border border-[#d2d6de] rounded focus:ring-2 focus:ring-[#3c8dbc] focus:border-[#3c8dbc] py-2 px-3 bg-white"
                 >
                   <option value="">নির্বাচন করুন</option>
                   <option value="দরসিয়াত">দরসিয়াত</option>
@@ -65,20 +63,20 @@ style="font-family: 'SolaimanLipi', sans-serif;"
                 </select>
               </div>
               <div class="w-full md:w-1/5">
-                <label class="block text-xl font-medium text-gray-700 mb-1">মারহালা</label>
+                <label class="block text-base font-semibold text-[#222d32] mb-1">মারহালা</label>
                 <select
                   v-model="marhalaType"
-                  class="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-400 focus:border-gray-400 py-2 px-3 bg-white"
+                  class="block w-full border border-[#d2d6de] rounded focus:ring-2 focus:ring-[#3c8dbc] focus:border-[#3c8dbc] py-2 px-3 bg-white"
                 >
                   <option value="">নির্বাচন করুন</option>
                   <option v-for="type in marhalaTypes" :key="type" :value="type">{{ type }}</option>
                 </select>
               </div>
               <div class="w-full md:w-1/5">
-                <label class="block text-xl font-medium text-gray-700 mb-1">স্ট্যাটাস</label>
+                <label class="block text-base font-semibold text-[#222d32] mb-1">স্ট্যাটাস</label>
                 <select
                   v-model="status"
-                  class="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-400 focus:border-gray-400 py-2 px-3 bg-white"
+                  class="block w-full border border-[#d2d6de] rounded focus:ring-2 focus:ring-[#3c8dbc] focus:border-[#3c8dbc] py-2 px-3 bg-white"
                 >
                   <option value="">নির্বাচন করুন</option>
                   <option value="active">সক্রিয়</option>
@@ -88,13 +86,13 @@ style="font-family: 'SolaimanLipi', sans-serif;"
               <div class="flex gap-2">
                 <button
                   @click="resetFilters"
-                  class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-xl font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 transition"
+                  class="inline-flex items-center px-4 py-2 border border-[#d2d6de] shadow-sm text-base font-semibold rounded text-[#222d32] bg-white hover:bg-[#e9ecef] transition"
                 >
                   রিসেট
                 </button>
                 <button
                   @click="fetchData"
-                  class="inline-flex items-center px-4 py-2 border border-transparent text-xl font-medium rounded-md shadow-sm text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400 transition"
+                  class="inline-flex items-center px-4 py-2 border border-transparent text-base font-semibold rounded shadow-sm text-white bg-[#3c8dbc] hover:bg-[#367fa9] transition"
                 >
                   অনুসন্ধান
                 </button>
@@ -103,14 +101,14 @@ style="font-family: 'SolaimanLipi', sans-serif;"
           </div>
           <!-- Results Count and Sorting -->
           <div v-if="filteredSubjects.length > 0" class="flex justify-between items-center mb-4">
-            <div class="text-xl text-gray-600">
+            <div class="text-base text-[#222d32]">
               {{ filteredSubjects.length }} টি বিষয় পাওয়া গেছে
             </div>
-            <div class="flex items-center gap-2 text-xl text-gray-600">
+            <div class="flex items-center gap-2 text-base text-[#222d32]">
               <span>সাজানঃ</span>
               <select
                 v-model="sortOption"
-                class="border border-gray-300 rounded px-2 py-1 text-xl focus:ring-2 focus:ring-gray-400 focus:border-gray-400"
+                class="border border-[#d2d6de] rounded px-2 py-1 text-base focus:ring-2 focus:ring-[#3c8dbc] focus:border-[#3c8dbc] bg-white"
                 @change="handleSortChange"
               >
                 <option value="code-asc">কোড (A-Z)</option>
@@ -121,85 +119,85 @@ style="font-family: 'SolaimanLipi', sans-serif;"
             </div>
           </div>
           <!-- Table -->
-          <div class="bg-white overflow-hidden border border-gray-100 rounded-lg shadow-sm">
+          <div class="bg-white overflow-hidden border border-[#d2d6de] rounded shadow-sm">
             <div class="overflow-x-auto">
-              <table class="min-w-full divide-y divide-gray-100">
-                <thead class="bg-gray-50">
+              <table class="min-w-full divide-y divide-[#d2d6de]">
+                <thead class="bg-[#f4f6f9]">
                   <tr>
-                    <th scope="col" class="px-6 py-3 text-left text-xl font-bold text-gray-600 uppercase tracking-wider cursor-pointer" @click="sortBy('code')">
+                    <th scope="col" class="px-6 py-3 text-left text-base font-bold text-[#222d32] uppercase cursor-pointer" @click="sortBy('code')">
                       কোড
                     </th>
-                    <th scope="col" class="px-6 py-3 text-left text-xl font-bold text-gray-600 uppercase tracking-wider cursor-pointer" @click="sortBy('Subject_Names')">
+                    <th scope="col" class="px-6 py-3 text-left text-base font-bold text-[#222d32] uppercase cursor-pointer" @click="sortBy('Subject_Names')">
                       বিষয়
                     </th>
-                    <th scope="col" class="px-6 py-3 text-left text-xl font-bold text-gray-600 uppercase tracking-wider cursor-pointer" @click="sortBy('Marhala_type')">
+                    <th scope="col" class="px-6 py-3 text-left text-base font-bold text-[#222d32] uppercase cursor-pointer" @click="sortBy('Marhala_type')">
                       মারহালা
                     </th>
-                    <th scope="col" class="px-6 py-3 text-left text-xl font-bold text-gray-600 uppercase tracking-wider cursor-pointer" @click="sortBy('student_type')">
+                    <th scope="col" class="px-6 py-3 text-left text-base font-bold text-[#222d32] uppercase cursor-pointer" @click="sortBy('student_type')">
                       বালক/বালিকা
                     </th>
-                    <th scope="col" class="px-6 py-3 text-left text-xl font-bold text-gray-600 uppercase tracking-wider cursor-pointer" @click="sortBy('markaz_type')">
+                    <th scope="col" class="px-6 py-3 text-left text-base font-bold text-[#222d32] uppercase cursor-pointer" @click="sortBy('markaz_type')">
                       মারকাযের ধরন
                     </th>
-                    <th scope="col" class="px-6 py-3 text-left text-xl font-bold text-gray-600 uppercase tracking-wider cursor-pointer" @click="sortBy('total_marks')">
+                    <th scope="col" class="px-6 py-3 text-left text-base font-bold text-[#222d32] uppercase cursor-pointer" @click="sortBy('total_marks')">
                       মোট নাম্বার
                     </th>
-                    <th scope="col" class="px-6 py-3 text-left text-xl font-bold text-gray-600 uppercase tracking-wider cursor-pointer" @click="sortBy('status')">
+                    <th scope="col" class="px-6 py-3 text-left text-base font-bold text-[#222d32] uppercase cursor-pointer" @click="sortBy('status')">
                       স্ট্যাটাস
                     </th>
-                    <th scope="col" class="px-6 py-3 text-center text-xl font-bold text-gray-600 uppercase tracking-wider">কর্মসূচী</th>
+                    <th scope="col" class="px-6 py-3 text-center text-base font-bold text-[#222d32] uppercase">কর্মসূচী</th>
                   </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-100">
+                <tbody class="bg-white divide-y divide-[#d2d6de]">
                   <!-- Loading State -->
                   <tr v-if="isLoading">
                     <td colspan="8" class="px-6 py-12 text-center">
                       <div class="flex flex-col items-center justify-center">
-                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600"></div>
-                        <h3 class="mt-4 text-lg font-medium text-gray-600">ডেটা লোড হচ্ছে...</h3>
-                        <p class="mt-1 text-sm text-gray-400">অনুগ্রহ করে অপেক্ষা করুন</p>
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3c8dbc]"></div>
+                        <h3 class="mt-4 text-lg font-semibold text-[#3c8dbc]">ডেটা লোড হচ্ছে...</h3>
+                        <p class="mt-1 text-base text-gray-400">অনুগ্রহ করে অপেক্ষা করুন</p>
                       </div>
                     </td>
                   </tr>
                   <!-- Data Rows -->
-                  <tr v-else v-for="subject in paginatedSubjects" :key="subject.id" class="hover:bg-gray-50 transition">
-                    <td class="px-6 py-4 font-medium text-gray-900">{{ subject.code }}</td>
-                    <td class="px-6 py-4 text-xl">
-                      <div class="font-medium text-gray-900">{{ subject.Subject_Names }}</div>
-                      <div class="text-xl text-gray-500">{{ subject.subject_type }}</div>
+                  <tr v-else v-for="subject in paginatedSubjects" :key="subject.id" class="hover:bg-[#e9ecef] transition">
+                    <td class="px-6 py-4 font-medium text-[#222d32]">{{ subject.code }}</td>
+                    <td class="px-6 py-4 text-base">
+                      <div class="font-medium text-[#222d32]">{{ subject.Subject_Names }}</div>
+                      <div class="text-base text-gray-500">{{ subject.subject_type }}</div>
                     </td>
-                    <td class="px-6 py-4 text-xl text-gray-900">
-                      <div class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xl font-medium bg-gray-100 text-gray-800">
+                    <td class="px-6 py-4 text-base text-[#222d32]">
+                      <div class="inline-flex items-center px-2.5 py-0.5 rounded-full text-base font-medium bg-[#f4f6f9] text-[#222d32] border border-[#d2d6de]">
                         {{ subject.Marhala_type }}
                       </div>
                     </td>
-                    <td class="px-6 py-4 text-xl text-gray-900">{{ subject.student_type }}</td>
-                    <td class="px-6 py-4 text-xl text-gray-900">{{ subject.markaz_type }}</td>
+                    <td class="px-6 py-4 text-base text-[#222d32]">{{ subject.student_type }}</td>
+                    <td class="px-6 py-4 text-base text-[#222d32]">{{ subject.markaz_type }}</td>
                     <td class="px-6 py-4 text-center">
-                      <div class="inline-flex items-center px-2.5 py-1 rounded-full text-xl font-medium bg-gray-100 text-gray-800">
+                      <div class="inline-flex items-center px-2.5 py-1 rounded-full text-base font-medium bg-[#e9ecef] text-[#222d32] border border-[#d2d6de]">
                         {{ subject.total_marks }}
-                        <span class="ml-1 text-xl text-gray-500">({{ subject.pass_marks }})</span>
+                        <span class="ml-1 text-base text-gray-500">({{ subject.pass_marks }})</span>
                       </div>
                     </td>
-                    <td class="px-6 py-4 text-xl">
+                    <td class="px-6 py-4 text-base">
                       <span
                         :class="[
-                          'inline-flex items-center px-2.5 py-1 rounded-full text-xl font-medium',
+                          'inline-flex items-center px-2.5 py-1 rounded-full text-base font-medium',
                           subject.status === 'active'
-                            ? 'bg-green-50 text-green-700'
-                            : 'bg-red-50 text-red-700'
+                            ? 'bg-[#dff0d8] text-[#00a65a] border border-[#d2d6de]'
+                            : 'bg-[#f2dede] text-[#dd4b39] border border-[#d2d6de]'
                         ]"
                       >
-                        <span class="w-1.5 h-1.5 rounded-full mr-1.5"
-                              :class="subject.status === 'active' ? 'bg-green-500' : 'bg-red-500'"></span>
+                        <span class="w-2 h-2 rounded-full mr-1.5"
+                              :class="subject.status === 'active' ? 'bg-[#00a65a]' : 'bg-[#dd4b39]'"></span>
                         {{ subject.status === 'active' ? 'সক্রিয়' : 'নিষ্ক্রিয়' }}
                       </span>
                     </td>
-                    <td class="px-6 py-4 text-right text-xl font-medium">
+                    <td class="px-6 py-4 text-right text-base font-medium">
                       <div class="flex justify-center gap-2">
                         <router-link
                           :to="{ name: 'subjectEdit', params: { id: subject.id } }"
-                          class="inline-flex items-center p-1.5 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400 transition"
+                          class="inline-flex items-center p-1.5 border border-[#d2d6de] rounded bg-white text-[#222d32] hover:bg-[#e9ecef] transition"
                           title="সংশোধন করুন"
                         >
                           <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -208,7 +206,7 @@ style="font-family: 'SolaimanLipi', sans-serif;"
                         </router-link>
                         <button
                           @click="viewSubjectDetails(subject)"
-                          class="inline-flex items-center p-1.5 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400 transition"
+                          class="inline-flex items-center p-1.5 border border-[#d2d6de] rounded bg-white text-[#222d32] hover:bg-[#e9ecef] transition"
                           title="বিস্তারিত দেখুন"
                         >
                           <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -222,15 +220,15 @@ style="font-family: 'SolaimanLipi', sans-serif;"
                   <tr v-if="paginatedSubjects.length === 0">
                     <td colspan="8" class="px-6 py-12 text-center">
                       <div class="flex flex-col items-center justify-center">
-                        <svg class="w-16 h-16 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-16 h-16 text-[#d2d6de]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                         </svg>
-                        <h3 class="mt-2 text-lg font-medium text-gray-500">কোন বিষয় পাওয়া যায়নি</h3>
-                        <p class="mt-1 text-xl text-gray-400">আপনার অনুসন্ধানের সাথে মিলে এমন কোন বিষয় নেই।</p>
+                        <h3 class="mt-2 text-base font-semibold text-[#222d32]">কোন বিষয় পাওয়া যায়নি</h3>
+                        <p class="mt-1 text-base text-gray-400">আপনার অনুসন্ধানের সাথে মিলে এমন কোন বিষয় নেই।</p>
                         <div class="mt-6">
                           <button
                             @click="resetFilters"
-                            class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-xl font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400"
+                            class="inline-flex items-center px-4 py-2 border border-[#d2d6de] rounded shadow-sm text-base font-semibold text-[#222d32] bg-white hover:bg-[#e9ecef]"
                           >
                             ফিল্টার রিসেট করুন
                           </button>
@@ -243,23 +241,23 @@ style="font-family: 'SolaimanLipi', sans-serif;"
             </div>
           </div>
           <!-- Pagination -->
-          <div v-if="paginatedSubjects.length > 0" class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white px-4 py-3 border border-gray-100 rounded-lg shadow-sm">
-            <div class="text-xl text-gray-700">
-              মোট <span class="font-medium">{{ filteredSubjects.length }}</span> টি রেজাল্ট থেকে
-              <span class="font-medium">{{ startIndex + 1 }}</span> থেকে
-              <span class="font-medium">{{ endIndex }}</span> পর্যন্ত দেখানো হচ্ছে
+          <div v-if="paginatedSubjects.length > 0" class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white px-4 py-3 border border-[#d2d6de] rounded shadow-sm">
+            <div class="text-base text-[#222d32]">
+              মোট <span class="font-semibold">{{ filteredSubjects.length }}</span> টি রেজাল্ট থেকে
+              <span class="font-semibold">{{ startIndex + 1 }}</span> থেকে
+              <span class="font-semibold">{{ endIndex }}</span> পর্যন্ত দেখানো হচ্ছে
             </div>
             <div>
-              <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+              <nav class="relative z-0 inline-flex rounded shadow-sm -space-x-px" aria-label="Pagination">
                 <button @click="firstPage" :disabled="currentPage === 1"
-                  class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-xl font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                  class="relative inline-flex items-center px-2 py-2 rounded-l border border-[#d2d6de] bg-white text-base font-semibold text-[#3c8dbc] hover:bg-[#e9ecef] disabled:opacity-50 disabled:cursor-not-allowed transition">
                   <span class="sr-only">প্রথম</span>
                   <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                     <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
                   </svg>
                 </button>
                 <button @click="prevPage" :disabled="currentPage === 1"
-                  class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-xl font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                  class="relative inline-flex items-center px-2 py-2 border border-[#d2d6de] bg-white text-base font-semibold text-[#3c8dbc] hover:bg-[#e9ecef] disabled:opacity-50 disabled:cursor-not-allowed transition">
                   <span class="sr-only">পূর্ববর্তী</span>
                   <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                     <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
@@ -270,10 +268,10 @@ style="font-family: 'SolaimanLipi', sans-serif;"
                     v-if="page !== '...'"
                     @click="goToPage(page)"
                     :class="[
-                      'relative inline-flex items-center px-4 py-2 border text-xl font-medium',
+                      'relative inline-flex items-center px-4 py-2 border text-base font-semibold',
                       currentPage === page
-                        ? 'z-10 bg-gray-100 border-gray-500 text-gray-800'
-                        : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50',
+                        ? 'z-10 bg-[#e9ecef] border-[#3c8dbc] text-[#222d32]'
+                        : 'bg-white border-[#d2d6de] text-[#3c8dbc] hover:bg-[#e9ecef]',
                       'transition'
                     ]"
                   >
@@ -281,20 +279,20 @@ style="font-family: 'SolaimanLipi', sans-serif;"
                   </button>
                   <span
                     v-else
-                    class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-xl font-medium text-gray-700"
+                    class="relative inline-flex items-center px-4 py-2 border border-[#d2d6de] bg-white text-base font-semibold text-[#222d32]"
                   >
                     ...
                   </span>
                 </template>
                 <button @click="nextPage" :disabled="currentPage === totalPages"
-                  class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-xl font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                  class="relative inline-flex items-center px-2 py-2 border border-[#d2d6de] bg-white text-base font-semibold text-[#3c8dbc] hover:bg-[#e9ecef] disabled:opacity-50 disabled:cursor-not-allowed transition">
                   <span class="sr-only">পরবর্তী</span>
                   <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                     <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
                   </svg>
                 </button>
                 <button @click="lastPage" :disabled="currentPage === totalPages"
-                  class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-xl font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                  class="relative inline-flex items-center px-2 py-2 rounded-r border border-[#d2d6de] bg-white text-base font-semibold text-[#3c8dbc] hover:bg-[#e9ecef] disabled:opacity-50 disabled:cursor-not-allowed transition">
                   <span class="sr-only">শেষ</span>
                   <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                     <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />

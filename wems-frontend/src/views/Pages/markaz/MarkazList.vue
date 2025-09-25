@@ -1,19 +1,95 @@
 <template>
-  <div class="font-[SolaimanLipi] min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
-    <!-- Header + Controls -->
-    <MarkazHeader
-      :examName="examName"
-      :searchQuery="searchQuery"
-      @update:searchQuery="val => (searchQuery = val)"
-      @refresh="handleRefresh"
-      @create="onCreate"
-    />
+  <div class="font-[SolaimanLipi] min-h-screen bg-gray-100 transition-colors duration-300">
+    <!-- AdminLTE Classic Header -->
+    <div class="bg-gray-800 border-b border-gray-900 shadow-lg py-6 px-8 flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-extrabold text-white tracking-tight flex items-center">
+          <i class="fas fa-university mr-3 text-indigo-300"></i>
+          {{ examName }}
+        </h1>
+        <p class="text-gray-200 mt-2 font-medium text-base">Markaz Management Dashboard</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <input
+          v-model="searchQuery"
+          class="px-4 py-2 rounded border border-gray-600 bg-gray-900 text-white text-base focus:border-indigo-400 focus:ring focus:ring-indigo-500 focus:ring-opacity-50"
+          :placeholder="`${examName} - খুঁজুন`"
+        />
+        <button
+          @click="handleRefresh"
+          class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-indigo-700 rounded font-bold text-white shadow hover:bg-indigo-700 transition"
+        >
+          <i class="fas fa-sync mr-2"></i>
+          রিফ্রেশ
+        </button>
+        <button
+          @click="onCreate"
+          class="inline-flex items-center px-4 py-2 bg-green-600 border border-green-700 rounded font-bold text-white shadow hover:bg-green-700 transition"
+        >
+          <i class="fas fa-plus mr-2"></i>
+          আবেদন করুন
+        </button>
+      </div>
+    </div>
 
-    <div class="mx-auto px-6 lg:px-8 py-8 space-y-8">
-      <StatsCards :stats="stats" />
+    <div class="mx-auto px-8 py-10 space-y-10 ">
+      <!-- Stats Cards - Classic Info Box -->
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-7">
+        <div
+          v-for="(stat, idx) in stats"
+          :key="idx"
+          class="bg-white border border-gray-300 rounded shadow-lg p-0"
+        >
+          <div class="flex items-center justify-between px-5 py-4 bg-gray-100 border-b border-gray-200 rounded-t">
+            <h3 class="font-bold text-base text-gray-700 flex items-center">
+              <i :class="`fas fa-${stat.icon} mr-2 text-${stat.color}-500`"></i>
+              {{ stat.title }}
+            </h3>
+          </div>
+          <div class="px-5 py-7 text-center">
+            <span class="text-2xl font-extrabold text-gray-900">{{ stat.value }}</span>
+            <span
+              class="ml-2 px-2 py-1 text-xs rounded font-bold inline-flex items-center"
+              :class="stat.trendUp ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
+            >
+              <i
+                :class="stat.trendUp ? 'fas fa-arrow-up mr-1 text-green-600' : 'fas fa-arrow-down mr-1 text-red-600'"
+              ></i>
+              {{ stat.change }}
+            </span>
+            <div class="mt-4">
+              <div class="h-5 rounded bg-gray-100 border border-gray-300 shadow-inner flex items-center w-full">
+                <div
+                  class="h-5 rounded-l transition-all duration-500 flex items-center"
+                  :class="`bg-${stat.color}-500`"
+                  :style="{ width: Math.round((stat.trend[stat.trend.length - 1] / Math.max(...stat.trend)) * 100) + '%' }"
+                >
+                  <span
+                    class="pr-2 text-white font-bold text-xs"
+                    v-if="((stat.trend[stat.trend.length - 1] / Math.max(...stat.trend)) * 100) > 15"
+                  >
+                    {{ Math.round((stat.trend[stat.trend.length - 1] / Math.max(...stat.trend)) * 100) }}%
+                  </span>
+                </div>
+              </div>
+              <div class="flex justify-between mt-1 text-xs text-gray-500">
+                <span>Min: {{ Math.min(...stat.trend) }}</span>
+                <span>Max: {{ Math.max(...stat.trend) }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="bg-gray-50 border-t border-gray-200 rounded-b px-5 py-2 flex items-center justify-between">
+            <span class="text-xs text-gray-600">
+              <i :class="`fas fa-${stat.icon} mr-1 text-${stat.color}-400`"></i>
+              {{ stat.title }}
+            </span>
+            <span class="text-xs text-gray-600">Info</span>
+          </div>
+        </div>
+      </div>
 
-      <div class="bg-white rounded-md shadow-md border overflow-hidden dark:bg-slate-900">
-        <!-- Loading / Empty / Table states managed inside table component -->
+      <!-- Table Box -->
+      <div class="bg-white rounded shadow-lg border border-gray-300 overflow-hidden">
         <AgreementTable
           :loading="loading"
           :agreements="agreements"
@@ -26,11 +102,12 @@
       </div>
 
       <!-- Details panel below the table (inline, not modal) -->
-      <AgreementDetailsPanel
-        v-if="selectedAgreement"
-        :agreement="selectedAgreement"
-        @close="selectedAgreement = null"
-      />
+      <div v-if="selectedAgreement" class="bg-white border border-gray-300 rounded shadow-lg p-6">
+        <AgreementDetailsPanel
+          :agreement="selectedAgreement"
+          @close="selectedAgreement = null"
+        />
+      </div>
 
       <!-- Confirm dialogs -->
       <ConfirmDialog
@@ -62,8 +139,6 @@ import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 
 // Components
-import MarkazHeader from '@/views/Pages/markaz/components/MarkazHeader.vue';
-import StatsCards from '@/views/Pages/markaz/components/StatsCards.vue';
 import AgreementTable from '@/views/Pages/markaz/components/AgreementTable.vue';
 import AgreementDetailsPanel from '@/views/Pages/markaz/components/AgreementDetailsPanel.vue';
 import ConfirmDialog from '@/views/Pages/markaz/components/ConfirmDialog.vue';
@@ -72,11 +147,50 @@ import Toast from 'primevue/toast';
 // Composable
 import { useAgreements, type Agreement } from '@/views/Pages/markaz/composable/useAgreements';
 
+// Stats dummy for classic cards (replace with actual if needed)
+const stats = ref([
+  {
+    title: 'মোট আবেদন',
+    value: '১৫৯',
+    change: '+৫%',
+    icon: 'file-alt',
+    color: 'indigo',
+    trend: [120, 122, 130, 140, 145, 150, 159],
+    trendUp: true
+  },
+  {
+    title: 'পেন্ডিং',
+    value: '৫২',
+    change: '-৩%',
+    icon: 'hourglass-half',
+    color: 'blue',
+    trend: [60, 58, 55, 54, 53, 52, 52],
+    trendUp: false
+  },
+  {
+    title: 'দাখিল',
+    value: '১০৭',
+    change: '+৮%',
+    icon: 'check-circle',
+    color: 'green',
+    trend: [80, 88, 90, 95, 100, 105, 107],
+    trendUp: true
+  },
+  {
+    title: 'বাতিল',
+    value: '০',
+    change: '০%',
+    icon: 'times-circle',
+    color: 'red',
+    trend: [0,0,0,0,0,0,0],
+    trendUp: false
+  }
+]);
+
 // Initialize composable
 const {
   agreements,
   loading,
-  stats,
   fetchAgreements,
   deleteAgreementById,
   submitAgreementById,
@@ -133,7 +247,6 @@ function onView(agreement: Agreement) {
 }
 
 function onEdit(agreement: Agreement) {
-  // Navigate to edit page using router
   router.push({
     name: 'MarkazEdit',
     params: { id: agreement.id.toString() }
@@ -158,7 +271,6 @@ function confirmDelete() {
       life: 3000
     });
 
-    // Close details panel if the deleted item was selected
     if (selectedAgreement.value?.id === pendingDeleteId.value) {
       selectedAgreement.value = null;
     }
@@ -193,7 +305,6 @@ function confirmSubmit() {
       life: 3000
     });
 
-    // Update selected agreement if it's the one being submitted
     if (selectedAgreement.value?.id === pendingSubmitId.value) {
       selectedAgreement.value.status = 'submitted';
     }
@@ -214,12 +325,11 @@ function onCreate() {
   router.push({ name: 'MarkazApply' });
 }
 
-// Initialize data on mount
 onMounted(async () => {
   await fetchAgreements();
 });
 </script>
 
 <style scoped>
-/* Parent level styles kept minimal - children control their own layout */
+/* AdminLTE flavor, minimal parent styles */
 </style>

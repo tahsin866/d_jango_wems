@@ -8,7 +8,10 @@ from mysite.apps.school.models import School
 from mysite.apps.Markaz.serializers import SchoolSelectSerializer, MarkazApplicationSerializer, MainMadrasaInfoSerializer, AssociatedMadrasaSerializer, AttachmentSerializer
 from .models import MarkazApplication, MainMadrasaInfo, AssociatedMadrasa, Attachment
 from django.db import transaction
+from rest_framework.permissions import AllowAny
+
 class MarkazApplicationCreateView(APIView):
+    permission_classes = [AllowAny]
     def post(self, request):
         data = request.data
         try:

@@ -1,3 +1,87 @@
+<template>
+  <div style="font-family: 'SolaimanLipi', sans-serif;" class="min-h-screen flex items-center justify-center classic-signup-bg ">
+    <div class="w-full max-w-6xl">
+      <form @submit.prevent="submit" class="bg-white border border-[#d2d6de] rounded-xl shadow-lg px-10 py-12 classic-signup-card" enctype="multipart/form-data">
+        <div v-if="madrashaInfo" class="bg-[#e9ecef] p-6 rounded-lg border border-[#d2d6de] mb-8 shadow">
+          <h3 class="text-xl font-extrabold text-[#222d32] mb-4 classic-title">মাদরাসা তথ্য</h3>
+          <div class="grid grid-cols-2 gap-4 text-base">
+            <p><strong>মাদরাসার নাম:</strong> <span class="text-[#3c8dbc]">{{ madrashaInfo.madrasha_name }}</span></p>
+            <p><strong>গ্রাম:</strong> <span class="text-[#3c8dbc]">{{ madrashaInfo.village }}</span></p>
+            <p><strong>পোস্ট অফিস:</strong> <span class="text-[#3c8dbc]">{{ madrashaInfo.post }}</span></p>
+            <p><strong>রেজিস্ট্রেশন কোড:</strong> <span class="text-[#605ca8]">{{ madrashaInfo.registration_code }}</span></p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-base">
+          <div class="space-y-6">
+            <div>
+              <label for="name" class="text-lg font-bold text-[#222d32]">এডমিনের নাম</label>
+              <input id="name" type="text" class="mt-1 block w-full border border-[#d2d6de] rounded px-3 py-2 bg-[#f9fafc] focus:outline-none focus:ring-2 focus:ring-[#3c8dbc]" v-model="form.name" required autocomplete="name" />
+              <div v-if="errors.name" class="text-sm text-[#dd4b39] mt-2">{{ errors.name }}</div>
+            </div>
+            <div>
+              <label for="admin_Designation" class="text-lg font-bold text-[#222d32]">এডমিনের পদবি</label>
+              <input id="admin_Designation" type="text" class="mt-1 block w-full border border-[#d2d6de] rounded px-3 py-2 bg-[#f9fafc] focus:outline-none focus:ring-2 focus:ring-[#3c8dbc]" v-model="form.admin_Designation" required autocomplete="admin_Designation" />
+              <div v-if="errors.admin_Designation" class="text-sm text-[#dd4b39] mt-2">{{ errors.admin_Designation }}</div>
+            </div>
+            <div>
+              <label for="NID_no" class="text-lg font-bold text-[#222d32]">জাতীয় পরিচয়পত্র নম্বর</label>
+              <input id="NID_no" type="text" class="mt-1 block w-full border border-[#d2d6de] rounded px-3 py-2 bg-[#f9fafc] focus:outline-none focus:ring-2 focus:ring-[#3c8dbc]" v-model="form.NID_no" required autocomplete="NID_no" />
+              <div v-if="errors.NID_no" class="text-sm text-[#dd4b39] mt-2">{{ errors.NID_no }}</div>
+            </div>
+            <div>
+              <label for="Mobile_no" class="text-lg font-bold text-[#222d32]">হোয়াটস এপ নম্বর</label>
+              <input id="Mobile_no" type="text" class="mt-1 block w-full border border-[#d2d6de] rounded px-3 py-2 bg-[#f9fafc] focus:outline-none focus:ring-2 focus:ring-[#3c8dbc]" v-model="form.Mobile_no" required autocomplete="Mobile_no" />
+              <div v-if="errors.Mobile_no" class="text-sm text-[#dd4b39] mt-2">{{ errors.Mobile_no }}</div>
+            </div>
+            <div>
+              <label for="phone" class="text-lg font-bold text-[#222d32]">মোবাইল নম্বর</label>
+              <input id="phone" type="text" class="mt-1 block w-full border border-[#d2d6de] rounded px-3 py-2 bg-[#f9fafc] focus:outline-none focus:ring-2 focus:ring-[#3c8dbc]" v-model="form.phone" required autocomplete="phone" />
+              <div v-if="errors.phone" class="text-sm text-[#dd4b39] mt-2">{{ errors.phone }}</div>
+            </div>
+            <div>
+              <label for="photo" class="text-lg font-bold text-[#222d32]">নিজের পাসপোর্ট সাইজের ছবি</label>
+              <input id="photo" type="file" accept="image/*" @change="form.photo = $event.target.files[0]" class="mt-1 block w-full border border-[#d2d6de] rounded px-3 py-2 bg-[#f9fafc]" />
+              <div v-if="form.photo" class="mt-2">
+                <img :src="URL.createObjectURL(form.photo)" alt="ছবি" class="h-20 rounded border border-[#3c8dbc]" />
+              </div>
+              <div v-if="errors.photo" class="text-sm text-[#dd4b39] mt-2">{{ errors.photo }}</div>
+            </div>
+            <div>
+              <label for="nid_photo" class="text-lg font-bold text-[#222d32]">ভোটার আইডি কার্ডের ছবি</label>
+              <input id="nid_photo" type="file" accept="image/*" @change="form.nid_photo = $event.target.files[0]" class="mt-1 block w-full border border-[#d2d6de] rounded px-3 py-2 bg-[#f9fafc]" />
+              <div v-if="form.nid_photo" class="mt-2">
+                <img :src="URL.createObjectURL(form.nid_photo)" alt="ভোটার আইডি" class="h-20 rounded border border-[#3c8dbc]" />
+              </div>
+              <div v-if="errors.nid_photo" class="text-sm text-[#dd4b39] mt-2">{{ errors.nid_photo }}</div>
+            </div>
+          </div>
+          <div class="space-y-6">
+            <div>
+              <label for="email" class="text-lg font-bold text-[#222d32]">ইমেইল</label>
+              <input id="email" type="email" class="mt-1 block w-full border border-[#d2d6de] rounded px-3 py-2 bg-[#f9fafc] focus:outline-none focus:ring-2 focus:ring-[#3c8dbc]" v-model="form.email" required autocomplete="username" />
+              <div v-if="errors.email" class="text-sm text-[#dd4b39] mt-2">{{ errors.email }}</div>
+            </div>
+            <div>
+              <label for="password" class="text-lg font-bold text-[#222d32]">পাসওয়ার্ড দিন</label>
+              <input id="password" type="password" class="mt-1 block w-full border border-[#d2d6de] rounded px-3 py-2 bg-[#f9fafc] focus:outline-none focus:ring-2 focus:ring-[#3c8dbc]" v-model="form.password" required autocomplete="new-password" />
+              <div v-if="errors.password" class="text-sm text-[#dd4b39] mt-2">{{ errors.password }}</div>
+            </div>
+            <div>
+              <label for="password_confirmation" class="text-lg font-bold text-[#222d32]">পুনরায় পাসওয়ার্ড দিন</label>
+              <input id="password_confirmation" type="password" class="mt-1 block w-full border border-[#d2d6de] rounded px-3 py-2 bg-[#f9fafc] focus:outline-none focus:ring-2 focus:ring-[#3c8dbc]" v-model="form.password_confirmation" required autocomplete="new-password" />
+              <div v-if="errors.password_confirmation" class="text-sm text-[#dd4b39] mt-2">{{ errors.password_confirmation }}</div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-10 pt-6 border-t border-[#d2d6de] flex items-center justify-end space-x-4">
+          <a href="/admin/login" class="text-[#3c8dbc] hover:text-[#367fa9] font-bold transition-colors">Already registered?</a>
+          <button type="submit" class="px-6 py-2.5 bg-[#3c8dbc] hover:bg-[#367fa9] text-white font-semibold rounded shadow focus:outline-none focus:ring-2 focus:ring-[#3c8dbc] transition disabled:opacity-25">Register</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</template>
+
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -31,7 +115,6 @@ const madrashaInfo = ref<{
 } | null>(null)
 
 onMounted(async () => {
-  // First check for data from localStorage (fallback for existing flow)
   const info = localStorage.getItem('madrashaInfo')
   if (info) {
     const parsed = JSON.parse(info)
@@ -47,7 +130,6 @@ onMounted(async () => {
     return
   }
 
-  // If no localStorage data, try to get from token
   const signupToken = route.query.token as string
   if (signupToken) {
     try {
@@ -58,7 +140,7 @@ onMounted(async () => {
           madrasha_name: schoolData.mname,
           post: schoolData.post,
           village: schoolData.village,
-          registration_code: 'SC-' + Math.random().toString().substring(2, 8), // Generate new code
+          registration_code: 'SC-' + Math.random().toString().substring(2, 8),
           elhaqno: schoolData.elhaqno,
           mobile: schoolData.mobile
         }
@@ -78,7 +160,6 @@ const submit = async () => {
     errors.value.password_confirmation = 'পাসওয়ার্ড মিলছে না'
   }
   if (!form.value.phone) errors.value.phone = 'মোবাইল নম্বর আবশ্যক'
-  // ছবি ফিল্ড চেক
   if (!form.value.photo) errors.value.photo = 'পাসপোর্ট সাইজের ছবি আবশ্যক'
   if (!form.value.nid_photo) errors.value.nid_photo = 'ভোটার আইডি কার্ডের ছবি আবশ্যক'
 
@@ -91,7 +172,6 @@ const submit = async () => {
       custom_code: madrashaInfo.value?.registration_code || null
     }
 
-    // ছবি ফাইল পাঠানো হলে FormData ব্যবহার করতে হবে (backend যদি ফাইল সাপোর্ট করে)
     const formData = new FormData()
     Object.entries(payload).forEach(([key, value]) => {
       if (value !== null && value !== undefined) {
@@ -109,30 +189,19 @@ const submit = async () => {
         withCredentials: true
       })
 
-      console.log('Signup response:', response.data)
-
       if (response.data.success) {
-        // Store JWT token if provided
         if (response.data.access_token) {
           localStorage.setItem('token', response.data.access_token)
-          console.log('Token stored:', response.data.access_token)
         }
-
-        // Store user info
         if (response.data.user) {
           localStorage.setItem('user_id', response.data.user.id.toString())
           localStorage.setItem('user_type', response.data.user.user_type)
           localStorage.setItem('user_name', response.data.user.name)
         }
-
         alert('রেজিস্ট্রেশন সফল হয়েছে!')
-
-        // Redirect to dashboard
         if (response.data.redirect) {
-          // Use Vue Router for SPA navigation
           await router.push(response.data.redirect)
         } else {
-          // Fallback to dashboard
           await router.push('/dashboard')
         }
       } else {
@@ -153,86 +222,16 @@ const submit = async () => {
 }
 </script>
 
-<template>
-  <div style="font-family: 'Merriweather', 'SolaimanLipi', sans-serif;" class="min-h-screen bg-[#f8f9fa] py-12">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <form @submit.prevent="submit" class="bg-white rounded-sm shadow-lg p-8" enctype="multipart/form-data">
-        <div v-if="madrashaInfo" class="bg-gray-50 p-6 rounded-lg border border-gray-200 mb-8">
-          <h3 class="text-xl font-semibold text-gray-800 mb-4">মাদরাসা তথ্য</h3>
-          <div class="grid grid-cols-2 gap-4 text-xl">
-            <p><strong>মাদরাসার নাম:</strong> {{ madrashaInfo.madrasha_name  }}</p>
-            <p><strong>গ্রাম:</strong> {{ madrashaInfo.village }}</p>
-            <p><strong>পোস্ট অফিস:</strong> {{ madrashaInfo.post }}</p>
-            <p><strong>রেজিস্ট্রেশন কোড:</strong> {{ madrashaInfo.registration_code }}</p>
-          </div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xl">
-          <div class="space-y-6">
-            <div>
-              <label for="name" class="text-lg font-medium">এডমিনের নাম</label>
-              <input id="name" type="text" class="mt-1 block w-full border rounded px-3 py-2" v-model="form.name" required autocomplete="name" />
-              <div v-if="errors.name" class="text-sm text-red-500 mt-2">{{ errors.name }}</div>
-            </div>
-            <div>
-              <label for="admin_Designation" class="text-lg font-medium">এডমিনের পদবি</label>
-              <input id="admin_Designation" type="text" class="mt-1 block w-full border rounded px-3 py-2" v-model="form.admin_Designation" required autocomplete="admin_Designation" />
-              <div v-if="errors.admin_Designation" class="text-sm text-red-500 mt-2">{{ errors.admin_Designation }}</div>
-            </div>
-            <div>
-              <label for="NID_no" class="text-lg font-medium">জাতীয় পরিচয়পত্র নম্বর</label>
-              <input id="NID_no" type="text" class="mt-1 block w-full border rounded px-3 py-2" v-model="form.NID_no" required autocomplete="NID_no" />
-              <div v-if="errors.NID_no" class="text-sm text-red-500 mt-2">{{ errors.NID_no }}</div>
-            </div>
-            <div>
-              <label for="Mobile_no" class="text-lg font-medium">হোয়াটস এপ নম্বর</label>
-              <input id="Mobile_no" type="text" class="mt-1 block w-full border rounded px-3 py-2" v-model="form.Mobile_no" required autocomplete="Mobile_no" />
-              <div v-if="errors.Mobile_no" class="text-sm text-red-500 mt-2">{{ errors.Mobile_no }}</div>
-            </div>
-            <div>
-              <label for="phone" class="text-lg font-medium">মোবাইল নম্বর</label>
-              <input id="phone" type="text" class="mt-1 block w-full border rounded px-3 py-2" v-model="form.phone" required autocomplete="phone" />
-              <div v-if="errors.phone" class="text-sm text-red-500 mt-2">{{ errors.phone }}</div>
-            </div>
-            <div>
-              <label for="photo" class="text-lg font-medium">নিজের পাসপোর্ট সাইজের ছবি</label>
-              <input id="photo" type="file" accept="image/*" @change="form.photo = $event.target.files[0]" class="mt-1 block w-full border rounded px-3 py-2" />
-              <div v-if="form.photo" class="mt-2">
-                <img :src="URL.createObjectURL(form.photo)" alt="ছবি" class="h-20 rounded border" />
-              </div>
-              <div v-if="errors.photo" class="text-sm text-red-500 mt-2">{{ errors.photo }}</div>
-            </div>
-            <div>
-              <label for="nid_photo" class="text-lg font-medium">ভোটার আইডি কার্ডের ছবি</label>
-              <input id="nid_photo" type="file" accept="image/*" @change="form.nid_photo = $event.target.files[0]" class="mt-1 block w-full border rounded px-3 py-2" />
-              <div v-if="form.nid_photo" class="mt-2">
-                <img :src="URL.createObjectURL(form.nid_photo)" alt="ভোটার আইডি" class="h-20 rounded border" />
-              </div>
-              <div v-if="errors.nid_photo" class="text-sm text-red-500 mt-2">{{ errors.nid_photo }}</div>
-            </div>
-          </div>
-          <div class="space-y-6">
-            <div>
-              <label for="email" class="text-lg font-medium">ইমেইল</label>
-              <input id="email" type="email" class="mt-1 block w-full border rounded px-3 py-2" v-model="form.email" required autocomplete="username" />
-              <div v-if="errors.email" class="text-sm text-red-500 mt-2">{{ errors.email }}</div>
-            </div>
-            <div>
-              <label for="password" class="text-lg font-medium">পাসওয়ার্ড দিন</label>
-              <input id="password" type="password" class="mt-1 block w-full border rounded px-3 py-2" v-model="form.password" required autocomplete="new-password" />
-              <div v-if="errors.password" class="text-sm text-red-500 mt-2">{{ errors.password }}</div>
-            </div>
-            <div>
-              <label for="password_confirmation" class="text-lg font-medium">পুনরায় পাসওয়ার্ড দিন</label>
-              <input id="password_confirmation" type="password" class="mt-1 block w-full border rounded px-3 py-2" v-model="form.password_confirmation" required autocomplete="new-password" />
-              <div v-if="errors.password_confirmation" class="text-sm text-red-500 mt-2">{{ errors.password_confirmation }}</div>
-            </div>
-          </div>
-        </div>
-        <div class="mt-8 pt-6 border-t border-gray-200 flex items-center justify-end space-x-4">
-          <a href="/admin/login" class="text-emerald-600 hover:text-emerald-800 font-medium transition-colors">Already registered?</a>
-          <button type="submit" class="px-6 py-2.5 bg-emerald-600 text-white font-semibold rounded hover:bg-emerald-700 transition disabled:opacity-25">Register</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</template>
+<style scoped>
+.classic-signup-bg {
+  background: linear-gradient(135deg, #e9ecef 0%, #f4f6f9 100%);
+}
+.classic-signup-card {
+  box-shadow: 0 4px 28px -8px #3c8dbc60;
+  border-radius: 12px;
+  border: 1.5px solid #d2d6de;
+}
+.classic-title {
+  letter-spacing: 1px;
+}
+</style>

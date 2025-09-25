@@ -17,7 +17,9 @@
               </div>
               <div>
                 <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-slate-100">
-                  {{ examName }}: {{ marhalaName }}
+                  মারহালার নাম:
+                  <span v-if="marhalaName">{{ marhalaName }}</span>
+                  <span v-else class="text-red-500">মারহালা নাম পাওয়া যায়নি</span>
                 </h1>
                 <p class="text-gray-500 dark:text-slate-300 text-sm md:text-base">পুরাতন শিক্ষার্থী নিবন্ধন সিস্টেম</p>
                 <p class="text-gray-400 dark:text-slate-400 text-xs mt-1">{{ getCurrentDate() }} • {{ currentUser }}</p>
@@ -303,8 +305,8 @@
 <script setup lang="ts">
 
 import { ref, onMounted, computed, watch } from 'vue';
-import { useRoute } from 'vue-router'
-import axios from 'axios'
+import { useRoute } from 'vue-router';
+import axios from 'axios';
 
 type Student = {
   id: number;
@@ -324,12 +326,33 @@ type Student = {
   CID?: string;
 };
 
-/* --- Simulated globals (route helper) --- */
-declare const route: ((name?: string, params?: Record<string, unknown>) => string) | undefined;
-
-/* --- Reactive state --- */
 const examName = ref<string>('পরীক্ষা নাম');
 const marhalaName = ref<string>('মারহালা নাম');
+
+const route = useRoute();
+
+onMounted(async () => {
+  // Get marhalaId from route param
+  const marhalaId = Array.isArray(route.params.marhala_id) ? route.params.marhala_id[0] : route.params.marhala_id || '2';
+  currentMarhalaId.value = marhalaId;
+
+  // Get marhala name from API
+  try {
+    const res = await axios.get(`/api/marhalas/${marhalaId}/`);
+    marhalaName.value = res.data.name_bn || 'মারহালা';
+  } catch {
+    marhalaName.value = 'মারহালা';
+  }
+
+  // Optionally, fetch years from API if available
+  // Example: const yearsRes = await axios.get('/api/years/'); years.value = yearsRes.data;
+  // Otherwise, keep years static or empty
+  years.value = [];
+
+  setTimeout(() => {
+    fadeIn.value = true;
+  }, 80);
+});
 const students = ref<Student[]>([]);
 const years = ref<string[]>([]);
 const loading = ref<boolean>(false);
@@ -349,130 +372,8 @@ const registrationNumber = ref<string>('');
 // current user (fake)
 const currentUser = 'tahsin866';
 
-/* --- Fake dataset --- */
-const FAKE_YEARS = ['2025', '2024', '2023'];
-const FAKE_STUDENTS: Student[] = [
-  {
-    id: 1,
-    Name: 'রফিকুল ইসলাম',
-    Father: 'আবুল হাসান',
-    Mother: 'আকতারুন্নেসা',
-    DateofBirth: '2008-02-14',
-    Class: '৮ম',
-    Roll: '101',
-    reg_id: 'REG-2025-101',
-    Division: 'জায়্যিদ',
-    Madrasha: 'আব্দুল্লাহ মাদরাসা',
-    Markaj: 'মারকায-১',
-    student_type: 'নিয়মিত',
-    year: '2025',
-    marhalaId: '2',
-    CID: 'CID101'
-  },
-  {
-    id: 2,
-    Name: 'জ্যাকব আলী',
-    Father: 'মোঃ সামাদ',
-    Mother: 'রুবানা',
-    DateofBirth: '2009-06-20',
-    Class: '৯ম',
-    Roll: '102',
-    reg_id: 'REG-2024-102',
-    Division: 'মমতাজ',
-    Madrasha: 'নূরানি মাদরাসা',
-    Markaj: 'মারকায-২',
-    student_type: 'অনিয়মিত যেমনী',
-    year: '2024',
-    marhalaId: '3',
-    CID: 'CID102'
-  },
-  {
-    id: 3,
-    Name: 'মরিয়ম খাতুন',
-    Father: 'হাবিবুর রহমান',
-    Mother: 'সাবেকা',
-    DateofBirth: '2010-11-05',
-    Class: '৭ম',
-    Roll: '103',
-    reg_id: 'REG-2025-103',
-    Division: 'রাসিব',
-    Madrasha: 'ফাতিহা মাদরাসা',
-    Markaj: 'মারকায-১',
-    student_type: 'নিয়মিত',
-    year: '2025',
-    marhalaId: '2',
-    CID: 'CID103'
-  },
-  {
-    id: 4,
-    Name: 'সায়মা রহমান',
-    Father: 'জলিল',
-    Mother: 'নাসরিন',
-    DateofBirth: '2007-03-12',
-    Class: '১০ম',
-    Roll: '104',
-    reg_id: 'REG-2023-104',
-    Division: 'জায়্যিদ',
-    Madrasha: 'আল-ইসলাম মাদরাসা',
-    Markaj: 'মারকায-৩',
-    student_type: 'নিয়মিত',
-    year: '2023',
-    marhalaId: '4',
-    CID: 'CID104'
-  }
-];
 
-/* --- Helpers: fake API calls (simulate latency) --- */
-const fakeFetchMarhalaInfo = (marhalaId: string) =>
-  new Promise<{ examName: string; marhalaName: string }>((resolve) => {
-    setTimeout(() => {
-      resolve({
-        examName: `নির্বাচনী পরীক্ষা ${marhalaId}`,
-        marhalaName: ['Unknown', 'ফযীলত', 'সানাবিয়া উলইয়া', 'সানাবিয়া', 'মুতাওয়াসসিতাহ'][parseInt(marhalaId, 10) - 1] || 'মারহালা'
-      });
-    }, 250);
-  });
-
-const fakeFetchYears = () =>
-  new Promise<string[]>((resolve) => {
-    setTimeout(() => resolve(FAKE_YEARS), 150);
-  });
-
-type SearchParams = {
-  marhala?: string;
-  year?: string;
-  roll?: string;
-  registration?: string;
-  marhalaId?: string;
-};
-
-const fakeSearchStudents = (params: SearchParams) =>
-  new Promise<Student[]>((resolve) => {
-    setTimeout(() => {
-      let results = FAKE_STUDENTS.slice();
-
-      if (params.marhala) {
-        results = results.filter((s) => s.marhalaId === params.marhala);
-      }
-      if (params.year) {
-        results = results.filter((s) => s.year === params.year);
-      }
-      if (params.roll) {
-        if (params.roll !== undefined) {
-          results = results.filter((s) => (s.Roll ?? '').toString() === params.roll!.toString());
-        }
-      }
-      if (params.registration) {
-        results = results.filter((s) => (s.reg_id ?? '').toLowerCase().includes(params.registration!.toLowerCase()));
-      }
-      // Simulate marhalaId header influence: if header given and not matching any student, return empty
-      if (params.marhalaId) {
-        results = results.filter((s) => s.marhalaId === params.marhalaId);
-      }
-
-      resolve(results);
-    }, 450);
-  });
+// --- Removed all fake API helpers and fakeSearchStudents ---
 
 /* --- Computed / Derived --- */
 const availableMarhalas = computed(() => {
@@ -499,48 +400,27 @@ const hasSearchCriteria = computed(() => {
   return !!(selectedMarhala.value || selectedYear.value || rollNumber.value || registrationNumber.value);
 });
 
-/* --- Lifecycle: initialize fake data --- */
 onMounted(async () => {
-  // try to obtain marhalaId from route() if available, else fallback to URL search param or default '2'
+  // Get marhalaId from route param
+  const marhalaId = Array.isArray(route.params.marhala_id) ? route.params.marhala_id[0] : route.params.marhala_id || '2';
+  currentMarhalaId.value = marhalaId;
+
+  // Get marhala name from API
   try {
-    let marhalaId = '2';
-    if (typeof route === 'function') {
-      const routeResult = route();
-      const params = typeof routeResult === 'object' && routeResult !== null && 'params' in routeResult
-        ? (routeResult as { params?: { marhalaId?: string } }).params ?? {}
-        : {};
-      if (params?.marhalaId) marhalaId = params.marhalaId;
-    } else {
-      const urlId = new URLSearchParams(window.location.search).get('marhalaId');
-      if (urlId) marhalaId = urlId;
-    }
-    currentMarhalaId.value = marhalaId;
-
-    const info = await fakeFetchMarhalaInfo(marhalaId);
-    examName.value = info.examName;
-    marhalaName.value = info.marhalaName;
-
-    years.value = await fakeFetchYears();
-
-    // small fade-in
-    setTimeout(() => {
-      fadeIn.value = true;
-    }, 80);
+    const res = await axios.get(`/api/marhalas/${marhalaId}/`);
+    marhalaName.value = res.data.name_bn || 'মারহালা';
   } catch {
-    // no-op for fake mode
+    marhalaName.value = 'মারহালা';
   }
 
-  const route = useRoute()
-  const marhalaId = route.params.marhala_id
-  const marhalaName = ref('')
+  // Optionally, fetch years from API if available
+  // Example: const yearsRes = await axios.get('/api/years/'); years.value = yearsRes.data;
+  // Otherwise, keep years static or empty
+  years.value = [];
 
-  onMounted(async () => {
-    if (marhalaId) {
-      // API endpoint আপনার backend অনুযায়ী দিন
-      const res = await axios.get(`/api/marhala/${marhalaId}/`)
-      marhalaName.value = res.data.name_bn // name_bn বা আপনার model field
-    }
-  })
+  setTimeout(() => {
+    fadeIn.value = true;
+  }, 80);
 });
 
 /* --- Functions for UI behavior --- */
@@ -559,25 +439,24 @@ const searchStudents = async () => {
   showError.value = false;
 
   try {
-    // Call fake search (simulate header marhalaId)
-    const results = await fakeSearchStudents({
+    // Real API call for students
+    const params = {
       marhala: selectedMarhala.value,
       year: selectedYear.value,
       roll: rollNumber.value,
       registration: registrationNumber.value,
       marhalaId: currentMarhalaId.value
-    });
+    };
+    const res = await axios.get('/api/old-students/', { params });
+    students.value = res.data || [];
 
-    students.value = results;
-
-    if (results.length === 0) {
+    if (students.value.length === 0) {
       showErrorMessage('রেজাল্ট পাওয়া যায়নি');
     }
   } catch {
     students.value = [];
     showErrorMessage('একটি ত্রুটি ঘটেছে');
   } finally {
-    // smooth UX: keep spinner visible briefly
     setTimeout(() => {
       loading.value = false;
       isSearching.value = false;
@@ -598,13 +477,6 @@ const resetSearch = () => {
 /* --- Router-link targets (use route() helper when available otherwise fallback paths) --- */
 
 const listUrl = computed(() => {
-  try {
-    if (typeof route === 'function') {
-      return route('students_registration.student_reg_table');
-    }
-  } catch {
-    /* ignore */
-  }
   return { path: '/students/list' };
 });
 

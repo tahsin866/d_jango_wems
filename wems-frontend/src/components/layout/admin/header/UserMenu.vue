@@ -1,69 +1,65 @@
 <template>
   <div
-
-  style="font-family: 'SolaimanLipi', sans-serif;"
-
-  class="relative" ref="dropdownRef">
+    style="font-family: 'SolaimanLipi', sans-serif;"
+    class="relative"
+    ref="dropdownRef"
+  >
     <button
-      class="flex items-center text-gray-700 dark:text-gray-400"
+      class="flex items-center px-2 py-1 text-[#b8c7ce] hover:text-white focus:outline-none"
       @click.prevent="toggleDropdown"
     >
-      <span class="mr-3 overflow-hidden rounded-full h-11 w-11">
+      <span class="mr-2 overflow-hidden rounded-circle border border-[#3c8dbc] h-10 w-10 bg-[#2c3b41] flex items-center justify-center">
         <img :src="displayAvatar" :alt="userName" class="w-full h-full object-cover" />
       </span>
-
-      <span class="block mr-1 font-medium text-theme-sm">{{ userName }}</span>
-
-      <ChevronDownIcon :class="{ 'rotate-180': dropdownOpen }" />
+      <span class="block mr-1 font-semibold text-base hidden md:inline">{{ userName }}</span>
+      <ChevronDownIcon :class="['ml-1 w-4 h-4 transition-transform', { 'rotate-180': dropdownOpen }]" />
     </button>
-
-    <!-- Dropdown Start -->
-    <div
-
-
-
-      v-if="dropdownOpen"
-      class="absolute right-0 mt-[17px] flex w-[260px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark"
-    >
-      <div>
-        <span class="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
-          {{ userName }}
-        </span>
-        <span class="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
-          {{ userEmail }}
-        </span>
-        <span v-if="isAdmin" class="mt-1 inline-flex items-center px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full dark:bg-purple-900 dark:text-purple-300">
-          অ্যাডমিন
-        </span>
-      </div>
-
-      <ul class="flex flex-col gap-1 pt-4 pb-3 border-b border-gray-200 dark:border-gray-800">
-        <li v-for="item in menuItems" :key="item.href">
-          <router-link
-            :to="item.href"
-            class="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
-          >
-            <!-- SVG icon would go here -->
-            <component
-              :is="item.icon"
-              class="text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300"
-            />
-            {{ item.text }}
-          </router-link>
-        </li>
-      </ul>
-      <router-link
-        to="/signin"
-        @click="signOut"
-        class="flex items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
+    <transition name="slide-fade">
+      <div
+        v-if="dropdownOpen"
+        class="absolute right-0 mt-2 w-64 rounded border border-[#1a2226] bg-[#222d32] shadow-lg text-[#b8c7ce] z-50"
       >
-        <LogoutIcon
-          class="text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300"
-        />
-        সাইন আউট
-      </router-link>
-    </div>
-    <!-- Dropdown End -->
+        <div class="px-4 py-3 border-b border-[#1a2226] flex items-center">
+          <span class="overflow-hidden rounded-circle border border-[#3c8dbc] h-10 w-10 bg-[#2c3b41] flex items-center justify-center mr-3">
+            <img :src="displayAvatar" :alt="userName" class="w-full h-full object-cover" />
+          </span>
+          <div>
+            <span class="block font-semibold text-base">{{ userName }}</span>
+            <span class="block text-xs text-[#999]">{{ userEmail }}</span>
+            <span
+              v-if="isAdmin"
+              class="mt-1 inline-block px-2 py-1 text-xs font-semibold bg-[#605ca8] text-white rounded"
+            >
+              অ্যাডমিন
+            </span>
+          </div>
+        </div>
+        <ul class="py-2">
+          <li v-for="item in menuItems" :key="item.href">
+            <router-link
+              :to="item.href"
+              class="flex items-center gap-3 px-4 py-2 text-base font-medium hover:bg-[#1a2226] hover:text-white transition rounded-none"
+            >
+              <component
+                :is="item.icon"
+                class="text-[#999] group-hover:text-white"
+              />
+              <span>{{ item.text }}</span>
+            </router-link>
+          </li>
+        </ul>
+        <div class="p-2 border-t border-[#1a2226]">
+          <router-link
+            to="/signin"
+            @click="signOut"
+            class="flex items-center gap-3 px-4 py-2 font-medium hover:bg-[#1a2226] hover:text-white text-base transition rounded-none"
+          >
+            <LogoutIcon class="text-[#999]" />
+            <span>সাইন আউট</span>
+          </router-link>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -118,7 +114,7 @@ const signOut = async () => {
     await axios.post('http://localhost:8000/auth/logout')
   } catch {}
   localStorage.removeItem('token')
-  clearProfile() // Clear user profile from store
+  clearProfile()
   closeDropdown()
   router.push('/')
 }
@@ -137,3 +133,18 @@ onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
 })
 </script>
+
+<style scoped>
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+  transition: all 0.2s cubic-bezier(.25,.8,.25,1);
+}
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateY(-4px);
+  opacity: 0;
+}
+.rounded-circle {
+  border-radius: 50%;
+}
+</style>

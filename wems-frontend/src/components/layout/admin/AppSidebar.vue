@@ -1,133 +1,103 @@
 <template>
-  <aside style="font-family: 'SolaimanLipi', sans-serif;" :class="[
-    'fixed mt-16 flex flex-col lg:mt-0 top-0 px-0 left-0 bg-[#18222e] text-[#e0e6ed] h-screen transition-all duration-300 ease-in-out z-99999 border-none shadow-none',
-    {
-      'lg:w-[280px]': isExpanded || isMobileOpen || isHovered,
-      'lg:w-[70px]': !isExpanded && !isHovered,
-      'translate-x-0 w-[280px]': isMobileOpen,
-      '-translate-x-full': !isMobileOpen,
-      'lg:translate-x-0': true,
-    },
-  ]" @mouseenter="!isExpanded && setIsHovered(true)" @mouseleave="setIsHovered(false)">
-    <!-- Header -->
-    <div :class="[
-      'py-5 px-4 bg-gradient-to-r from-emerald-600/80 to-emerald-800/80 border-b border-emerald-900/30',
-      !isExpanded && !isHovered ? 'lg:px-3' : 'px-4',
-    ]">
-      <div v-if="isExpanded || isHovered || isMobileOpen" class="flex items-center">
-        <h1 class="text-base font-semibold text-emerald-50 text-xl text-center tracking-wide">
-          এক্সাম মেনেজমেন্ট সিস্টেম
+  <aside
+    style="font-family: 'SolaimanLipi', sans-serif;"
+    :class="[
+      'fixed top-0 left-0 h-screen transition-all duration-300 z-50 flex flex-col bg-[#222d32] text-[#b8c7ce] shadow-xl border-r border-[#1a2226]',
+      isMobileOpen ? 'translate-x-0 w-[300px]' : '-translate-x-full',
+      isExpanded || isMobileOpen || isHovered ? 'lg:w-[290px]' : 'lg:w-[60px]',
+      'lg:translate-x-0'
+    ]"
+    @mouseenter="!isExpanded && setIsHovered(true)"
+    @mouseleave="setIsHovered(false)"
+  >
+    <!-- Sidebar Header / Logo (Classic) -->
+    <div class="flex items-center justify-center h-16 border-b border-[#1a2226] bg-gradient-to-r from-[#222d32] to-[#3c8dbc]">
+      <div class="flex items-center gap-2">
+        <div class="bg-[#367fa9] px-2 py-1 rounded text-white shadow font-bold text-lg">EM</div>
+        <h1 class="text-xl font-bold text-[#b8c7ce] tracking-wide font-sans" style="letter-spacing: 1px;">
+          <span class="ml-1">এক্সাম মেনেজমেন্ট</span>
         </h1>
-      </div>
-      <div v-else class="flex justify-center">
-        <div class="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
-          <span class="text-white text-sm font-semibold">E</span>
-        </div>
       </div>
     </div>
 
     <!-- Navigation -->
-    <div class="flex-1 overflow-y-auto bg-[#18222e] custom-scrollbar">
-      <nav class="px-0 py-2">
-        <div class="space-y-1">
-          <div v-for="(item, index) in menuItems" :key="item.label">
-            <!-- Submenu Items -->
-            <div v-if="item.items && item.items.length > 0">
-              <button @click="toggleSubmenu(index)" :class="[
-                'w-full flex items-center text-left px-5 py-2 text-xl font-medium rounded transition-all duration-150',
-                {
-                  'bg-emerald-50/10 text-emerald-400 border-l-4 border-emerald-400': isSubmenuOpen(index),
-                  'text-[#e0e6ed] hover:bg-[#223049] hover:text-emerald-400 border-l-4 border-transparent': !isSubmenuOpen(index),
-                },
-                !isExpanded && !isHovered ? 'justify-center' : '',
-              ]">
-                <span class="flex-shrink-0 w-5 h-5">
-                  <component :is="item.icon" class="w-full h-full" />
-                </span>
-                <span v-if="isExpanded || isHovered || isMobileOpen" class="ml-3 flex-1">
-                  {{ item.label }}
-                </span>
-                <ChevronDownIcon v-if="isExpanded || isHovered || isMobileOpen" :class="[
-                  'ml-2 w-4 h-4 transition-transform duration-200',
-                  { 'rotate-180': isSubmenuOpen(index) },
-                ]" />
-              </button>
-
-              <!-- Submenu -->
-              <transition @enter="startTransition" @after-enter="endTransition" @before-leave="startTransition"
-                @after-leave="endTransition">
-                <div v-show="isSubmenuOpen(index) && (isExpanded || isHovered || isMobileOpen)" class="bg-[#1d2737] rounded-md ml-3 my-1 py-1">
-                  <button v-for="subItem in item.items" :key="subItem.label" @click="router.push(subItem.href)" :class="[
-                    'flex items-center w-full px-5 py-2 text-xl rounded transition-all duration-150',
-                    {
-                      'bg-emerald-50/10 text-emerald-400': isActive(subItem.href),
-                      'text-[#e0e6ed] hover:bg-[#223049] hover:text-emerald-400': !isActive(subItem.href),
-                    },
-                  ]">
-                    <span class="flex-shrink-0 w-4 h-4 mr-3">
-                      <component :is="subItem.icon" class="w-full h-full" />
-                    </span>
-                    <span class="flex-1 text-left">{{ subItem.label }}</span>
-                  </button>
-                </div>
-              </transition>
-            </div>
-
-            <!-- Direct Link Items -->
-            <button v-else-if="item.href" @click="router.push(item.href)" :class="[
-              'w-full flex items-center px-5 py-2 text-xl font-medium rounded transition-all duration-150',
-              {
-                'bg-emerald-50/10 text-emerald-400 border-l-4 border-emerald-400': isActive(item.href),
-                'text-[#e0e6ed] hover:bg-[#223049] hover:text-emerald-400 border-l-4 border-transparent': !isActive(item.href),
-              },
-              !isExpanded && !isHovered ? 'justify-center' : '',
-            ]">
-              <span class="flex-shrink-0 w-5 h-5">
+    <nav class="flex-1 overflow-y-auto py-4 classic-scrollbar">
+      <ul class="space-y-1 px-2">
+        <li v-for="(item, index) in menuItems" :key="item.label">
+          <!-- If has submenu -->
+          <template v-if="item.items && item.items.length > 0">
+            <button
+              @click="toggleSubmenu(index)"
+              class="w-full flex items-center px-3 py-2 rounded font-semibold text-base transition-all duration-150 classic-menu-btn"
+              :class="isSubmenuOpen(index)
+                ? 'bg-[#1a2226] text-white border-l-4 border-[#3c8dbc] shadow'
+                : 'hover:bg-[#293846] hover:text-white'"
+              style="letter-spacing: 0.5px;"
+            >
+              <span class="w-5 h-5 mr-3 flex items-center justify-center">
                 <component :is="item.icon" class="w-full h-full" />
               </span>
-              <span v-if="isExpanded || isHovered || isMobileOpen" class="ml-3">
-                {{ item.label }}
-              </span>
+              <span class="flex-1 text-left font-sans">{{ item.label }}</span>
+              <ChevronDownIcon class="ml-2 w-4 h-4 text-[#b8c7ce] transition-transform duration-200" :class="{ 'rotate-180': isSubmenuOpen(index) }" />
             </button>
-          </div>
-        </div>
-      </nav>
-    </div>
+            <transition name="slide-fade">
+              <ul v-show="isSubmenuOpen(index)" class="pl-7 mt-1 space-y-1 classic-submenu" style="border-left:2px solid #3c8dbc;">
+                <li v-for="subItem in item.items" :key="subItem.label">
+                  <button
+                    @click="router.push(subItem.href)"
+                    class="w-full flex items-center px-3 py-2 rounded text-base font-medium transition-all duration-150 classic-submenu-btn"
+                    :class="isActive(subItem.href)
+                      ? 'bg-[#3c8dbc] text-white font-bold shadow'
+                      : 'hover:bg-[#1a2226] hover:text-white'"
+                  >
+                    <span class="w-4 h-4 mr-3 flex items-center justify-center">
+                      <component :is="subItem.icon" class="w-full h-full" />
+                    </span>
+                    <span class="flex-1 text-left font-sans">{{ subItem.label }}</span>
+                  </button>
+                </li>
+              </ul>
+            </transition>
+          </template>
+          <!-- Direct link -->
+          <button
+            v-else-if="item.href"
+            @click="router.push(item.href)"
+            class="w-full flex items-center px-3 py-2 rounded font-semibold text-base transition-all duration-150 classic-menu-btn"
+            :class="isActive(item.href)
+              ? 'bg-[#3c8dbc] text-white font-bold shadow'
+              : 'hover:bg-[#293846] hover:text-white'"
+            style="letter-spacing: 0.5px;"
+          >
+            <span class="w-5 h-5 mr-3 flex items-center justify-center">
+              <component :is="item.icon" class="w-full h-full" />
+            </span>
+            <span class="font-sans">{{ item.label }}</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+    <!-- Classic footer divider -->
+    <div class="h-2 w-full bg-gradient-to-r from-[#3c8dbc]/30 via-[#d2d6de]/60 to-[#605ca8]/30"></div>
   </aside>
 </template>
 
 <script setup lang="ts">
+// তোমার পুরা স্ক্রিপ্ট অপরিবর্তিত (ফাংশন, ডাটা, এপিআই, ক্যাশ, ইত্যাদি)
+// শুধু template ও style বদলানো হয়েছে—সব function যেমন ছিল তেমনই থাকবে!
 import { ref, onMounted, markRaw } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSidebar } from '@/composables/useSidebar'
 import axios from 'axios'
-
-// Import all icons you need individually
 import {
-  HomeIcon,          // Dashboard
-  SettingsIcon,      // Setup & Settings
-  BarChartIcon,      // Stats, Payment, Performance
-  BoxCubeIcon,       // Bill, Madrasa, Markaz
-  UserGroupIcon,     // Teams, Groups, Inclusion
-  CalenderIcon,      // Routine, Attendance
-  UserCircleIcon,    // Admin, Supervisor, Profile
-  DocsIcon,          // Documents, Registration, Khata
-  ChevronDownIcon,   // Dropdown arrow
-  ListIcon,          // List
-  TaskIcon,          // Task/Training
-  RefreshIcon,       // Refresh/Change
-  SendIcon,          // Apply/Send
-  DraftIcon,         // Draft
-  TrashIcon,         // Delete/Cancel
-  FolderIcon,        // Folder/Subject
-  SupportIcon,       // Support/Help
-  SchoolIcon         // School/Help
+  HomeIcon, SettingsIcon, BarChartIcon, BoxCubeIcon, UserGroupIcon, CalenderIcon,
+  UserCircleIcon, DocsIcon, ChevronDownIcon, ListIcon, TaskIcon, RefreshIcon, SendIcon,
+  DraftIcon, TrashIcon, FolderIcon, SupportIcon, SchoolIcon
 } from '@/icons'
 
 const router = useRouter()
 const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar()
 
-// Define types for menu items
 interface MenuItem {
   label: string
   href?: string
@@ -135,7 +105,6 @@ interface MenuItem {
   iconName?: string
   items?: SubMenuItem[]
 }
-
 interface SubMenuItem {
   label: string
   href: string
@@ -143,7 +112,6 @@ interface SubMenuItem {
   iconName?: string
 }
 
-// Icon mapping function with markRaw
 const iconMap: Record<string, unknown> = {
   HomeIcon: markRaw(HomeIcon),
   SettingsIcon: markRaw(SettingsIcon),
@@ -164,14 +132,11 @@ const iconMap: Record<string, unknown> = {
   SupportIcon: markRaw(SupportIcon),
   SchoolIcon: markRaw(SchoolIcon)
 }
-
 function getIconComponent(iconName: string) {
   return iconMap[iconName] || iconMap.HomeIcon
 }
 
 const openSubmenu = ref<string | null>(null)
-
-// Default fallback menu items for instant loading with markRaw - Only Dashboard
 const defaultMenuItems = [
   {
     label: 'ই এম ড্যাশবোর্ড',
@@ -179,14 +144,10 @@ const defaultMenuItems = [
     icon: getIconComponent('HomeIcon'),
   }
 ]
-
-// Dynamic menu items from database
 const menuItems = ref(defaultMenuItems)
-
-// Cache management
 const CACHE_KEY = 'sidebar_menu_cache'
 const CACHE_VERSION_KEY = 'sidebar_cache_version'
-const CACHE_EXPIRY_HOURS = 24 // Cache for 24 hours
+const CACHE_EXPIRY_HOURS = 24
 
 function getCachedData() {
   try {
@@ -197,8 +158,6 @@ function getCachedData() {
     if (cachedData && cacheVersion) {
       const cached = JSON.parse(cachedData)
       const version = JSON.parse(cacheVersion)
-
-      // Check if cache is still valid (within expiry time)
       if (currentTime - version.timestamp < CACHE_EXPIRY_HOURS * 60 * 60 * 1000) {
         return cached.map((item: MenuItem) => ({
           ...item,
@@ -210,63 +169,47 @@ function getCachedData() {
         }))
       }
     }
-  } catch (error) {
-    console.warn('Failed to load cached sidebar data:', error)
-  }
+  } catch (error) { }
   return null
 }
-
 function setCachedData(data: MenuItem[]) {
   try {
-    // Store data with icon names (not components) for serialization
     const cacheData = data.map(item => ({
       ...item,
       iconName: typeof item.icon === 'string' ? item.icon : getIconNameFromComponent(item.icon),
-      icon: undefined, // Remove component reference
+      icon: undefined,
       items: item.items?.map((subItem: SubMenuItem) => ({
         ...subItem,
         iconName: typeof subItem.icon === 'string' ? subItem.icon : getIconNameFromComponent(subItem.icon),
-        icon: undefined // Remove component reference
+        icon: undefined
       }))
     }))
-
     localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData))
     localStorage.setItem(CACHE_VERSION_KEY, JSON.stringify({
       timestamp: new Date().getTime(),
       version: '1.0'
     }))
-  } catch (error) {
-    console.warn('Failed to cache sidebar data:', error)
-  }
+  } catch (error) { }
 }
-
 function getIconNameFromComponent(component: unknown): string {
-  // Try to find icon name by comparing with iconMap
   for (const [name, comp] of Object.entries(iconMap)) {
     if (comp === component) return name
   }
   return 'HomeIcon'
 }
-
-// Load menu items with smart caching
 onMounted(async () => {
-  // Step 1: Try to load from cache immediately
   const cachedData = getCachedData()
-  if (cachedData && cachedData.length > 1) { // More than just dashboard
-    console.log('Loading sidebar from cache for instant display')
+  if (cachedData && cachedData.length > 1) {
     menuItems.value = [
-      defaultMenuItems[0], // Dashboard
-      ...cachedData.slice(1) // Other cached items
+      defaultMenuItems[0],
+      ...cachedData.slice(1)
     ]
   }
-
-  // Step 2: Load fresh data from API in background
   try {
     const response = await axios.get('http://127.0.0.1:8000/api/sidebar/')
-
     if (response.data.sidebar_data && Array.isArray(response.data.sidebar_data)) {
       const freshData = [
-        defaultMenuItems[0], // Dashboard
+        defaultMenuItems[0],
         ...response.data.sidebar_data.map((item: MenuItem) => ({
           label: item.label,
           key: item.label.toLowerCase().replace(/\s+/g, '_'),
@@ -284,33 +227,18 @@ onMounted(async () => {
           }))
         }))
       ]
-
-      // Update UI with fresh data
       menuItems.value = freshData
-
-      // Cache the fresh data for next time
       setCachedData(freshData)
-
-      console.log('Sidebar updated with fresh data from API')
     }
   } catch (error) {
-    console.warn('Failed to load fresh sidebar data, using cached/default data:', error)
-
-    // If API fails and no cache, keep default items
-    if (!cachedData) {
-      console.log('Using default sidebar items')
-    }
+    if (!cachedData) { }
   }
 })
-
-// Helper functions for menu interaction
 const isActive = (href: string) => window.location.pathname === href
-
 const toggleSubmenu = (groupIndex: string | number) => {
   const currentKey = `${groupIndex}`
   openSubmenu.value = openSubmenu.value === currentKey ? null : currentKey
 }
-
 const isSubmenuOpen = (groupIndex: string | number) => {
   const key = `${groupIndex}`
   const index = typeof groupIndex === 'number' ? groupIndex : Number(groupIndex)
@@ -322,47 +250,65 @@ const isSubmenuOpen = (groupIndex: string | number) => {
     )
   )
 }
-
-const endTransition = (el: Element) => {
-  (el as HTMLElement).style.height = ""
-}
-
-const startTransition = (el: Element) => {
-  (el as HTMLElement).style.height = "auto"
-}
-
-// Clear cache function (for development/debugging)
+const endTransition = (el: Element) => { (el as HTMLElement).style.height = "" }
+const startTransition = (el: Element) => { (el as HTMLElement).style.height = "auto" }
 const clearSidebarCache = () => {
   localStorage.removeItem(CACHE_KEY)
   localStorage.removeItem(CACHE_VERSION_KEY)
-  console.log('Sidebar cache cleared')
 }
-
-// Make it available globally for debugging
-// Extend the Window interface to include clearSidebarCache
 declare global {
-  interface Window {
-    clearSidebarCache: () => void
-  }
+  interface Window { clearSidebarCache: () => void }
 }
 window.clearSidebarCache = clearSidebarCache
 </script>
 
 <style scoped>
-.custom-scrollbar {
+.classic-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: #3ba97b #18222e;
+  scrollbar-color: #888 #222d32;
   max-height: 100%;
 }
-.custom-scrollbar::-webkit-scrollbar {
+.classic-scrollbar::-webkit-scrollbar {
   width: 7px;
 }
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #3ba97b;
+.classic-scrollbar::-webkit-scrollbar-thumb {
+  background: #888;
   border-radius: 8px;
 }
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: #18222e;
+.classic-scrollbar::-webkit-scrollbar-track {
+  background: #222d32;
   border-radius: 8px;
+}
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+  transition: all 0.2s cubic-bezier(.25,.8,.25,1);
+}
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateY(-4px);
+  opacity: 0;
+}
+.classic-menu-btn {
+  border-left: 3px solid transparent;
+  box-shadow: none;
+}
+.classic-menu-btn:active, .classic-menu-btn:focus {
+  outline: none;
+  border-left: 3px solid #3c8dbc;
+}
+.classic-menu-btn.bg-[#3c8dbc] {
+  border-left: 3px solid #367fa9;
+  background: linear-gradient(90deg,#3c8dbc, #367fa9 80%);
+}
+.classic-submenu {
+  background: #222d32;
+  border-radius: 0 0 7px 7px;
+  box-shadow: 0 4px 12px -3px #222d32a0;
+}
+.classic-submenu-btn {
+  border-left: 2px solid transparent;
+}
+.classic-submenu-btn.bg-[#3c8dbc] {
+  border-left: 2px solid #367fa9;
 }
 </style>

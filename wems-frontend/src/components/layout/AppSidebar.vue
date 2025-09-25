@@ -1,107 +1,109 @@
 <template>
-  <aside style="font-family: 'SolaimanLipi', sans-serif;" :class="[
-    'fixed flex flex-col lg:mt-0 top-0 px-0 left-0 bg-[#18222e] text-[#e0e6ed] h-screen transition-all duration-300 ease-in-out z-99999 border-none shadow-none',
-    {
-      'lg:w-[280px]': isExpanded || isMobileOpen || isHovered,
-      'lg:w-[70px]': !isExpanded && !isHovered,
-      'translate-x-0 w-[280px]': isMobileOpen,
-      '-translate-x-full': !isMobileOpen,
-      'lg:translate-x-0': true,
-    },
-  ]" @mouseenter="!isExpanded && (isHovered = true)" @mouseleave="isHovered = false">
-    <!-- Header -->
-    <div :class="[
-      'py-5 bg-gradient-to-r from-emerald-600/80 to-emerald-800/80  border-emerald-900/30',
-      !isExpanded && !isHovered ? 'lg:px-3' : 'px-4',
-    ]">
-      <div v-if="isExpanded || isHovered || isMobileOpen" class="flex items-center">
-        <h1 class="text-base font-semibold text-emerald-50 text-xl text-center tracking-wide">
-          মাদরাসা পেনেল
+  <aside
+    style="font-family: 'SolaimanLipi', sans-serif;"
+    :class="[
+      'fixed flex flex-col top-0 left-0 h-screen transition-all duration-300 z-50 bg-[#222d32] text-[#b8c7ce] shadow-xl border-r border-[#1a2226]',
+  isMobileOpen ? 'translate-x-0 w-[300px]' : '-translate-x-full',
+  isExpanded || isMobileOpen || isHovered ? 'lg:w-[290px]' : 'lg:w-[60px]',
+      'lg:translate-x-0'
+    ]"
+    @mouseenter="!isExpanded && (isHovered = true)"
+    @mouseleave="isHovered = false"
+  >
+    <!-- Sidebar Header / Logo -->
+    <div class="flex items-center justify-center h-16 border-b border-[#1a2226] bg-gradient-to-r from-[#222d32] to-[#294358] px-3">
+      <template v-if="isExpanded || isHovered || isMobileOpen">
+        <h1 class="text-xl font-extrabold text-[#b8c7ce] tracking-wide font-sans" style="letter-spacing: 1px;">
+
+          <span class="ml-2">মাদরাসা</span>
         </h1>
-      </div>
-      <div v-else class="flex justify-center">
-        <div class="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
-          <span class="text-white text-sm font-semibold">M</span>
+      </template>
+      <template v-else>
+        <div class="w-10 h-10 bg-[#3c8dbc] rounded-lg flex items-center justify-center border-2 border-white/30 shadow-inner">
+          <span class="text-white text-lg font-extrabold">M</span>
         </div>
-      </div>
+      </template>
     </div>
 
     <!-- Navigation -->
-    <div class="flex-1 overflow-y-auto bg-[#18222e] custom-scrollbar">
-      <nav class="px-0 py-2">
-        <div class="space-y-1">
-          <div v-for="(item, index) in menuItems" :key="item.label">
+    <div class="flex-1 overflow-y-auto bg-[#222d32] classic-scrollbar">
+      <nav class="py-4">
+        <ul class="space-y-1 px-2">
+          <li v-for="(item, index) in menuItems" :key="item.label">
             <!-- Submenu Items -->
-            <div v-if="item.items">
-              <button @click="toggleSubmenu(index)" :class="[
-                'w-full flex items-center text-left px-5 py-2 text-xl font-medium rounded transition-all duration-150',
-                {
-                  'bg-emerald-50/10 text-emerald-400 border-l-4 border-emerald-400': isSubmenuOpen(index),
-                  'text-[#e0e6ed] hover:bg-[#223049] hover:text-emerald-400 border-l-4 border-transparent': !isSubmenuOpen(index),
-                },
-                !isExpanded && !isHovered ? 'justify-center' : '',
-              ]">
-                <span class="flex-shrink-0 w-5 h-5">
+            <template v-if="item.items">
+              <button
+                @click="toggleSubmenu(index)"
+                :class="[
+                  'w-full flex items-center text-left px-3 py-2 rounded font-semibold transition-all duration-150 group classic-menu-btn',
+                  isSubmenuOpen(index)
+                    ? 'bg-[#1a2226] text-[#f4f6f9] border-l-4 border-[#3c8dbc] shadow'
+                    : 'hover:bg-[#293846] hover:text-white',
+                  !isExpanded && !isHovered ? 'justify-center' : ''
+                ]"
+                style="letter-spacing: 0.5px;"
+              >
+                <span class="w-5 h-5 mr-3 flex items-center justify-center">
                   <component :is="item.icon" class="w-full h-full" />
                 </span>
-                <span v-if="isExpanded || isHovered || isMobileOpen" class="ml-3 flex-1">
-                  {{ item.label }}
-                </span>
-                <ChevronDownIcon v-if="isExpanded || isHovered || isMobileOpen" :class="[
-                  'ml-2 w-4 h-4 transition-transform duration-200',
-                  { 'rotate-180': isSubmenuOpen(index) },
-                ]" />
+                <span v-if="isExpanded || isHovered || isMobileOpen" class="flex-1 text-left font-sans">{{ item.label }}</span>
+                <ChevronDownIcon
+                  v-if="isExpanded || isHovered || isMobileOpen"
+                  class="ml-2 w-4 h-4 text-[#b8c7ce] transition-transform"
+                  :class="{ 'rotate-180': isSubmenuOpen(index) }"
+                />
               </button>
-
-              <!-- Submenu -->
-              <transition @enter="startTransition" @after-enter="endTransition" @before-leave="startTransition"
-                @after-leave="endTransition">
-                <div v-show="isSubmenuOpen(index) && (isExpanded || isHovered || isMobileOpen)"
-                  class="bg-[#1d2737] rounded-md ml-3 my-1 py-1">
-                  <router-link v-for="subItem in item.items" :key="subItem.label" :to="subItem.to" :class="[
-                    'flex items-center w-full px-5 py-2 text-xl rounded transition-all duration-150',
-                    {
-                      'bg-emerald-50/10 text-emerald-400': isActive(subItem.to),
-                      'text-[#e0e6ed] hover:bg-[#223049] hover:text-emerald-400': !isActive(subItem.to),
-                    },
-                  ]">
-                    <span class="flex-shrink-0 w-4 h-4 mr-3">
-                      <component :is="subItem.icon" class="w-full h-full" />
-                    </span>
-                    <span class="flex-1 text-left">{{ subItem.label }}</span>
-                    <div class="flex items-center gap-1">
-                      <span v-if="subItem.new"
-                        class="px-1.5 py-0.5 text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 rounded-full">
-                        new
+              <transition name="slide-fade">
+                <ul
+                  v-show="isSubmenuOpen(index) && (isExpanded || isHovered || isMobileOpen)"
+                  class="pl-8 mt-2 space-y-1 classic-submenu"
+                  style="border-left:2px solid #3c8dbc;"
+                >
+                  <li v-for="subItem in item.items" :key="subItem.label">
+                    <router-link
+                      :to="subItem.to"
+                      :class="[
+                        'flex items-center px-3 py-2 rounded font-medium transition-all duration-150 classic-submenu-btn',
+                        isActive(subItem.to)
+                          ? 'bg-[#3c8dbc] text-white font-bold shadow'
+                          : 'hover:bg-[#1a2226] hover:text-white'
+                      ]"
+                    >
+                      <span class="w-4 h-4 mr-3 flex items-center justify-center">
+                        <component :is="subItem.icon" class="w-full h-full" />
                       </span>
-                      <span v-if="subItem.pro"
-                        class="px-1.5 py-0.5 text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300 rounded-full">
-                        pro
-                      </span>
-                    </div>
-                  </router-link>
-                </div>
+                      <span class="flex-1 text-left font-sans">{{ subItem.label }}</span>
+                      <div class="flex items-center gap-1">
+                        <span v-if="subItem.new"
+                          class="px-2 py-1 text-xs font-bold bg-[#00a65a] text-white rounded-full">NEW</span>
+                        <span v-if="subItem.pro"
+                          class="px-2 py-1 text-xs font-bold bg-[#f39c12] text-white rounded-full">PRO</span>
+                      </div>
+                    </router-link>
+                  </li>
+                </ul>
               </transition>
-            </div>
-
+            </template>
             <!-- Direct Link Items -->
-            <router-link v-else-if="item.to" :to="item.to" :class="[
-              'w-full flex items-center px-5 py-2 text-xl font-medium rounded transition-all duration-150',
-              {
-                'bg-emerald-50/10 text-emerald-400 border-l-4 border-emerald-400': isActive(item.to),
-                'text-[#e0e6ed] hover:bg-[#223049] hover:text-emerald-400 border-l-4 border-transparent': !isActive(item.to),
-              },
-              !isExpanded && !isHovered ? 'justify-center' : '',
-            ]">
-              <span class="flex-shrink-0 w-5 h-5">
+            <router-link
+              v-else-if="item.to"
+              :to="item.to"
+              :class="[
+                'w-full flex items-center px-3 py-2 rounded font-semibold transition-all duration-150 classic-menu-btn',
+                isActive(item.to)
+                  ? 'bg-[#3c8dbc] text-white font-bold shadow'
+                  : 'hover:bg-[#293846] hover:text-white',
+                !isExpanded && !isHovered ? 'justify-center' : ''
+              ]"
+              style="letter-spacing: 0.5px;"
+            >
+              <span class="w-5 h-5 mr-3 flex items-center justify-center">
                 <component :is="item.icon" class="w-full h-full" />
               </span>
-              <span v-if="isExpanded || isHovered || isMobileOpen" class="ml-3">
-                {{ item.label }}
-              </span>
+              <span v-if="isExpanded || isHovered || isMobileOpen" class="font-sans">{{ item.label }}</span>
             </router-link>
-          </div>
-        </div>
+          </li>
+        </ul>
       </nav>
     </div>
   </aside>
@@ -110,7 +112,6 @@
 <script setup lang="ts">
 import { type Component, markRaw } from "vue";
 import { useRoute } from "vue-router";
-
 import {
   CalenderIcon,
   UserCircleIcon,
@@ -135,7 +136,6 @@ import {
 import { useSidebar } from "@/composables/useSidebar";
 
 const route = useRoute();
-
 const { isExpanded, isMobileOpen, isHovered, openSubmenu } = useSidebar();
 
 type SubMenuItem = {
@@ -154,6 +154,7 @@ type MenuItem = {
   items?: SubMenuItem[];
 };
 
+// --- Full Menu Data ---
 const menuItems: MenuItem[] = [
   {
     label: 'ড্যাশবোর্ড',
@@ -289,17 +290,13 @@ const menuItems: MenuItem[] = [
 
 const isActive = (path: string) => route.path === path;
 
-// Fixed toggleSubmenu function - now only takes groupIndex
 const toggleSubmenu = (groupIndex: number) => {
   const currentKey = `${groupIndex}`;
-  // If clicking on the same submenu, close it; otherwise open the new one
   openSubmenu.value = openSubmenu.value === currentKey ? null : currentKey;
 };
 
-// Fixed isSubmenuOpen function
 const isSubmenuOpen = (groupIndex: number) => {
   const key = `${groupIndex}`;
-  // Check if submenu is open or any subItem is active
   return (
     openSubmenu.value === key ||
     (
@@ -312,30 +309,61 @@ const isSubmenuOpen = (groupIndex: number) => {
 const endTransition = (el: Element) => {
   (el as HTMLElement).style.height = "";
 };
-
 const startTransition = (el: Element) => {
   (el as HTMLElement).style.height = "auto";
 };
 </script>
 
 <style scoped>
-.custom-scrollbar {
+.classic-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: #3ba97b #18222e;
+  scrollbar-color: #888 #222d32;
   max-height: 100%;
 }
-
-.custom-scrollbar::-webkit-scrollbar {
+.classic-scrollbar::-webkit-scrollbar {
   width: 7px;
 }
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #3ba97b;
+.classic-scrollbar::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 8px;
+}
+.classic-scrollbar::-webkit-scrollbar-track {
+  background: #222d32;
   border-radius: 8px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: #18222e;
-  border-radius: 8px;
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+  transition: all 0.18s cubic-bezier(.25,.8,.25,1);
+}
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateY(-4px);
+  opacity: 0;
+}
+
+.classic-menu-btn {
+  border-left: 3px solid transparent;
+  box-shadow: none;
+}
+.classic-menu-btn:active, .classic-menu-btn:focus {
+  outline: none;
+  border-left: 3px solid #3c8dbc;
+}
+.classic-menu-btn.bg-[#3c8dbc] {
+  border-left: 3px solid #367fa9;
+  background: linear-gradient(90deg,#3c8dbc, #367fa9 80%);
+}
+
+.classic-submenu {
+  background: #222d32;
+  border-radius: 0 0 7px 7px;
+  box-shadow: 0 4px 12px -3px #222d32a0;
+}
+.classic-submenu-btn {
+  border-left: 2px solid transparent;
+}
+.classic-submenu-btn.bg-[#3c8dbc] {
+  border-left: 2px solid #367fa9;
 }
 </style>

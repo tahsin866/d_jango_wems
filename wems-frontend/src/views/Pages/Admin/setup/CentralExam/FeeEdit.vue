@@ -1,46 +1,44 @@
 <template>
-
-  <div style="font-family: 'SolaimanLipi', sans-serif;"
-    class="py-6 px-4 md:px-6 lg:px-8 bg-gradient-to-br from-gray-50 to-emerald-50 min-h-screen">
+  <div style="font-family: 'SolaimanLipi', sans-serif;" class="py-6 px-4 md:px-6 lg:px-8 bg-[#f4f6f9] min-h-screen">
     <!-- Header Dashboard Card -->
-    <div class="mb-6 bg-white rounded-sm shadow-md overflow-hidden border border-emerald-100">
-      <div class="px-6 py-5 bg-gradient-to-r from-emerald-600 to-teal-500 text-white">
+    <div class="mb-6 bg-white rounded shadow-lg overflow-hidden border border-[#d2d6de]">
+      <div class="px-6 py-5 bg-gradient-to-r from-[#3c8dbc] to-[#367fa9] text-white">
         <div class="flex items-center justify-between">
           <div class="flex items-center">
             <div class="bg-white/20 p-2.5 rounded-lg mr-4">
-              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
             </div>
             <div>
               <h1 class="text-xl font-bold leading-tight">পরীক্ষা ফি সেটাপ</h1>
-              <p class="text-lg text-emerald-100">{{ formattedTitle }}</p>
+              <p class="text-lg text-[#f9e79f]">{{ formattedTitle }}</p>
             </div>
           </div>
           <div class="hidden md:flex items-center space-x-4">
-            <div class="bg-white/10 px-3 py-1.5 rounded-lg text-lg">
+            <div class="bg-white/10 px-3 py-1.5 rounded text-base">
               <span class="opacity-80">তারিখ:</span> {{ getCurrentDate() }}
             </div>
-            <div class="bg-white/10 px-3 py-1.5 rounded-lg text-lg">
+            <div class="bg-white/10 px-3 py-1.5 rounded text-base">
               <span class="opacity-80">সময়:</span> {{ getCurrentTime() }}
             </div>
           </div>
         </div>
       </div>
 
-      <div class="p-5 bg-emerald-50/50 border-b border-emerald-100">
+      <div class="p-5 bg-[#f4f6f9] border-b border-[#d2d6de]">
         <div class="flex flex-wrap items-center justify-between gap-4">
           <div class="flex items-center gap-4">
-            <div class="px-4 py-2 bg-white rounded-lg shadow-sm border border-emerald-100">
+            <div class="px-4 py-2 bg-white rounded shadow border border-[#d2d6de]">
               <div class="text-xs text-gray-500">মোট মারহালা</div>
               <div class="text-lg font-bold text-gray-800">{{ rows.length }}</div>
             </div>
-            <div class="px-4 py-2 bg-white rounded-lg shadow-sm border border-emerald-100">
+            <div class="px-4 py-2 bg-white rounded shadow border border-[#d2d6de]">
               <div class="text-xs text-gray-500">কেন্দ্রীয় পরীক্ষা</div>
               <div class="text-lg font-bold text-gray-800">{{ examSetup?.exam_name || 'N/A' }}</div>
             </div>
-            <div class="px-4 py-2 bg-white rounded-lg shadow-sm border border-emerald-100">
+            <div class="px-4 py-2 bg-white rounded shadow border border-[#d2d6de]">
               <div class="text-xs text-gray-500">শিক্ষাবর্ষ</div>
               <div class="text-lg font-bold text-gray-800">{{ examSetup?.english_year || 'N/A' }} ইসাব্দ</div>
             </div>
@@ -48,7 +46,7 @@
 
           <div class="flex flex-wrap gap-3">
             <button @click="downloadExcel"
-              class="flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-700 hover:bg-emerald-100 transition duration-150">
+              class="flex items-center gap-2 px-4 py-2 bg-[#e9ecef] border border-[#d2d6de] rounded text-[#367fa9] hover:bg-[#d9edf7] transition duration-150">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -57,7 +55,7 @@
               এক্সেল ডাউনলোড
             </button>
             <button @click="toggleExpand"
-              class="flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 hover:bg-blue-100 transition duration-150">
+              class="flex items-center gap-2 px-4 py-2 bg-[#e9ecef] border border-[#d2d6de] rounded text-[#222d32] hover:bg-[#d9edf7] transition duration-150">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
                 <path v-if="expandAll" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -74,24 +72,24 @@
     <!-- Fee Setup Cards -->
     <div class="grid grid-cols-1 gap-6">
       <div v-for="(row, index) in rows" :key="index"
-        class="bg-white rounded-sm shadow-md overflow-hidden border border-emerald-100 transition-all duration-300"
-        :class="{ 'ring-2 ring-emerald-300': expandedCards[index] }">
+        class="bg-white rounded shadow border border-[#d2d6de] transition-all duration-300"
+        :class="{ 'ring-2 ring-[#3c8dbc]': expandedCards[index] }">
         <!-- Card Header -->
         <div @click="toggleCard(index)"
           class="flex items-center justify-between px-6 py-4 cursor-pointer bg-gradient-to-r"
-          :class="expandedCards[index] ? 'from-emerald-50 to-emerald-100 border-b border-emerald-200' : 'from-white to-gray-50'">
+          :class="expandedCards[index] ? 'from-[#ecf0f1] to-[#e9ecef] border-b border-[#d2d6de]' : 'from-white to-[#f4f6f9]'">
           <div class="flex items-center space-x-4">
             <div
-              class="h-10 w-10 flex items-center justify-center rounded-full bg-emerald-100 text-emerald-700 font-bold text-lg">
+              class="h-10 w-10 flex items-center justify-center rounded-full bg-[#d2d6de] text-[#222d32] font-bold text-lg">
               {{ index + 1 }}
             </div>
-        <div>
+            <div>
               <h3 class="text-lg font-bold text-gray-800">{{ row.examName }}</h3>
               <p class="text-lg text-gray-500">{{ row.examName }}</p>
             </div>
           </div>
           <div class="flex items-center gap-3">
-            <div v-if="isCardFilled(row)" class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs">
+            <div v-if="isCardFilled(row)" class="px-3 py-1 rounded-full bg-[#00a65a]/10 text-[#00a65a] text-xs font-bold">
               <span class="flex items-center gap-1">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24"
                   stroke="currentColor">
@@ -110,16 +108,16 @@
         <!-- Card Body (Collapsible) -->
         <div v-show="expandedCards[index]" class="p-6 bg-white">
           <!-- Tabs -->
-          <div class="border-b border-gray-200 mb-6">
+          <div class="border-b border-[#d2d6de] mb-6">
             <div class="flex -mb-px">
               <button @click="activeTab[index] = 'regular'"
-                class="px-4 py-2 font-medium text-lg border-b-2 transition-colors duration-200 mr-4"
-                :class="activeTab[index] === 'regular' ? 'border-emerald-500 text-emerald-600' : 'border-transparent text-gray-500 hover:text-gray-700'">
+                class="px-4 py-2 font-semibold text-base border-b-2 transition-colors duration-200 mr-4"
+                :class="activeTab[index] === 'regular' ? 'border-[#3c8dbc] text-[#3c8dbc]' : 'border-transparent text-gray-500 hover:text-gray-700'">
                 নিয়মিত ফি
               </button>
               <button @click="activeTab[index] = 'late'"
-                class="px-4 py-2 font-medium text-lg border-b-2 transition-colors duration-200"
-                :class="activeTab[index] === 'late' ? 'border-emerald-500 text-emerald-600' : 'border-transparent text-gray-500 hover:text-gray-700'">
+                class="px-4 py-2 font-semibold text-base border-b-2 transition-colors duration-200"
+                :class="activeTab[index] === 'late' ? 'border-[#f39c12] text-[#f39c12]' : 'border-transparent text-gray-500 hover:text-gray-700'">
                 বিলম্ব ফি
               </button>
             </div>
@@ -129,110 +127,64 @@
           <div v-if="activeTab[index] === 'regular'">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <!-- Date Range -->
-              <div class="bg-gray-50 p-4 rounded-lg">
-                <h4 class="text-lg font-medium text-gray-700 mb-4 flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-emerald-600" fill="none"
+              <div class="bg-[#f4f6f9] p-4 rounded-lg">
+                <h4 class="text-base font-semibold text-gray-700 mb-4 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-[#3c8dbc]" fill="none"
                     viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                   নিবন্ধন সময়সীমা
                 </h4>
-
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label class="block text-xs text-gray-500 mb-1">শুরুর তারিখ</label>
                     <div class="relative">
                       <input type="date" v-model="row.dateFrom1"
-                        class="block w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
+                        class="block w-full border border-[#d2d6de] rounded-md py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#3c8dbc] focus:border-[#3c8dbc]" />
                     </div>
                   </div>
-
                   <div>
                     <label class="block text-xs text-gray-500 mb-1">শেষের তারিখ</label>
                     <div class="relative">
                       <input type="date" v-model="row.dateTo1"
-                        class="block w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
+                        class="block w-full border border-[#d2d6de] rounded-md py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#3c8dbc] focus:border-[#3c8dbc]" />
                     </div>
                   </div>
                 </div>
-
                 <div class="text-xs text-gray-500 mt-3 flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1 text-amber-500" fill="none"
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1 text-[#f39c12]" fill="none"
                     viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   নিবন্ধন কাল:
-                  <span class="ml-1 font-medium text-emerald-700">
+                  <span class="ml-1 font-semibold text-[#3c8dbc]">
                     {{ calculateDateDifference(row.dateFrom1, row.dateTo1) }}
                   </span>
                 </div>
               </div>
 
               <!-- Fee Inputs -->
-              <div class="bg-gray-50 p-4 rounded-lg">
-                <h4 class="text-lg font-medium text-gray-700 mb-4 flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-emerald-600" fill="none"
+              <div class="bg-[#f4f6f9] p-4 rounded-lg">
+                <h4 class="text-base font-semibold text-gray-700 mb-4 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-[#3c8dbc]" fill="none"
                     viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   নিবন্ধন ফি
                 </h4>
-
                 <div class="space-y-4">
-                  <div class="flex items-center">
-                    <div class="w-36 text-lg text-gray-700">নিয়মিত ফি:</div>
+                  <div v-for="(label, key) in regularFeeLabels" :key="key" class="flex items-center">
+                    <div class="w-44 text-base text-gray-700">{{ label }}</div>
                     <div class="flex-1">
                       <div class="relative rounded-md">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <span class="text-gray-500 sm:text-lg">৳</span>
+                          <span class="text-gray-500 sm:text-base">৳</span>
                         </div>
-                        <input type="number" v-model="row.fee1"
-                          class="block w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                          placeholder="0.00" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="flex items-center">
-                    <div class="w-36 text-lg text-gray-700">অনিয়মিত (যেমনি):</div>
-                    <div class="flex-1">
-                      <div class="relative rounded-md">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <span class="text-gray-500 sm:text-lg">৳</span>
-                        </div>
-                        <input type="number" v-model="row.invest1Men"
-                          class="block w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                          placeholder="0.00" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="flex items-center">
-                    <div class="w-36 text-lg text-gray-700">অনিয়মিত (মানোন্নয়ন):</div>
-                    <div class="flex-1">
-                      <div class="relative rounded-md">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <span class="text-gray-500 sm:text-lg">৳</span>
-                        </div>
-                        <input type="number" v-model="row.invest1Madan"
-                          class="block w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                          placeholder="0.00" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="flex items-center">
-                    <div class="w-36 text-lg text-gray-700">অনিয়মিত (অন্যান্য):</div>
-                    <div class="flex-1">
-                      <div class="relative rounded-md">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <span class="text-gray-500 sm:text-lg">৳</span>
-                        </div>
-                        <input type="number" v-model="row.invest1Others"
-                          class="block w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                        <input type="number" v-model="row[key]"
+                          class="block w-full pl-8 pr-3 py-2 border border-[#d2d6de] rounded-md text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#3c8dbc] focus:border-[#3c8dbc]"
                           placeholder="0.00" />
                       </div>
                     </div>
@@ -246,110 +198,64 @@
           <div v-if="activeTab[index] === 'late'">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <!-- Date Range -->
-              <div class="bg-gray-50 p-4 rounded-lg">
-                <h4 class="text-lg font-medium text-gray-700 mb-4 flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-amber-600" fill="none"
+              <div class="bg-[#f4f6f9] p-4 rounded-lg">
+                <h4 class="text-base font-semibold text-gray-700 mb-4 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-[#f39c12]" fill="none"
                     viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   বিলম্ব ফি সময়সীমা
                 </h4>
-
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label class="block text-xs text-gray-500 mb-1">শুরুর তারিখ</label>
                     <div class="relative">
                       <input type="date" v-model="row.dateFrom2"
-                        class="block w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500" />
+                        class="block w-full border border-[#d2d6de] rounded-md py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#f39c12] focus:border-[#f39c12]" />
                     </div>
                   </div>
-
                   <div>
                     <label class="block text-xs text-gray-500 mb-1">শেষের তারিখ</label>
                     <div class="relative">
                       <input type="date" v-model="row.dateTo2"
-                        class="block w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500" />
+                        class="block w-full border border-[#d2d6de] rounded-md py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#f39c12] focus:border-[#f39c12]" />
                     </div>
                   </div>
                 </div>
-
                 <div class="text-xs text-gray-500 mt-3 flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1 text-amber-500" fill="none"
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1 text-[#f39c12]" fill="none"
                     viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   বিলম্ব কাল:
-                  <span class="ml-1 font-medium text-amber-700">
+                  <span class="ml-1 font-semibold text-[#f39c12]">
                     {{ calculateDateDifference(row.dateFrom2, row.dateTo2) }}
                   </span>
                 </div>
               </div>
 
               <!-- Fee Inputs -->
-              <div class="bg-gray-50 p-4 rounded-lg">
-                <h4 class="text-lg font-medium text-gray-700 mb-4 flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-amber-600" fill="none"
+              <div class="bg-[#f4f6f9] p-4 rounded-lg">
+                <h4 class="text-base font-semibold text-gray-700 mb-4 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-[#f39c12]" fill="none"
                     viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   বিলম্ব ফি
                 </h4>
-
                 <div class="space-y-4">
-                  <div class="flex items-center">
-                    <div class="w-36 text-lg text-gray-700">নিয়মিত ফি:</div>
+                  <div v-for="(label, key) in lateFeeLabels" :key="key" class="flex items-center">
+                    <div class="w-44 text-base text-gray-700">{{ label }}</div>
                     <div class="flex-1">
                       <div class="relative rounded-md">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <span class="text-gray-500 sm:text-lg">৳</span>
+                          <span class="text-gray-500 sm:text-base">৳</span>
                         </div>
-                        <input type="number" v-model="row.fee2"
-                          class="block w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                          placeholder="0.00" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="flex items-center">
-                    <div class="w-36 text-lg text-gray-700">অনিয়মিত (যেমনি):</div>
-                    <div class="flex-1">
-                      <div class="relative rounded-md">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <span class="text-gray-500 sm:text-lg">৳</span>
-                        </div>
-                        <input type="number" v-model="row.invest2Men"
-                          class="block w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                          placeholder="0.00" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="flex items-center">
-                    <div class="w-36 text-lg text-gray-700">অনিয়মিত (মানোন্নয়ন):</div>
-                    <div class="flex-1">
-                      <div class="relative rounded-md">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <span class="text-gray-500 sm:text-lg">৳</span>
-                        </div>
-                        <input type="number" v-model="row.invest2Madan"
-                          class="block w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                          placeholder="0.00" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="flex items-center">
-                    <div class="w-36 text-lg text-gray-700">অনিয়মিত (অন্যান্য):</div>
-                    <div class="flex-1">
-                      <div class="relative rounded-md">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <span class="text-gray-500 sm:text-lg">৳</span>
-                        </div>
-                        <input type="number" v-model="row.invest2Others"
-                          class="block w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                        <input type="number" v-model="row[key]"
+                          class="block w-full pl-8 pr-3 py-2 border border-[#d2d6de] rounded-md text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#f39c12] focus:border-[#f39c12]"
                           placeholder="0.00" />
                       </div>
                     </div>
@@ -360,29 +266,27 @@
           </div>
 
           <!-- Summary and Extra Actions -->
-          <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+          <div class="mt-6 p-4 bg-[#f4f6f9] rounded-lg">
             <div class="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <h4 class="text-lg font-medium text-gray-700 flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-blue-600" fill="none"
+                <h4 class="text-base font-semibold text-gray-700 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-[#605ca8]" fill="none"
                     viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                   ফি সারসংক্ষেপ
                 </h4>
-                <div class="mt-2 grid grid-cols-2 gap-x-8 gap-y-1 text-lg">
+                <div class="mt-2 grid grid-cols-2 gap-x-8 gap-y-1 text-base">
                   <div class="text-gray-500">নিয়মিত ফি:</div>
                   <div class="text-gray-700 font-medium">৳ {{ formatAmount(row.fee1) }}</div>
-
                   <div class="text-gray-500">বিলম্ব ফি:</div>
                   <div class="text-gray-700 font-medium">৳ {{ formatAmount(row.fee2) }}</div>
                 </div>
               </div>
-
               <div class="flex gap-2">
                 <button @click="copyToAllCards(row)"
-                  class="inline-flex items-center px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 hover:bg-blue-100 transition duration-150 text-lg">
+                  class="inline-flex items-center px-3 py-1.5 bg-[#d9edf7] border border-[#bce8f1] rounded text-[#367fa9] hover:bg-[#e9ecef] transition duration-150 text-base">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -391,7 +295,7 @@
                   সব কার্ডে কপি করুন
                 </button>
                 <button @click="resetSingleCard(index)"
-                  class="inline-flex items-center px-3 py-1.5 bg-red-50 border border-red-200 rounded-lg text-red-700 hover:bg-red-100 transition duration-150 text-lg">
+                  class="inline-flex items-center px-3 py-1.5 bg-[#f2dede] border border-[#ebcccc] rounded text-[#a94442] hover:bg-[#f9e7e7] transition duration-150 text-base">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -407,10 +311,10 @@
     </div>
 
     <!-- Submit Button - Fixed at Bottom -->
-    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex justify-end shadow-lg z-10">
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-[#d2d6de] p-4 flex justify-end shadow-lg z-10">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex justify-between items-center">
         <div class="flex items-center">
-          <div class="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-lg flex items-center">
+          <div class="bg-[#d9edf7] text-[#367fa9] px-3 py-1 rounded-full text-base flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24"
               stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -423,7 +327,7 @@
 
         <div class="flex gap-3">
           <button @click="resetForm"
-            class="inline-flex items-center px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition duration-150">
+            class="inline-flex items-center px-4 py-2.5 bg-white border border-[#d2d6de] rounded text-[#222d32] hover:bg-[#f4f6f9] transition duration-150">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
               stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -432,7 +336,7 @@
             সব রিসেট করুন
           </button>
           <button @click="updateAllFees"
-            class="inline-flex items-center px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-500 border border-transparent rounded-lg text-white hover:from-emerald-700 hover:to-teal-600 focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition duration-150 shadow-md">
+            class="inline-flex items-center px-4 py-2.5 bg-gradient-to-r from-[#3c8dbc] to-[#367fa9] border border-transparent rounded text-white hover:from-[#367fa9] hover:to-[#3c8dbc] focus:ring-2 focus:ring-offset-2 focus:ring-[#3c8dbc] transition duration-150 shadow-lg">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
               stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -443,16 +347,27 @@
       </div>
     </div>
   </div>
-
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 
-// ---------------------------
+// Fee label mapping for classic style, no green
+const regularFeeLabels = {
+  fee1: 'নিয়মিত ফি',
+  invest1Men: 'অনিয়মিত (যেমনি)',
+  invest1Madan: 'অনিয়মিত (মানোন্নয়ন)',
+  invest1Others: 'অনিয়মিত (অন্যান্য)'
+}
+const lateFeeLabels = {
+  fee2: 'নিয়মিত ফি',
+  invest2Men: 'অনিয়মিত (যেমনি)',
+  invest2Madan: 'অনিয়মিত (মানোন্নয়ন)',
+  invest2Others: 'অনিয়মিত (অন্যান্য)'
+}
+
 // Types
-// ---------------------------
 type ExamSetup = {
   id: number
   exam_name: string
@@ -476,12 +391,10 @@ type FeeRow = {
   invest2Men: number | null
   invest2Madan: number | null
   invest2Others: number | null
-  id?: number // future update-এর জন্য
+  id?: number
 }
 
-// ---------------------------
 // State
-// ---------------------------
 const examSetup = ref<ExamSetup | null>({
   id: 1,
   exam_name: '৪৬ তম কেন্দ্রীয় পরীক্ষা',
@@ -490,7 +403,7 @@ const examSetup = ref<ExamSetup | null>({
   english_year: '২০২৫'
 })
 
-const rows = ref<FeeRow[]>([]) // Initial rows will be set dynamically
+const rows = ref<FeeRow[]>([])
 const expandedCards = ref<{ [key: number]: boolean }>({ 0: true })
 const activeTab = ref<{ [key: number]: string }>({ 0: 'regular' })
 const expandAll = ref<boolean>(false)
@@ -498,66 +411,50 @@ const expandAll = ref<boolean>(false)
 const marhalaNames = ref<string[]>([])
 const marhalaList = ref<{ id: number, name: string }[]>([])
 
-// ---------------------------
 // Computed
-// ---------------------------
 const formattedTitle = computed(() => {
   if (!examSetup.value) return ''
   return `${examSetup.value.exam_name} ${examSetup.value.arabic_year} হিজরি/${examSetup.value.bangla_year} বঙ্গাব্দ/${examSetup.value.english_year} ইসাব্দ`
 })
 
-// ---------------------------
 // Utils
-// ---------------------------
 const getCurrentDate = () => {
   const date = new Date()
   return date.toLocaleDateString('bn-BD', { year: 'numeric', month: 'long', day: 'numeric' })
 }
-
 const getCurrentTime = () => {
   const date = new Date()
   return date.toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' })
 }
-
 function isCardFilled(row: FeeRow): boolean {
   return !!(row.dateFrom1 && row.dateTo1 && row.fee1 &&
             row.dateFrom2 && row.dateTo2 && row.fee2)
 }
-
 function filledCards(): number {
   return rows.value.filter(row => isCardFilled(row)).length
 }
-
 function formatAmount(amount: number | null): string {
   if (!amount) return '0'
   return new Intl.NumberFormat('bn-BD').format(amount)
 }
-
 function calculateDateDifference(start: string | null, end: string | null): string {
   if (!start || !end) return 'নির্ধারিত নয়'
-
   const startDate = new Date(start)
   const endDate = new Date(end)
-
   if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return 'অবৈধ তারিখ'
   if (endDate < startDate) return 'অবৈধ সময়কাল'
-
   const diffTime = Math.abs(endDate.getTime() - startDate.getTime())
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-
   return `${diffDays} দিন`
 }
 
-// ---------------------------
 // Actions
-// ---------------------------
 function toggleCard(index: number) {
   expandedCards.value[index] = !expandedCards.value[index]
   if (!activeTab.value[index]) {
     activeTab.value[index] = 'regular'
   }
 }
-
 function toggleExpand() {
   expandAll.value = !expandAll.value
   rows.value.forEach((_, index) => {
@@ -567,7 +464,6 @@ function toggleExpand() {
     }
   })
 }
-
 function copyToAllCards(sourceRow: FeeRow) {
   if (confirm('আপনি কি নিশ্চিত যে এই কার্ডের ডাটা সমস্ত কার্ডে কপি করতে চান?')) {
     rows.value = rows.value.map(row => ({
@@ -587,7 +483,6 @@ function copyToAllCards(sourceRow: FeeRow) {
     }))
   }
 }
-
 function resetSingleCard(index: number) {
   if (confirm('আপনি কি নিশ্চিত যে এই কার্ডের ডাটা রিসেট করতে চান?')) {
     rows.value[index] = {
@@ -607,7 +502,6 @@ function resetSingleCard(index: number) {
     }
   }
 }
-
 function resetForm() {
   if (confirm('আপনি কি নিশ্চিত যে সমস্ত ডাটা রিসেট করতে চান?')) {
     rows.value = rows.value.map(row => ({
@@ -629,14 +523,11 @@ function resetForm() {
     activeTab.value = { 0: 'regular' }
   }
 }
-
 function downloadExcel() {
   alert('এক্সেল ডাউনলোড ফাংশন বাস্তবায়ন করা হবে।')
 }
 
-// ---------------------------
 // API Calls
-// ---------------------------
 const fetchMarhalaNames = async () => {
   const response = await axios.get('http://127.0.0.1:8000/api/marhalas/')
   if (response.data.success) {
@@ -644,7 +535,6 @@ const fetchMarhalaNames = async () => {
     marhalaNames.value = marhalaList.value.map(m => m.name)
   }
 }
-
 const fetchExamFees = async () => {
   const response = await axios.get(
     `http://127.0.0.1:8000/api/central-exam/exam-fees/by-setup/?exam_setup=${examSetupId.value}`
@@ -672,18 +562,14 @@ const fetchExamFees = async () => {
     })
   }
 }
-
 const getExamSetupIdFromUrl = () => {
   const path = window.location.pathname
   const matches = path.match(/\/FeeEdit\/(\d+)/)
   return matches ? parseInt(matches[1]) : null
 }
-
 const examSetupId = ref(getExamSetupIdFromUrl())
 
-// ---------------------------
 // Update All Fees
-// ---------------------------
 async function updateAllFees() {
   let successCount = 0
   let failCount = 0
@@ -721,13 +607,10 @@ async function updateAllFees() {
       }
     }
   }
-
   alert(`সফলভাবে আপডেট হয়েছে: ${successCount} | ব্যর্থ: ${failCount}`)
 }
 
-// ---------------------------
 // Lifecycle
-// ---------------------------
 onMounted(() => {
   expandedCards.value = { 0: true }
   activeTab.value = { 0: 'regular' }
