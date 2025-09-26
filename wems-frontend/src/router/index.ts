@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from 'vue-router'
 import axios from 'axios'
 import {
   isTokenExpired,
-  getUserTypeFromToken,
   requiresAuth,
   isAdminAccessingUserRoute,
   isNonAdminAccessingAdminRoute,
@@ -326,7 +325,7 @@ const routes = [
         component: () => import('@/views/Pages/registraion/oldStudentList.vue'),
         meta: { title: 'Old Student List', requiresAuth: true, role: 'user' },
       },
-      
+
       {
         path: 'student/old/verify/:marhala_id',
         name: 'VerifyOldStudents',
@@ -497,10 +496,25 @@ export default router
 router.beforeEach(async (to, from, next) => {
   document.title = `${to.meta.title} | মাদরাসা পেনেল`
 
+  // Use session/localStorage for userType (not JWT)
   const token = localStorage.getItem('token');
   const routeName = String(to.name || '');
   const routePath = to.path;
-  const userType = getUserTypeFromToken(token || '');
+  let userType = localStorage.getItem('user_type');
+  if (!userType && token) {
+    // fallback: try to get from backend if needed
+    try {
+      const response = await axios.get('/auth/profile/', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.data?.user?.user_type) {
+        userType = response.data.user.user_type;
+        localStorage.setItem('user_type', userType ?? '');
+      }
+    } catch {
+      userType = null;
+    }
+  }
 
   console.log(`🚀 Layout-based Route Guard: ${routeName} (${routePath}) - User: ${userType || 'anonymous'}`);
 
@@ -531,20 +545,16 @@ router.beforeEach(async (to, from, next) => {
     }
   }
 
-  // Check layout-based access control
-
   // Layout-based role check
   if (to.meta.role && userType) {
-    // Check if user role matches route role requirement
     if (to.meta.role === 'admin' && !isAdminType(userType)) {
       console.log(`❌ Access denied: Non-admin user (${userType}) trying to access admin layout`);
-      next({ name: 'Dashboard' }); // Redirect to user dashboard
+      next({ name: 'Dashboard' });
       return;
     }
-
     if (to.meta.role === 'user' && isAdminType(userType)) {
       console.log(`❌ Access denied: Admin user trying to access user layout`);
-      next({ name: 'AdminDashboard' }); // Redirect to admin dashboard
+      next({ name: 'AdminDashboard' });
       return;
     }
   }
@@ -566,54 +576,22 @@ router.beforeEach(async (to, from, next) => {
       return;
     }
 
-    // Enhanced role-based access control with backend validation
+    // Enhanced role-based access control
     console.log(`👤 Current user type: ${userType}, accessing route: ${routeName}`);
 
     if (requiresAuth(routeName)) {
-      // Backend validation disabled temporarily due to CSRF issues
-      // Will enable after proper CSRF token setup
-
-      /*
-      try {
-        const response = await axios.post('/auth/validate-route-access/', {
-          route: routePath,
-          route_name: routeName
-        }, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (!response.data.valid) {
-          console.log(`❌ Backend denied access to ${routeName} for user ${userType}`);
-          if (isAdminType(userType || '')) {
-            next({ name: 'AdminDashboard' });
-          } else {
-            next({ name: 'Dashboard' });
-          }
-          return;
-        }
-      } catch (error: unknown) {
-        console.log('⚠️ Backend validation failed, using frontend validation', error);
-        // Fall back to frontend validation if backend is unavailable
-      }
-      */
-
-      // Frontend validation as primary method
       // Block non-admin users from admin routes
       if (isNonAdminAccessingAdminRoute(routeName, userType || '')) {
         console.log(`❌ Access denied: Non-admin user (${userType}) trying to access admin route ${routeName}`);
         next({ name: 'Dashboard' });
         return;
       }
-
       // Block admin users from user-only routes
       if (isAdminAccessingUserRoute(routeName, userType || '')) {
         console.log(`❌ Access denied: Admin user trying to access user-only route ${routeName}`);
         next({ name: 'AdminDashboard' });
         return;
       }
-
       // Auto-redirect authenticated users accessing signin page
       if (routeName === 'Signin') {
         if (isAdminType(userType || '')) {

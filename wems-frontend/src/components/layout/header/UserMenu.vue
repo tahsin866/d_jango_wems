@@ -97,7 +97,7 @@ const closeDropdown = () => {
 const router = useRouter()
 const signOut = async () => {
   try {
-    await axios.post('http://localhost:8000/auth/logout')
+    await axios.post('http://localhost:8000/auth/logout/')
   } catch {}
   localStorage.removeItem('token')
   clearProfile() // Clear user profile from store

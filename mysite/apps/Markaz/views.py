@@ -7,28 +7,90 @@ from rest_framework import status
 from mysite.apps.school.models import School
 from mysite.apps.Markaz.serializers import SchoolSelectSerializer, MarkazApplicationSerializer, MainMadrasaInfoSerializer, AssociatedMadrasaSerializer, AttachmentSerializer
 from .models import MarkazApplication, MainMadrasaInfo, AssociatedMadrasa, Attachment
-from django.db import transaction
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from django.db import transaction, connection
+from rest_framework.permissions import AllowAny
 
 class MarkazApplicationCreateView(APIView):
-    permission_classes = [IsAuthenticated]
+   
+    permission_classes = [AllowAny]
     def post(self, request):
-        user = request.user
-        # Check user type
-        if not hasattr(user, 'user_type') or str(user.user_type.name).lower() != 'madrasha':
+        # --- Debug: Print all possible header sources ---
+        print("[Markaz Debug] Authorization header:", request.headers.get('Authorization'))
+        print("[Markaz Debug] META HTTP_AUTHORIZATION:", request.META.get('HTTP_AUTHORIZATION'))
+        # --- Extract session_token from all possible sources ---
+        session_token = (
+            request.headers.get('Authorization') or
+            request.META.get('HTTP_AUTHORIZATION') or
+            ''
+        ).replace('Bearer ', '')
+        print("[Markaz Debug] Extracted session_token:", session_token)
+        from mysite.apps.users.models import UserSessions, User
+        user_id = None
+        user_obj = None
+        if session_token:
+            from django.utils import timezone
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT user_id, expires_at FROM user_sessions WHERE session_token = %s AND is_active = TRUE
+                """, [session_token])
+                row = cursor.fetchone()
+                print("[Markaz Debug] DB session row:", row)
+                if row:
+                    user_id, expires_at = row
+                    from django.utils.timezone import is_aware, make_aware
+                    now = timezone.now()
+                    # Ensure both datetimes are aware
+                    if expires_at:
+                        if not is_aware(expires_at):
+                            expires_at = make_aware(expires_at)
+                        if not is_aware(now):
+                            now = make_aware(now)
+                        if expires_at < now:
+                            print("[Markaz Debug] Session expired.")
+                            return Response({'success': False, 'error': 'Session expired.'}, status=status.HTTP_401_UNAUTHORIZED)
+                    try:
+                        user_obj = User.objects.get(id=user_id)
+                        print("[Markaz Debug] User found:", user_obj.id)
+                    except User.DoesNotExist:
+                        print("[Markaz Debug] User not found for id:", user_id)
+                        return Response({'success': False, 'error': 'User not found.'}, status=status.HTTP_401_UNAUTHORIZED)
+        if not user_obj:
+            print("[Markaz Debug] No user_obj, authentication failed.")
+            return Response({'success': False, 'error': 'Authentication credentials were not provided.'}, status=status.HTTP_403_FORBIDDEN)
+
+        # Check user type (case-insensitive, handle None)
+        user_type_name = getattr(getattr(user_obj, 'user_type', None), 'name', None)
+        if not user_type_name or user_type_name.strip().lower() != 'madrasha':
             return Response({'success': False, 'error': 'Only madrasha users can insert data.'}, status=status.HTTP_403_FORBIDDEN)
         data = request.data
         try:
+            from mysite.apps.users.models import UserInformation
             with transaction.atomic():
-                # Create MarkazApplication with actual user id
+                # Get madrasa_id from user_information table
+                madrasha_id = None
+                try:
+                    user_info = UserInformation.objects.get(user_id=user_obj.id)
+                    madrasha_id = user_info.madrasha_id
+                except UserInformation.DoesNotExist:
+                    return Response({'success': False, 'error': 'User information not found.'}, status=status.HTTP_400_BAD_REQUEST)
+
+                # Get latest exam id from exam_setups table
+                from mysite.apps.CentralExam.models import ExamSetup
+                latest_exam = ExamSetup.objects.order_by('-id').first()
+                latest_exam_id = latest_exam.id if latest_exam else None
+
+                # Create MarkazApplication with actual user id, madrasa_id, and latest exam id
                 markaz_app_data = data.get('markaz_application') or {}
-                markaz_app_data['user'] = user.id
+                markaz_app_data['user'] = user_obj.id
+                markaz_app_data['madrasa_id'] = madrasha_id
+                markaz_app_data['exam'] = latest_exam_id
                 markaz_app_serializer = MarkazApplicationSerializer(data=markaz_app_data)
                 markaz_app_serializer.is_valid(raise_exception=True)
                 markaz_app = markaz_app_serializer.save()
 
                 # Create MainMadrasaInfo
-                main_madrasa_serializer = MainMadrasaInfoSerializer(data={**data.get('main_madrasa_info', {}), 'markaz_application': markaz_app.id})
+                main_madrasa_info_data = {**data.get('main_madrasa_info', {}), 'markaz_application': markaz_app.id, 'madrasa': madrasha_id}
+                main_madrasa_serializer = MainMadrasaInfoSerializer(data=main_madrasa_info_data)
                 main_madrasa_serializer.is_valid(raise_exception=True)
                 main_madrasa_serializer.save()
 

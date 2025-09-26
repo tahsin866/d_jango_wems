@@ -159,7 +159,7 @@ class SecureJWTAuthMiddleware:
         if any(path.startswith(route) for route in self.admin_only_routes):
             return 'Admin'
         elif any(path.startswith(route) for route in self.madrasa_only_routes):
-            return 'Madrasah'
+            return 'madrasha'
         return 'Any'
 
 # Keep the old middleware for backward compatibility
@@ -175,7 +175,7 @@ class JWTAuthMiddleware:
                 payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
                 user = User.objects.get(id=payload['user_id'])
                 request.user = user
-                request.user_type = payload.get('user_type', 'madrasa')
+                request.user_type = payload.get('user_type', 'madrasha')
             except (jwt.InvalidTokenError, User.DoesNotExist):
                 pass
 

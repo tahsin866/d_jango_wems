@@ -54,16 +54,31 @@ class EmailOrPhoneBackend(ModelBackend):
                                 password=password
                             )
                         
-                        # Store user info in session
+                        # Store user info in session (session-based auth only)
                         if request is not None:
                             request.session['user_type'] = user_type
                             request.session['user_id'] = user_id
                             request.session['admin_category'] = admin_category
-                        
+
                         # Attach user info to user object
-                        user.user_type = user_type
+                        from mysite.apps.users.models import UserType, AdminCategory
+                        # Always assign user_type as UserType instance
+                        if isinstance(user_type, str):
+                            try:
+                                user.user_type = UserType.objects.get(name=user_type)
+                            except UserType.DoesNotExist:
+                                user.user_type = None
+                        else:
+                            user.user_type = user_type
+                        # Always assign admin_category as AdminCategory instance
+                        if isinstance(admin_category, str):
+                            try:
+                                user.admin_category = AdminCategory.objects.get(name=admin_category)
+                            except AdminCategory.DoesNotExist:
+                                user.admin_category = None
+                        else:
+                            user.admin_category = admin_category
                         user.custom_user_id = user_id
-                        user.admin_category = admin_category
                         return user
             except Exception as e:
                 print(f"Authentication error: {e}")

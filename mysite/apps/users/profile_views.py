@@ -7,34 +7,41 @@ from rest_framework.response import Response
 from rest_framework import status
 from mysite.apps.users.auth_views import SecureAuthMixin
 import json
+from datetime import datetime
 
 
 @csrf_exempt
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def get_user_profile(request):
-    """Get user profile information including name, email, user_type and photo"""
+    print("[DEBUG] get_user_profile called")
     try:
         token = request.headers.get('Authorization')
+        print("[DEBUG] Authorization header:", token)
         if token and token.startswith('Bearer '):
             token = token[7:]
         else:
             return Response({'error': 'Token required'}, status=status.HTTP_401_UNAUTHORIZED)
-        
-        # Validate token
-        mixin = SecureAuthMixin()
-        payload = mixin.validate_token(token)
-        
-        if not payload:
-            return Response({'error': 'Invalid or expired token'}, status=status.HTTP_401_UNAUTHORIZED)
-        
-        user_id = payload.get('user_id')
-        if not user_id:
-            return Response({'error': 'User ID not found in token'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Get user profile data with joins including school/madrasha info
+
+        # Validate session_token
         with connection.cursor() as cursor:
-            # Debug query to check what data is available
+            cursor.execute("SELECT user_id, expires_at, is_active FROM user_sessions WHERE session_token = %s", [token])
+            session_row = cursor.fetchone()
+            print("[DEBUG] Session row result:", session_row)
+
+            if not session_row:
+                return Response({'error': 'Invalid or expired session token'}, status=status.HTTP_401_UNAUTHORIZED)
+
+            user_id, expires_at, is_active = session_row
+            print("[DEBUG] Using user_id:", user_id)
+
+            if not is_active:
+                return Response({'error': 'Session inactive'}, status=status.HTTP_401_UNAUTHORIZED)
+            if expires_at and expires_at < datetime.now():
+                return Response({'error': 'Session expired'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Fetch user profile
+        with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT 
                     u.id as user_id,
@@ -52,12 +59,13 @@ def get_user_profile(request):
                 LEFT JOIN schools s ON ui.madrasha_id = s.id
                 WHERE u.id = %s
             """, [user_id])
-            
+
             row = cursor.fetchone()
+            print("[DEBUG] User profile row:", row)
+
             if not row:
                 return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
-            
-            # Build user profile data
+
             user_profile = {
                 'id': row[0],
                 'name': row[1],
@@ -71,287 +79,138 @@ def get_user_profile(request):
                 'is_admin': row[4] in ['Master Admin', 'Super Admin', 'Board Admin', 'Admin'] if row[4] else False,
                 'avatar_url': None
             }
-            
-            # Generate photo URL if photo exists
+
             if user_profile['photo']:
-                # Assuming photos are stored in media/user_photos/ directory
                 user_profile['avatar_url'] = f"/media/user_photos/{user_profile['photo']}"
-            
-            return Response({
-                'success': True,
-                'user': user_profile
-            }, status=status.HTTP_200_OK)
-            
+
+            return Response({'success': True, 'user': user_profile}, status=status.HTTP_200_OK)
+
     except Exception as e:
-        return Response({
-            'success': False,
-            'error': f'Profile fetch error: {str(e)}'
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'success': False, 'error': f'Profile fetch error: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @csrf_exempt
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def update_user_profile(request):
-    """Update user profile information"""
+    print("[DEBUG] update_user_profile called")
     try:
         token = request.headers.get('Authorization')
+        print("[DEBUG] Authorization header:", token)
         if token and token.startswith('Bearer '):
             token = token[7:]
         else:
             return Response({'error': 'Token required'}, status=status.HTTP_401_UNAUTHORIZED)
-        
-        # Validate token
-        mixin = SecureAuthMixin()
-        payload = mixin.validate_token(token)
-        
-        if not payload:
-            return Response({'error': 'Invalid or expired token'}, status=status.HTTP_401_UNAUTHORIZED)
-        
-        user_id = payload.get('user_id')
-        data = request.data
-        
+
+        # Validate session_token
         with connection.cursor() as cursor:
-            # Update users table
-            if 'name' in data or 'email' in data:
-                update_fields = []
-                update_values = []
-                
-                if 'name' in data:
-                    update_fields.append('name = %s')
-                    update_values.append(data['name'])
-                
-                if 'email' in data:
-                    update_fields.append('email = %s')
-                    update_values.append(data['email'])
-                
-                update_values.append(user_id)
-                
-                cursor.execute(f"""
-                    UPDATE users 
-                    SET {', '.join(update_fields)}
-                    WHERE id = %s
-                """, update_values)
-        
-        return Response({
-            'success': True,
-            'message': 'Profile updated successfully'
-        }, status=status.HTTP_200_OK)
-        
+            cursor.execute("SELECT user_id FROM user_sessions WHERE session_token = %s AND is_active = true", [token])
+            session_row = cursor.fetchone()
+            print("[DEBUG] Session row result:", session_row)
+
+            if not session_row:
+                return Response({'error': 'Invalid or expired session'}, status=status.HTTP_401_UNAUTHORIZED)
+
+            user_id = session_row[0]
+            print("[DEBUG] Using user_id:", user_id)
+
+        data = json.loads(request.body)
+        name = data.get('name')
+        email = data.get('email')
+        madrasha_id = data.get('madrasha_id')
+
+        with connection.cursor() as cursor:
+            cursor.execute("UPDATE users SET name=%s, email=%s WHERE id=%s", [name, email, user_id])
+            cursor.execute("UPDATE user_information SET madrasha_id=%s WHERE user_id=%s", [madrasha_id, user_id])
+
+        return Response({'success': True, 'message': 'Profile updated successfully'}, status=status.HTTP_200_OK)
+
     except Exception as e:
-        return Response({
-            'success': False,
-            'error': f'Profile update error: {str(e)}'
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'success': False, 'error': f'Update error: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @csrf_exempt
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def upload_profile_photo(request):
-    """Upload user profile photo"""
+    print("[DEBUG] upload_profile_photo called")
     try:
         token = request.headers.get('Authorization')
+        print("[DEBUG] Authorization header:", token)
         if token and token.startswith('Bearer '):
             token = token[7:]
         else:
             return Response({'error': 'Token required'}, status=status.HTTP_401_UNAUTHORIZED)
-        
-        # Validate token
-        mixin = SecureAuthMixin()
-        payload = mixin.validate_token(token)
-        
-        if not payload:
-            return Response({'error': 'Invalid or expired token'}, status=status.HTTP_401_UNAUTHORIZED)
-        
-        user_id = payload.get('user_id')
-        
-        if 'photo' not in request.FILES:
-            return Response({'error': 'No photo file provided'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        photo = request.FILES['photo']
-        
-        # Validate file type
-        allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif']
-        if photo.content_type not in allowed_types:
-            return Response({'error': 'Invalid file type. Only JPEG, PNG, GIF allowed'}, 
-                          status=status.HTTP_400_BAD_REQUEST)
-        
-        # Validate file size (max 5MB)
-        if photo.size > 5 * 1024 * 1024:
-            return Response({'error': 'File too large. Maximum size is 5MB'}, 
-                          status=status.HTTP_400_BAD_REQUEST)
-        
-        # Generate unique filename
-        import os
-        import uuid
-        from django.conf import settings
-        
-        extension = os.path.splitext(photo.name)[1]
-        filename = f"user_{user_id}_{uuid.uuid4().hex[:8]}{extension}"
-        
-        # Save file
-        upload_path = os.path.join(settings.MEDIA_ROOT, 'user_photos')
-        os.makedirs(upload_path, exist_ok=True)
-        
-        file_path = os.path.join(upload_path, filename)
-        with open(file_path, 'wb+') as destination:
+
+        # Validate session_token
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT user_id FROM user_sessions WHERE session_token = %s AND is_active = true", [token])
+            session_row = cursor.fetchone()
+            print("[DEBUG] Session row result:", session_row)
+
+            if not session_row:
+                return Response({'error': 'Invalid or expired session'}, status=status.HTTP_401_UNAUTHORIZED)
+
+            user_id = session_row[0]
+            print("[DEBUG] Using user_id:", user_id)
+
+        photo = request.FILES.get('photo')
+        if not photo:
+            return Response({'error': 'No photo uploaded'}, status=status.HTTP_400_BAD_REQUEST)
+
+        file_path = f"user_photos/{user_id}_{photo.name}"
+        with open(f"media/{file_path}", 'wb+') as destination:
             for chunk in photo.chunks():
                 destination.write(chunk)
-        
-        # Update database
+
         with connection.cursor() as cursor:
-            # Check if user_information record exists
-            cursor.execute("SELECT id FROM user_information WHERE user_id = %s", [user_id])
-            if cursor.fetchone():
-                cursor.execute("""
-                    UPDATE user_information 
-                    SET photo = %s 
-                    WHERE user_id = %s
-                """, [filename, user_id])
-            else:
-                cursor.execute("""
-                    INSERT INTO user_information (user_id, photo)
-                    VALUES (%s, %s)
-                """, [user_id, filename])
-        
-        return Response({
-            'success': True,
-            'message': 'Photo uploaded successfully',
-            'photo_url': f"/media/user_photos/{filename}"
-        }, status=status.HTTP_200_OK)
-        
+            cursor.execute("UPDATE user_information SET photo=%s WHERE user_id=%s", [file_path, user_id])
+
+        return Response({'success': True, 'photo_url': f"/media/{file_path}"}, status=status.HTTP_200_OK)
+
     except Exception as e:
-        return Response({
-            'success': False,
-            'error': f'Photo upload error: {str(e)}'
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'success': False, 'error': f'Photo upload error: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @csrf_exempt
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def get_profile_fallback(request):
-    """Fallback profile API without token for specific user"""
+    print("[DEBUG] get_profile_fallback called")
+    user_id = request.GET.get('user_id')
+    if user_id is None:
+        return Response({'error': 'user_id query parameter required'}, status=status.HTTP_400_BAD_REQUEST)
     try:
-        # Get user_id from query parameter or default to 15
-        user_id = request.GET.get('user_id', 15)
-        
+        user_id_int = int(user_id)
+    except Exception:
+        return Response({'error': 'Invalid user_id'}, status=status.HTTP_400_BAD_REQUEST)
+    try:
         with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT 
-                    u.id as user_id,
-                    u.name as user_name,
-                    u.email,
-                    u.user_type_id,
-                    ut.name as user_type_name,
-                    ui.photo,
-                    ui.madrasha_id,
-                    s.id as school_id,
-                    s.mname as madrasha_name
-                FROM users u
-                LEFT JOIN user_types ut ON u.user_type_id = ut.id
-                LEFT JOIN user_information ui ON u.id = ui.user_id
-                LEFT JOIN schools s ON ui.madrasha_id = s.id
-                WHERE u.id = %s
-            """, [user_id])
-            
+            cursor.execute("SELECT id, name, email FROM users WHERE id=%s", [user_id_int])
             row = cursor.fetchone()
+            print("[DEBUG] User row:", row)
+
             if not row:
                 return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
-            
-            # Build user profile data
-            user_profile = {
-                'id': row[0],
-                'name': row[1],
-                'email': row[2],
-                'user_type_id': row[3],
-                'user_type_name': row[4],
-                'photo': row[5],
-                'madrasha_id': row[6],
-                'madrasha_name': row[8] if row[8] else 'মাদ্রাসার তথ্য নেই',
-                'is_admin': row[4] in ['Master Admin', 'Super Admin', 'Board Admin', 'Admin'] if row[4] else False,
-                'avatar_url': None
-            }
-            
-            # Generate photo URL if photo exists
-            if user_profile['photo']:
-                user_profile['avatar_url'] = f"/media/user_photos/{user_profile['photo']}"
-            
-            return Response({
-                'success': True,
-                'user': user_profile
-            }, status=status.HTTP_200_OK)
-            
+
+            return Response({'success': True, 'user': {'id': row[0], 'name': row[1], 'email': row[2]}}, status=status.HTTP_200_OK)
+
     except Exception as e:
-        return Response({
-            'success': False,
-            'error': f'Fallback profile error: {str(e)}'
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'success': False, 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @csrf_exempt
 @api_view(['GET'])
 @permission_classes([AllowAny])
-def debug_user_data(request, user_id):
-    """Debug API to check user data for specific user_id"""
+def debug_user_data(request):
+    print("[DEBUG] debug_user_data called")
     try:
         with connection.cursor() as cursor:
-            # Check users table
-            cursor.execute("SELECT id, name, email, user_type_id FROM users WHERE id = %s", [user_id])
-            user_data = cursor.fetchone()
-            
-            # Check user_information table
-            cursor.execute("SELECT user_id, madrasha_id, phone, address, photo FROM user_information WHERE user_id = %s", [user_id])
-            user_info_data = cursor.fetchone()
-            
-            # Check schools table if madrasha_id exists
-            school_data = None
-            if user_info_data and user_info_data[1]:  # madrasha_id
-                cursor.execute("SELECT id, mname FROM schools WHERE id = %s", [user_info_data[1]])
-                school_data = cursor.fetchone()
-            
-            # Full join query
-            cursor.execute("""
-                SELECT 
-                    u.id as user_id,
-                    u.name as user_name,
-                    u.email,
-                    u.user_type_id,
-                    ut.name as user_type_name,
-                    ui.user_id as ui_user_id,
-                    ui.madrasha_id,
-                    ui.phone,
-                    ui.address,
-                    ui.photo,
-                    s.id as school_id,
-                    s.mname as madrasha_name
-                FROM users u
-                LEFT JOIN user_types ut ON u.user_type_id = ut.id
-                LEFT JOIN user_information ui ON u.id = ui.user_id
-                LEFT JOIN schools s ON ui.madrasha_id = s.id
-                WHERE u.id = %s
-            """, [user_id])
-            
-            joined_data = cursor.fetchone()
-            
-            return Response({
-                'success': True,
-                'user_id': user_id,
-                'users_table': user_data,
-                'user_information_table': user_info_data,
-                'schools_table': school_data,
-                'joined_query_result': joined_data,
-                'debug_info': {
-                    'has_user': bool(user_data),
-                    'has_user_info': bool(user_info_data),
-                    'has_madrasha_id': bool(user_info_data and user_info_data[1]),
-                    'has_school_data': bool(school_data),
-                }
-            }, status=status.HTTP_200_OK)
-            
+            cursor.execute("SELECT * FROM users LIMIT 5")
+            rows = cursor.fetchall()
+            print("[DEBUG] Sample rows:", rows)
+
+        return Response({'success': True, 'sample_users': rows}, status=status.HTTP_200_OK)
+
     except Exception as e:
-        return Response({
-            'success': False,
-            'error': f'Debug error: {str(e)}'
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'success': False, 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

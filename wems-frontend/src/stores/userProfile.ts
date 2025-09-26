@@ -70,43 +70,28 @@ export async function fetchUserProfile() {
     loading.value = true
     error.value = null
 
-    // Get current user ID
-    const userId = getCurrentUserId()
-
-    if (userId) {
-      // Use user ID based endpoint
-      try {
-        const response = await axios.get(`/auth/profile/fallback/?user_id=${userId}`)
-
-        if (response.data.success) {
-          user.value = response.data.user
-          return
-        }
-      } catch {
-        console.log('User ID based fetch failed, trying token auth...')
-      }
-    }
-
-    // Fallback to token auth
+    // Always use session-based profile endpoint
     try {
       const response = await axios.get('/auth/profile/')
-
       if (response.data.success) {
         user.value = response.data.user
         return
       } else {
-        throw new Error('Token auth failed')
+        throw new Error('Session token auth failed')
       }
     } catch {
-      // Final fallback - use hardcoded user ID 15
-      console.log('All auth failed, using fallback for user 15...')
-
-      const fallbackResponse = await axios.get('/auth/profile/fallback/')
-
-      if (fallbackResponse.data.success) {
-        user.value = fallbackResponse.data.user
+      // Fallback: use currentUserId if available
+      const fallbackUserId = getCurrentUserId();
+      if (fallbackUserId) {
+        console.log(`Session token auth failed, using fallback for user ${fallbackUserId}...`);
+        const fallbackResponse = await axios.get(`/auth/profile/fallback/?user_id=${fallbackUserId}`);
+        if (fallbackResponse.data.success) {
+          user.value = fallbackResponse.data.user;
+        } else {
+          throw new Error('All authentication methods failed');
+        }
       } else {
-        throw new Error('All authentication methods failed')
+        throw new Error('No user_id available for fallback profile fetch');
       }
     }
   } catch (err: unknown) {
@@ -186,15 +171,5 @@ export const profileError = error
 // Initialize profile on module load
 const token = localStorage.getItem('token')
 if (token && !user.value) {
-  // Try to get user_id from token
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]))
-    if (payload.user_id) {
-      setCurrentUserId(payload.user_id)
-    }
-  } catch {
-    console.log('Could not parse token for user_id')
-  }
-
   fetchUserProfile()
 }

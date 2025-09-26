@@ -164,6 +164,8 @@ CACHES = {
     }
 }
 
+AUTH_USER_MODEL = 'users.User'  # যদি আপনার model এর নাম User হয় এবং app 'users'
+
 # Alternative Redis configuration (uncomment when Redis is available)
 # CACHES = {
 #     'default': {
@@ -211,14 +213,27 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # REST Framework configuration
+# REST_FRAMEWORK = {
+#     'DEFAULT_AUTHENTICATION_CLASSES': [
+#         'rest_framework.authentication.SessionAuthentication',
+#     ],
+#     'DEFAULT_PERMISSION_CLASSES': [
+#         'rest_framework.permissions.IsAuthenticated',
+#     ],
+# }
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        # যদি JWT ব্যবহার করেন:
+        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
 }
+
+
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [

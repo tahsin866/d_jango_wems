@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.contrib.auth import get_user_model
 class UserType(models.Model):
     name = models.CharField(max_length=50)
     description = models.CharField(max_length=255, blank=True)
@@ -21,6 +21,32 @@ class AdminCategory(models.Model):
         return self.name
 
 class User(models.Model):
+    # --- Django authentication compatibility ---
+    @property
+    def is_anonymous(self):
+        return False
+
+    @property
+    def is_authenticated(self):
+        return True
+
+    is_staff = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    is_superuser = models.BooleanField(default=False)
+
+    # --- Password check method for authentication ---
+    from django.contrib.auth.hashers import check_password as django_check_password
+    def check_password(self, raw_password):
+        return self.django_check_password(raw_password, self.password)
+
+    # --- Note for user_type assignment ---
+    # Always assign user_type as UserType instance, not string.
+    # Example: user.user_type = UserType.objects.get(name='Master Admin')
+    # Django custom user model requirements
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['name', 'phone']
+    from django.contrib.auth.models import UserManager
+    objects = UserManager()
     last_login = models.DateTimeField(null=True, blank=True)
 
     STATUS_CHOICES = [
@@ -48,6 +74,18 @@ class User(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def is_anonymous(self):
+        return False
+
+    @property
+    def is_authenticated(self):
+        return True
+
+    is_staff = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    is_superuser = models.BooleanField(default=False)
 
 class UserInformation(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='information')
@@ -133,7 +171,8 @@ class UserLoginHistory(models.Model):
         ('success', 'Success'),
         ('failed', 'Failed'),
     ]
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='login_histories')
+    # user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='login_histories')
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     login_time = models.DateTimeField(auto_now_add=True)
     logout_time = models.DateTimeField(null=True, blank=True)
     ip_address = models.CharField(max_length=50, blank=True, null=True)

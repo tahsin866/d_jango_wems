@@ -83,6 +83,10 @@ export function parseJwt(token: string) {
 
 // Enhanced token expiry check
 export function isTokenExpired(token: string): boolean {
+  // If token is not JWT, always return false (never expired)
+  if (!token || token.split('.').length !== 3) return false;
+  // If token is not JWT, treat as never expired
+  if (!token || token.split('.').length !== 3) return false;
   const decoded = parseJwt(token);
   if (!decoded) return true;
   const currentTime = Date.now() / 1000;

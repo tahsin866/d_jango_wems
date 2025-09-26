@@ -2,6 +2,7 @@
 import 'primeicons/primeicons.css';
 
 import { ref, computed, watch, onMounted } from 'vue'
+import axios from 'axios'
 
 import MarkazConditions from '@/views/Pages/markaz/components/MarkazConditions.vue'
 import CategorySelect from '@/views/Pages/markaz/components/CategorySelect.vue'
@@ -31,6 +32,7 @@ const user_id = 1;
 const user_name = "Demo Madrasha";
 const exam_id = "";
 const exam_name = "";
+// Remove invalid token set, token should be set after login, not here
 
 const form = ref<{
     user_id: number,
@@ -384,11 +386,22 @@ watch(() => form.value.markaz_type, (newType) => {
   });
 });
 
-const submitForm = () => {
+const submitForm = async () => {
   loading.value = true;
   formErrors.value = [];
   validationErrors.value = {};
 
+  // Check if user is logged in first
+  const token = localStorage.getItem('token');
+  if (!token) {
+    loading.value = false;
+    formErrors.value = ['আপনি লগইন করে নেই। অনুগ্রহ করে আগে লগইন করুন।'];
+    // Redirect to login page if needed
+    // await router.push('/signin');
+    return;
+  }
+
+  // Validation logic
   if (!form.value.requirements) {
     loading.value = false;
     formErrors.value = ['মারকাজ প্রয়োজনীয়তা ব্যাখ্যা করুন'];
@@ -401,6 +414,7 @@ const submitForm = () => {
     return;
   }
 
+  // Markaz type specific validation
   if (form.value.markaz_type === 'দরসিয়াত') {
     if (form.value.fazilat === null) {
       loading.value = false;
@@ -432,47 +446,40 @@ const submitForm = () => {
     return;
   }
 
+  // Validate associated madrasas
+  const invalidRows = rows.value.filter(row => {
+    // Common required fields
+    if (!row.madrasa_id) return true;
+    if (!row.files.noc || !row.files.resolution) return true;
 
-const invalidRows = rows.value.filter(row => {
-  // Common required fields
-  if (!row.madrasa_id) return true;
-  if (!row.files.noc || !row.files.resolution) return true;
+    // Darsiyat: All fields must be non-null/non-undefined and > 0
+    if (form.value.markaz_type === 'দরসিয়াত') {
+      if (
+        !isValidNumber(row.fazilat) ||
+        !isValidNumber(row.sanabiya_ulya) ||
+        !isValidNumber(row.sanabiya) ||
+        !isValidNumber(row.mutawassita) ||
+        !isValidNumber(row.ibtedaiyyah)
+      ) {
+        return true;
+      }
+    } else if (form.value.markaz_type === 'তাহফিজুল কোরআন') {
+      if (!isValidNumber(row.hifzul_quran)) {
+        return true;
+      }
+    } else if (form.value.markaz_type === 'কিরাআত') {
+      if (!isValidNumber(row.qirat)) {
+        return true;
+      }
+    }
 
-  // Darsiyat: All fields must be non-null/non-undefined and > 0
-  if (form.value.markaz_type === 'দরসিয়াত') {
-    if (
-      !isValidNumber(row.fazilat) ||
-      !isValidNumber(row.sanabiya_ulya) ||
-      !isValidNumber(row.sanabiya) ||
-      !isValidNumber(row.mutawassita) ||
-      !isValidNumber(row.ibtedaiyyah)
-    ) {
-      return true;
-    }
-  } else if (form.value.markaz_type === 'তাহফিজুল কোরআন') {
-    if (!isValidNumber(row.hifzul_quran)) {
-      return true;
-    }
-  } else if (form.value.markaz_type === 'কিরাআত') {
-    if (!isValidNumber(row.qirat)) {
-      return true;
-    }
+    return false;
+  });
+
+  // Helper function
+  function isValidNumber(val) {
+    return val !== null && val !== undefined && Number(val) > 0;
   }
-
-  return false;
-});
-
-// Helper function
-function isValidNumber(val: any) {
-  return val !== null && val !== undefined && Number(val) > 0;
-}
-
-
-
-
-
-
-
 
   if (invalidRows.length > 0) {
     loading.value = false;
@@ -480,35 +487,14 @@ function isValidNumber(val: any) {
     return;
   }
 
-  form.value.associated_madrasas = rows.value.map(row => ({
-    madrasa_Name: row.madrasa_Name,
-    madrasa_id: row.madrasa_id,
-    fazilat: row.fazilat,
-    sanabiya_ulya: row.sanabiya_ulya,
-    sanabiya: row.sanabiya,
-    mutawassita: row.mutawassita,
-    ibtedaiyyah: row.ibtedaiyyah,
-    hifzul_quran: row.hifzul_quran,
-    qirat: row.qirat,
-    noc_file: row.files.noc,
-    resolution_file: row.files.resolution
-  }))
+  // Get user info from localStorage (যেমন আপনার login এ save করা হয়েছে)
+const userId = localStorage.getItem('user_id');
+// const token = localStorage.getItem('token');
+console.log('user_id:', userId, 'token:', token); // Debug log
 
-  form.value.muhtamim_consent = muhtamimFile.value
-  form.value.president_consent = presidentFile.value
-  form.value.committee_resolution = committeeFile.value
-
-    // Backend expects:
-    // {
-    //   markaz_application: {...},
-    //   main_madrasa_info: {...},
-    //   associated_madrasas: [...],
-    //   attachments: [...]
-    // }
-
-    // Prepare main madrasa info
+  // Prepare main madrasa info
   const mainMadrasaInfo = {
-    madrasa: form.value.school_id, // School টেবিলের আইডি
+    madrasa: userId, // Use logged in user's ID (assuming it's school ID)
     fazilat: form.value.fazilat,
     sanabiya_ulya: form.value.sanabiya_ulya,
     sanabiya: form.value.sanabiya,
@@ -520,69 +506,91 @@ function isValidNumber(val: any) {
     resolution_file_path: form.value.resolution_file ? form.value.resolution_file.name : ''
   };
 
-    // Prepare associated madrasas
-    const associatedMadrasas = rows.value.map(row => ({
-        madrasa: row.madrasa_id,
-        fazilat: row.fazilat,
-        sanabiya_ulya: row.sanabiya_ulya,
-        sanabiya: row.sanabiya,
-        mutawassita: row.mutawassita,
-        ibtedaiyyah: row.ibtedaiyyah,
-        hifzul_quran: row.hifzul_quran,
-        qirat: row.qirat,
-        noc_file_path: row.files.noc ? row.files.noc.name : '',
-        resolution_file_path: row.files.resolution ? row.files.resolution.name : ''
-    }));
+  // Prepare associated madrasas
+  const associatedMadrasas = rows.value.map(row => ({
+    madrasa: row.madrasa_id,
+    fazilat: row.fazilat,
+    sanabiya_ulya: row.sanabiya_ulya,
+    sanabiya: row.sanabiya,
+    mutawassita: row.mutawassita,
+    ibtedaiyyah: row.ibtedaiyyah,
+    hifzul_quran: row.hifzul_quran,
+    qirat: row.qirat,
+    noc_file_path: row.files.noc ? row.files.noc.name : '',
+    resolution_file_path: row.files.resolution ? row.files.resolution.name : ''
+  }));
 
-    // Prepare attachments
-    const attachments = [];
-    if (form.value.muhtamim_consent) attachments.push({ type: 'muhtamim_consent', file_path: form.value.muhtamim_consent.name });
-    if (form.value.president_consent) attachments.push({ type: 'president_consent', file_path: form.value.president_consent.name });
-    if (form.value.committee_resolution) attachments.push({ type: 'committee_resolution', file_path: form.value.committee_resolution.name });
+  // Prepare attachments
+  const attachments = [];
+  if (muhtamimFile.value) attachments.push({ type: 'muhtamim_consent', file_path: muhtamimFile.value.name });
+  if (presidentFile.value) attachments.push({ type: 'president_consent', file_path: presidentFile.value.name });
+  if (committeeFile.value) attachments.push({ type: 'committee_resolution', file_path: committeeFile.value.name });
 
-    // Prepare markaz application
-    const markazApplication = {
-        user: form.value.user_id,
-        exam: form.value.exam_id,
-        markaz_type: form.value.markaz_type,
-        requirements: form.value.requirements,
-        status: 'pending',
-        ip_address: '',
-        printed: false
-    };
+  // Prepare markaz application
+  const markazApplication = {
+    user: userId,
+    exam: form.value.exam_id || null,
+    markaz_type: form.value.markaz_type,
+    requirements: form.value.requirements,
+    status: 'pending',
+    ip_address: window?.location?.hostname || '',
+    printed: false
+  };
 
-    // Send to backend
-    const payload = {
-        markaz_application: markazApplication,
-        main_madrasa_info: mainMadrasaInfo,
-        associated_madrasas: associatedMadrasas,
-        attachments: attachments
-    };
+  const payload = {
+    markaz_application: markazApplication,
+    main_madrasa_info: mainMadrasaInfo,
+    associated_madrasas: associatedMadrasas,
+    attachments: attachments
+  };
 
-    fetch('http://127.0.0.1:8000/api/markaz/apply/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: 'Bearer ' + localStorage.getItem('token')
-        },
-        body: JSON.stringify(payload)
-    })
-        .then(response => response.json())
-        .then(data => {
-            loading.value = false;
-            if (data.success) {
-                formErrors.value = [];
-                // Show success message
-                alert('আবেদন সফলভাবে জমা হয়েছে!');
-            } else {
-                formErrors.value = [data.error || 'আবেদন জমা দিতে সমস্যা হয়েছে'];
-            }
-        })
-        .catch(error => {
-            loading.value = false;
-            formErrors.value = ['সার্ভার সমস্যা: ' + error];
-        });
-}
+  try {
+    // Use axios (same as your login) with proper Authorization header
+    const response = await axios.post('http://127.0.0.1:8000/api/markaz/apply/', payload, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    loading.value = false;
+
+    if (response.data.success) {
+      formErrors.value = [];
+      alert('আবেদন সফলভাবে জমা হয়েছে!');
+      // Optionally redirect or reset form
+      // await router.push('/dashboard');
+      // resetForm();
+    } else {
+      formErrors.value = [response.data.error || 'আবেদন জমা দিতে সমস্যা হয়েছে'];
+    }
+
+  } catch (error) {
+    loading.value = false;
+    console.error('Submit error:', error);
+
+    if (error.response?.status === 401) {
+      formErrors.value = ['আপনার লগইন সেশন শেষ হয়ে গেছে। পুনরায় লগইন করুন।'];
+      // Clear invalid token
+      localStorage.removeItem('token');
+      localStorage.removeItem('user_id');
+      localStorage.removeItem('user_type');
+      localStorage.removeItem('permissions');
+      // Redirect to login
+      // await router.push('/signin');
+    } else if (error.response?.status === 403) {
+      formErrors.value = ['আপনার এই কাজের অনুমতি নেই।'];
+    } else if (error.response?.status >= 500) {
+      formErrors.value = ['সার্ভার ত্রুটি। পরে আবার চেষ্টা করুন।'];
+    } else if (error.request) {
+      formErrors.value = ['নেটওয়ার্ক ত্রুটি। ইন্টারনেট সংযোগ চেক করুন।'];
+    } else {
+      formErrors.value = ['আবেদন জমা দিতে সমস্যা হয়েছে: ' + (error.message || 'অজানা সমস্যা')];
+    }
+  }
+};
+
+
 
 const getCurrentDateTime = () => {
     return "2025-07-22 09:17:27";

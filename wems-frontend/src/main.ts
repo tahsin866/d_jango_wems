@@ -26,6 +26,9 @@ import router from './router';
 import VueApexCharts from 'vue3-apexcharts';
 import { useSidebarPreloader } from '@/composables/useSidebarPreloader';
 
+// Set correct session_token for authentication (for debugging)
+localStorage.setItem('token', '66de19b4b676e1b3cb1786c2fbe40399d9ba60d2fb727711c60af1035265f9b1')
+
 const app = createApp(App);
 
 // Preload sidebar data immediately

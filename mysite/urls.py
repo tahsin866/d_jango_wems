@@ -38,7 +38,7 @@ urlpatterns = [
     
     # CentralExam APIs
     path('api/central-exam/', include('mysite.apps.CentralExam.urls')),
-    
+    path('users/', include('mysite.apps.users.urls')),  # <-- শুধু এভাবে include করুন!
     # Dashboard APIs
     path('api/admin/dashboard/', admin_dashboard_api),
     path('api/madrasa/dashboard/', madrasa_dashboard_api),

@@ -116,7 +116,7 @@
 import { ref, defineProps, defineOptions } from 'vue'
 import axios from '@/utils/axios';
 import { useRouter } from 'vue-router';
-import { isAdminType, parseJwt } from '@/utils/auth';
+import { isAdminType } from '@/utils/auth';
 
 defineOptions({ name: 'AuthSignin' })
 
@@ -153,48 +153,51 @@ const router = useRouter();
 
 const submit = async () => {
   form.value.processing = true
-  form.value.errors = {} // Clear previous errors
+  form.value.errors = {}
 
   try {
-    const response = await axios.post('/auth/signin/', {
+    const response = await axios.post('http://localhost:8000/auth/signin/', {
       email: form.value.login,
       password: form.value.password,
+    }, {
+      withCredentials: true
     });
 
-
     if (response.data.success) {
-      localStorage.setItem('token', response.data.access_token);
+  // Debug: Show full backend response and redirect value
+  console.log('Login Success, backend response:', response.data);
+  console.log('Redirect URL:', response.data.redirect);
+  // Store session token for router guard authentication
+  localStorage.setItem('token', response.data.session_token);
+  localStorage.setItem('user_type', response.data.user_type);
+  localStorage.setItem('user_id', response.data.user_id.toString());
+  localStorage.setItem('permissions', JSON.stringify(response.data.permissions || []));
+  localStorage.setItem('current_user_id', response.data.user_id.toString());
 
-      const decoded = parseJwt(response.data.access_token);
-
-      if (decoded) {
-        localStorage.setItem('user_type', decoded.user_type);
-        localStorage.setItem('user_id', decoded.user_id);
-        localStorage.setItem('permissions', JSON.stringify(decoded.permissions || []));
-      }
-
-      // Login history API call
+      // Login history API call (optional, backend handles this already)
       try {
-        await axios.post('/users/login-history/create/', {
+        await axios.post('http://localhost:8000/users/login-history/create/', {
           user: response.data.user_id,
           status: 'success',
           ip_address: window?.location?.hostname || '',
           device: navigator?.platform || '',
           browser: navigator?.userAgent || '',
           location: '',
+        }, {
+          withCredentials: true
         });
-      } catch (e) {
-        // Ignore error, don't block login
-      }
+      } catch (e) {}
 
       const userType = response.data.user_type;
 
-      if (isAdminType(userType)) {
+      if (response.data.redirect) {
+        await router.push(response.data.redirect);
+      } else if (isAdminType(userType)) {
         await router.push('/AdminDashboard');
       } else if (userType === 'Madrasah' || userType === 'madrasha') {
         await router.push('/dashboard');
       } else {
-        await router.push('/signin'); // Fallback
+        await router.push('/signin');
       }
     } else {
       form.value.errors.login = 'Authentication failed';
@@ -218,7 +221,6 @@ const submit = async () => {
   }
 }
 
-// Classic logo SVG inline
 const LogoComponent = {
   template: `
     <svg class="w-12 h-12 text-[#3c8dbc]" fill="none" viewBox="0 0 48 48">

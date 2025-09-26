@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 // Configure axios defaults
-axios.defaults.baseURL = 'http://localhost:8000'
+axios.defaults.baseURL = 'http://127.0.0.1:8000'
 axios.defaults.withCredentials = true
 axios.defaults.headers.common['Content-Type'] = 'application/json'
 
@@ -9,6 +9,8 @@ axios.defaults.headers.common['Content-Type'] = 'application/json'
 function getCsrfToken() {
   const name = 'csrftoken'
   let cookieValue = null
+  // Debug: log cookies for CSRF troubleshooting
+  console.log('[Axios Debug] document.cookie:', document.cookie)
   if (document.cookie && document.cookie !== '') {
     const cookies = document.cookie.split(';')
     for (let i = 0; i < cookies.length; i++) {
@@ -27,9 +29,15 @@ axios.interceptors.request.use(
   (config) => {
     // Add JWT token to requests
     const token = localStorage.getItem('token')
+    // Debug: log token value before request
+    console.log('[Axios Debug] token from localStorage:', token)
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`
+      // Debug: log Authorization header value
+      console.log('[Axios Debug] Authorization header:', config.headers['Authorization'])
     }
+
+    config.withCredentials = true // যদি session cookie লাগে
 
     // Add CSRF token for POST, PUT, DELETE requests
     if (['post', 'put', 'patch', 'delete'].includes(config.method?.toLowerCase() || '')) {
