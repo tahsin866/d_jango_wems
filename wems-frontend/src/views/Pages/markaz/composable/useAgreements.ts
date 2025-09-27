@@ -47,72 +47,56 @@ function updateStats() {
   };
 }
 
+
+
 export function useAgreements() {
-  // Mock fetch function
-  async function fetchAgreements() {
-    try {
-      loading.value = true;
-
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 300));
-
-      const mockData: Agreement[] = [
-        {
-          id: 1,
-          application_date: '2025-08-06',
-          markaz_type: 'প্রধান',
-          main_madrasa: 'মাদরাসা আল-হুদা',
-          associated_madrasas: ['মাদরাসা ফারুকিয়া', 'মাদরাসা ইসলামিয়া'],
-          exam_name: 'বার্ষিক পরীক্ষা',
-          main_total_students: 120,
-          associated_total_students: 80,
-          status: 'pending'
-        },
-        {
-          id: 2,
-          application_date: '2025-08-01',
-          markaz_type: 'সহযোগী',
-          main_madrasa: 'মাদরাসা নূরানী',
-          associated_madrasas: [],
-          exam_name: 'ফাইনাল পরীক্ষা',
-          main_total_students: 75,
-          associated_total_students: 0,
-          status: 'approved'
-        },
-        {
-          id: 3,
-          application_date: '2025-08-03',
-          markaz_type: 'প্রধান',
-          main_madrasa: 'মাদরাসা দারুল উলুম',
-          associated_madrasas: ['মাদরাসা তাকওয়া', 'মাদরাসা হিদায়া'],
-          exam_name: 'মধ্যবর্তী পরীক্ষা',
-          main_total_students: 95,
-          associated_total_students: 60,
-          status: 'submitted'
-        }
-      ];
-
-      agreements.value = mockData;
-      updateStats();
-
-    } catch (error) {
-      console.error('Error fetching agreements:', error);
-      agreements.value = [];
-      updateStats();
-    } finally {
-      loading.value = false;
-    }
+  // Backend fetch function
+async function fetchAgreements() {
+  try {
+    loading.value = true;
+    const axios = (await import('@/utils/axios')).default;
+    const res = await axios.get('http://localhost:8000/api/markaz/table/', {
+      withCredentials: true
+    });
+    const data = res.data?.data || [];
+    agreements.value = data.map((item: any) => ({
+      id: item.id,
+      application_date: item.created_at,
+      markaz_type: item.markaz_type,
+      main_madrasa: item.main_madrasa_name,
+      associated_madrasas: item.associated_madrasas?.map((a: any) => a.madrasa_name) || [],
+      exam_name: item.exam_name,
+      main_total_students: item.main_total_students,
+      associated_total_students: item.associated_total_students,
+      status: item.status,
+    }));
+    updateStats();
+  } catch (error) {
+    console.error('Error fetching agreements:', error);
+    agreements.value = [];
+    updateStats();
+  } finally {
+    loading.value = false;
   }
+}
 
   // Delete agreement by ID
   function deleteAgreementById(id: number) {
-    const index = agreements.value.findIndex(a => a.id === id);
-    if (index !== -1) {
-      agreements.value.splice(index, 1);
-      updateStats();
-      return true;
-    }
-    return false;
+    // Backend DELETE request
+    import('@/utils/axios').then(({ default: axios }) => {
+      axios.delete(`http://localhost:8000/api/markaz/table/${id}/`, { withCredentials: true })
+        .then(() => {
+          const index = agreements.value.findIndex(a => a.id === id);
+          if (index !== -1) {
+            agreements.value.splice(index, 1);
+            updateStats();
+          }
+        })
+        .catch((err) => {
+          console.error('Delete failed:', err);
+        });
+    });
+    return true;
   }
 
   // Submit agreement by ID
