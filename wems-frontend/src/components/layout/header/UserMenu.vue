@@ -1,48 +1,51 @@
 <template>
   <div
-  style="font-family: 'SolaimanLipi', sans-serif;"
-
-  class="relative" ref="dropdownRef">
+    style="font-family: 'SolaimanLipi', Arial, sans-serif;"
+    class="relative"
+    ref="dropdownRef"
+  >
     <button
-      class="flex items-center text-gray-700 dark:text-gray-400"
+      class="flex items-center px-2 py-2 rounded border border-gray-300 bg-white shadow-sm hover:shadow-md transition"
       @click.prevent="toggleDropdown"
     >
-      <span class="mr-3 overflow-hidden rounded-full h-11 w-11">
+      <span class="mr-2 overflow-hidden rounded-full border border-gray-400 bg-gray-100" style="height:44px;width:44px;">
         <img :src="displayAvatar" :alt="userName" class="w-full h-full object-cover" />
       </span>
-
-      <span class="block mr-1 font-medium text-theme-xl">{{ userName }}</span>
-
-      <ChevronDownIcon :class="{ 'rotate-180': dropdownOpen }" />
+      <span class="block mr-2 font-semibold text-gray-900 text-base">{{ userName }}</span>
+      <ChevronDownIcon :class="{ 'rotate-180': dropdownOpen }" class="ml-1 text-gray-500" />
     </button>
 
     <!-- Dropdown Start -->
     <div
       v-if="dropdownOpen"
-      class="absolute right-0 mt-[17px] flex w-[260px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark"
+      class="absolute right-0 mt-2 w-64 rounded border border-gray-200 bg-white shadow-lg"
+      style="min-width:256px;z-index:99;"
     >
-      <div>
-        <span class="block font-medium text-gray-700 text-theme-xl dark:text-gray-400">
-          {{ userName }}
+      <div class="px-4 py-3 border-b border-gray-200">
+        <span class="block font-semibold text-gray-900 text-base truncate">{{ userName }}</span>
+        <span class="block text-gray-600 text-sm truncate">{{ userEmail }}</span>
+        <span
+          v-if="isAdmin"
+          class="mt-1 inline-flex items-center px-2 py-1 text-xs font-bold bg-gray-200 text-gray-700 rounded"
+        >
+          অ্যাডমিন
         </span>
-        <span class="mt-0.5 block text-theme-md text-gray-500 dark:text-gray-400">
-          {{ userEmail }}
-        </span>
-        <span v-if="!isAdmin" class="mt-1 inline-flex items-center px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full dark:bg-green-900 dark:text-green-300">
+        <span
+          v-else
+          class="mt-1 inline-flex items-center px-2 py-1 text-xs font-bold bg-gray-100 text-gray-700 rounded"
+        >
           ব্যবহারকারী
         </span>
       </div>
-
-      <ul class="flex flex-col gap-1 pt-4 pb-3 border-b border-gray-200 dark:border-gray-800">
+      <ul class="flex flex-col gap-1 py-2 px-2 border-b border-gray-200">
         <li v-for="item in menuItems" :key="item.href">
           <router-link
             :to="item.href"
-            class="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
+            class="flex items-center gap-2 px-2 py-2 rounded text-gray-900 hover:bg-gray-100 font-normal text-sm transition"
           >
-            <!-- SVG icon would go here -->
             <component
               :is="item.icon"
-              class="text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300"
+              class="text-gray-500 mr-1"
             />
             {{ item.text }}
           </router-link>
@@ -51,12 +54,10 @@
       <router-link
         to="/signin"
         @click="signOut"
-        class="flex items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
+        class="flex items-center gap-2 px-2 py-2 mt-2 font-normal text-gray-900 rounded hover:bg-gray-100 text-sm transition"
       >
-        <LogoutIcon
-          class="text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300"
-        />
-        সাইন আউট
+        <LogoutIcon class="text-gray-500 mr-1" />
+        <span>সাইন আউট</span>
       </router-link>
     </div>
     <!-- Dropdown End -->
@@ -100,7 +101,7 @@ const signOut = async () => {
     await axios.post('http://localhost:8000/auth/logout/')
   } catch {}
   localStorage.removeItem('token')
-  clearProfile() // Clear user profile from store
+  clearProfile()
   closeDropdown()
   router.push('/')
 }
@@ -113,7 +114,7 @@ const handleClickOutside = (event: MouseEvent) => {
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
-  fetchUserProfile() // Add this line
+  fetchUserProfile()
 })
 
 onUnmounted(() => {

@@ -34,59 +34,62 @@
 
     <div class="mx-auto px-8 py-10 space-y-10 ">
       <!-- Stats Cards - Classic Info Box -->
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-7">
-        <div
-          v-for="(stat, idx) in stats"
-          :key="idx"
-          class="bg-white border border-gray-300 rounded shadow-lg p-0"
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-7">
+    <div
+      v-for="(stat, idx) in stats"
+      :key="idx"
+      class="bg-white border border-gray-300 rounded-lg shadow-sm p-0 transition hover:shadow-md"
+      style="min-width:220px;"
+    >
+      <!-- Card Header -->
+      <div class="flex items-center justify-between px-5 py-3 bg-gray-50 border-b border-gray-200 rounded-t">
+        <div class="flex items-center">
+          <i :class="`fas fa-${stat.icon} mr-2 text-gray-500`"></i>
+          <span class="font-semibold text-base text-gray-800">{{ stat.title }}</span>
+        </div>
+      </div>
+      <!-- Card Body -->
+      <div class="px-5 py-7 text-center">
+        <span class="text-2xl font-bold text-gray-900">{{ stat.value }}</span>
+        <span
+          class="ml-2 px-2 py-1 text-xs rounded font-bold inline-flex items-center border"
+          :class="stat.trendUp ? 'bg-gray-100 text-gray-700 border-gray-200' : 'bg-gray-100 text-gray-700 border-gray-200'"
         >
-          <div class="flex items-center justify-between px-5 py-4 bg-gray-100 border-b border-gray-200 rounded-t">
-            <h3 class="font-bold text-base text-gray-700 flex items-center">
-              <i :class="`fas fa-${stat.icon} mr-2 text-${stat.color}-500`"></i>
-              {{ stat.title }}
-            </h3>
-          </div>
-          <div class="px-5 py-7 text-center">
-            <span class="text-2xl font-extrabold text-gray-900">{{ stat.value }}</span>
-            <span
-              class="ml-2 px-2 py-1 text-xs rounded font-bold inline-flex items-center"
-              :class="stat.trendUp ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
+          <i
+            :class="stat.trendUp ? 'fas fa-arrow-up mr-1 text-gray-500' : 'fas fa-arrow-down mr-1 text-gray-500'"
+          ></i>
+          {{ stat.change }}
+        </span>
+        <div class="mt-4">
+          <div class="h-5 rounded bg-gray-100 border border-gray-300 shadow-inner flex items-center w-full">
+            <div
+              class="h-5 rounded-l transition-all duration-500 flex items-center bg-gray-300"
+              :style="{ width: Math.round((stat.trend[stat.trend.length - 1] / Math.max(...stat.trend)) * 100) + '%' }"
             >
-              <i
-                :class="stat.trendUp ? 'fas fa-arrow-up mr-1 text-green-600' : 'fas fa-arrow-down mr-1 text-red-600'"
-              ></i>
-              {{ stat.change }}
-            </span>
-            <div class="mt-4">
-              <div class="h-5 rounded bg-gray-100 border border-gray-300 shadow-inner flex items-center w-full">
-                <div
-                  class="h-5 rounded-l transition-all duration-500 flex items-center"
-                  :class="`bg-${stat.color}-500`"
-                  :style="{ width: Math.round((stat.trend[stat.trend.length - 1] / Math.max(...stat.trend)) * 100) + '%' }"
-                >
-                  <span
-                    class="pr-2 text-white font-bold text-xs"
-                    v-if="((stat.trend[stat.trend.length - 1] / Math.max(...stat.trend)) * 100) > 15"
-                  >
-                    {{ Math.round((stat.trend[stat.trend.length - 1] / Math.max(...stat.trend)) * 100) }}%
-                  </span>
-                </div>
-              </div>
-              <div class="flex justify-between mt-1 text-xs text-gray-500">
-                <span>Min: {{ Math.min(...stat.trend) }}</span>
-                <span>Max: {{ Math.max(...stat.trend) }}</span>
-              </div>
+              <span
+                class="pr-2 text-gray-900 font-bold text-xs"
+                v-if="((stat.trend[stat.trend.length - 1] / Math.max(...stat.trend)) * 100) > 15"
+              >
+                {{ Math.round((stat.trend[stat.trend.length - 1] / Math.max(...stat.trend)) * 100) }}%
+              </span>
             </div>
           </div>
-          <div class="bg-gray-50 border-t border-gray-200 rounded-b px-5 py-2 flex items-center justify-between">
-            <span class="text-xs text-gray-600">
-              <i :class="`fas fa-${stat.icon} mr-1 text-${stat.color}-400`"></i>
-              {{ stat.title }}
-            </span>
-            <span class="text-xs text-gray-600">Info</span>
+          <div class="flex justify-between mt-1 text-xs text-gray-500">
+            <span>Min: {{ Math.min(...stat.trend) }}</span>
+            <span>Max: {{ Math.max(...stat.trend) }}</span>
           </div>
         </div>
       </div>
+      <!-- Card Footer -->
+      <div class="bg-gray-50 border-t border-gray-200 rounded-b px-5 py-2 flex items-center justify-between">
+        <span class="text-xs text-gray-600 flex items-center">
+          <i :class="`fas fa-${stat.icon} mr-1 text-gray-400`"></i>
+          {{ stat.title }}
+        </span>
+        <span class="text-xs text-gray-500">Info</span>
+      </div>
+    </div>
+  </div>
 
       <!-- Table Box -->
       <div class="bg-white rounded shadow-lg border border-gray-300 overflow-hidden">

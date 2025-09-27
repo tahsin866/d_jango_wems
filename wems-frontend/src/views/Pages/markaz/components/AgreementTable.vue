@@ -1,21 +1,29 @@
 <template>
-  <div class=" mx-auto mt-10">
+  <div class="mx-auto mt-10">
     <!-- Card -->
     <div class="bg-white dark:bg-slate-900 rounded-sm shadow-2xl border border-slate-200 dark:border-slate-800">
       <!-- Card Header -->
       <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800">
         <h2 class="text-2xl font-bold text-slate-700 dark:text-slate-100">
-          এগ্রিমেন্ট তালিকা
+          মারকায আবেদন তালিকা
         </h2>
         <!-- Search (Demo) -->
         <div class="flex items-center gap-2">
           <input
             type="text"
             placeholder="খুঁজুন..."
-            class="border border-slate-300 dark:border-slate-700 rounded-md px-3 py-1 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+            class="border border-slate-300 dark:border-slate-700 rounded-sm px-3 py-2 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-300"
           />
-          <button class="px-3 py-1 bg-indigo-600 text-white rounded-md font-semibold hover:bg-indigo-700 transition">
+          <button class="px-3 py-2 bg-indigo-600 text-white rounded-sm font-semibold hover:bg-indigo-700 transition">
             খুঁজুন
+          </button>
+          <!-- PDF Download Button -->
+          <button
+            class="px-3 py-2 ml-2 border border-gray-300 rounded-sm bg-white text-gray-700 font-bold shadow hover:bg-gray-100 transition flex items-center gap-2"
+            @click="downloadPDF"
+          >
+            <i class="fas fa-file-pdf text-red-500"></i>
+            PDF ডাউনলোড
           </button>
         </div>
       </div>
@@ -86,14 +94,17 @@
                   </span>
                 </td>
                 <td class="py-3 px-6 text-center">
-                  <div class="flex items-center justify-center">
+                  <div
+                    style="font-family: 'SolaimanLipi', sans-serif;"
+                    class="flex items-center justify-center"
+                  >
                     <SplitButton
                       :model="getMenuItems(item)"
                       label="বিস্তারিত"
                       icon="pi pi-eye"
-                      class="p-0.5 px-4 py-2  text-slate-700 dark:text-slate-200   transition"
+                      class="p-0.5 px-4 py-3 text-xl text-slate-700 dark:text-slate-200 transition"
                       :menuStyle="splitMenuStyle"
-                      @click="onView(item)"
+                      @click="openPanel(item)"
                     />
                   </div>
                 </td>
@@ -116,12 +127,75 @@
         </div>
       </div>
     </div>
+
+    <!-- Side Panel -->
+    <transition name="slide">
+      <div
+        v-if="panelOpen"
+        class="fixed top-0 right-0 h-full w-full md:w-96 bg-white dark:bg-slate-900 shadow-2xl border-l border-slate-300 dark:border-slate-800 z-50"
+        style="max-width:400px;"
+      >
+        <div class="flex justify-between items-center px-6 py-4 border-b border-slate-200 dark:border-slate-800">
+          <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100">
+            মাদরাসা তথ্য
+          </h3>
+          <button @click="panelOpen = false" class="text-gray-500 hover:text-gray-800 text-xl font-bold">
+            ×
+          </button>
+        </div>
+        <div class="p-6">
+          <!-- Dummy info for now -->
+          <div class="mb-4">
+            <span class="block font-semibold text-gray-700 dark:text-gray-200 mb-1">মাদরাসা নাম:</span>
+            <span class="block text-base text-gray-900 dark:text-gray-100">{{ currentItem?.main_madrasa || 'Demo মাদরাসা' }}</span>
+          </div>
+          <div class="mb-4">
+            <span class="block font-semibold text-gray-700 dark:text-gray-200 mb-1">পরীক্ষা:</span>
+            <span class="block text-base text-gray-900 dark:text-gray-100">{{ currentItem?.exam_name || 'Demo পরীক্ষা' }}</span>
+          </div>
+          <div class="mb-4">
+            <span class="block font-semibold text-gray-700 dark:text-gray-200 mb-1">ছাত্র সংখ্যা:</span>
+            <span class="block text-base text-gray-900 dark:text-gray-100">
+              {{ currentItem?.main_total_students || 0 }}
+            </span>
+          </div>
+          <div class="mb-4">
+            <span class="block font-semibold text-gray-700 dark:text-gray-200 mb-1">স্ট্যাটাস:</span>
+            <span class="block text-base text-gray-900 dark:text-gray-100">
+              {{ getStatusLabel(currentItem?.status) }}
+            </span>
+          </div>
+          <div class="mb-4">
+            <span class="block font-semibold text-gray-700 dark:text-gray-200 mb-1">সংযুক্ত মাদরাসা:</span>
+            <ul>
+              <li v-for="(assoc, idx) in currentItem?.associated_madrasas || ['Demo সংযুক্ত ১','Demo সংযুক্ত ২']" :key="idx" class="text-gray-800 dark:text-gray-200">
+                {{ assoc }}
+              </li>
+            </ul>
+          </div>
+          <!-- Add more dummy info if needed -->
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-// সব এগ্রিমেন্টের মেইন ও এসোসিয়েট ছাত্রের মোট সংখ্যা
+import { computed, ref } from 'vue';
+const panelOpen = ref(false);
+const currentItem = ref();
+
+function openPanel(item) {
+  currentItem.value = item;
+  panelOpen.value = true;
+}
+
+// PDF Download function (dummy)
+function downloadPDF() {
+  // Here you can use jsPDF or any pdf lib, now just demo
+  alert('PDF ডাউনলোড হচ্ছে...');
+}
+
 const totalStudents = computed(() => {
   return props.filtered.reduce((sum, item) => sum + (item.main_total_students || 0) + (item.associated_total_students || 0), 0);
 });
@@ -132,7 +206,6 @@ const router = useRouter();
 import SplitButton from 'primevue/splitbutton';
 
 function formatDate(dateStr: string) {
-  // ISO string থেকে dd/mm/yyyy ফরমেটে রিটার্ন
   if (!dateStr) return '';
   const d = new Date(dateStr);
   const day = d.getDate().toString().padStart(2, '0');
@@ -190,7 +263,6 @@ function getMenuItems(item: Agreement) {
   ];
 }
 
-
 function getStatusLabel(status: string) {
   switch (status) {
     case 'pending':
@@ -225,3 +297,20 @@ function statusClass(status: string) {
   }
 }
 </script>
+
+<style>
+.slide-enter-active,
+.slide-leave-active {
+  transition: all 0.3s;
+}
+.slide-enter-from,
+.slide-leave-to {
+  transform: translateX(100%);
+  opacity: 0;
+}
+.slide-enter-to,
+.slide-leave-from {
+  transform: translateX(0);
+  opacity: 1;
+}
+</style>
