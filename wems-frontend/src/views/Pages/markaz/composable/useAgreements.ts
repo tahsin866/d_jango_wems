@@ -51,34 +51,34 @@ function updateStats() {
 
 export function useAgreements() {
   // Backend fetch function
-async function fetchAgreements() {
-  try {
-    loading.value = true;
-    const axios = (await import('@/utils/axios')).default;
-    const res = await axios.get('http://localhost:8000/api/markaz/table/', {
-      withCredentials: true
-    });
-    const data = res.data?.data || [];
-    agreements.value = data.map((item: any) => ({
-      id: item.id,
-      application_date: item.created_at,
-      markaz_type: item.markaz_type,
-      main_madrasa: item.main_madrasa_name,
-      associated_madrasas: item.associated_madrasas?.map((a: any) => a.madrasa_name) || [],
-      exam_name: item.exam_name,
-      main_total_students: item.main_total_students,
-      associated_total_students: item.associated_total_students,
-      status: item.status,
-    }));
-    updateStats();
-  } catch (error) {
-    console.error('Error fetching agreements:', error);
-    agreements.value = [];
-    updateStats();
-  } finally {
-    loading.value = false;
+  async function fetchAgreements() {
+    try {
+      loading.value = true;
+      const axios = (await import('@/utils/axios')).default;
+      const res = await axios.get('http://localhost:8000/api/markaz/table/', {
+        withCredentials: true
+      });
+      const data = res.data?.data || [];
+      agreements.value = data.map((item: any) => ({
+        id: item.id,
+        application_date: item.created_at,
+        markaz_type: item.markaz_type,
+        main_madrasa: item.main_madrasa_name,
+        associated_madrasas: item.associated_madrasas?.map((a: any) => a.madrasa_name) || [],
+        exam_name: item.exam_name,
+        main_total_students: item.main_total_students,
+        associated_total_students: item.associated_total_students,
+        status: item.status,
+      }));
+      updateStats();
+    } catch (error) {
+      console.error('Error fetching agreements:', error);
+      agreements.value = [];
+      updateStats();
+    } finally {
+      loading.value = false;
+    }
   }
-}
 
   // Delete agreement by ID
   function deleteAgreementById(id: number) {

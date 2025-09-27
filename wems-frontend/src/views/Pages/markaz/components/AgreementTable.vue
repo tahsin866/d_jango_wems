@@ -62,22 +62,20 @@
                     <span class="font-bold">{{ item.main_madrasa }}</span>
                   </div>
                   <div v-if="item.associated_madrasas && item.associated_madrasas.length">
-                    <span class="text-xs text-slate-500">এসোসিয়েট মাদরাসা:</span>
-                    <ul class="ml-2 list-disc">
-                      <li v-for="(assoc, idx) in item.associated_madrasas" :key="idx" class="text-xs text-slate-600 dark:text-slate-300">
-                        {{ assoc }}
-                      </li>
-                    </ul>
+                    <span class="text-xl text-slate-500">সংযুক্ত  মাদরাসা:</span>
+                    <select class="ml-2 px-2 py-1 rounded border text-xs text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800">
+                      <option v-for="(assoc, idx) in item.associated_madrasas" :key="idx">{{ assoc }}</option>
+                    </select>
                   </div>
                 </td>
                 <td class="py-3 px-6 text-slate-700 dark:text-slate-100">{{ item.exam_name }}</td>
                 <td class="py-3 px-6 text-center font-semibold text-slate-900 dark:text-slate-100">
                   <div>
-                    <span class="text-xs">মেইন: </span>
+                    <span class="text-xs">মুল মাদরাসা: </span>
                     <span class="font-bold">{{ item.main_total_students }}</span>
                   </div>
                   <div>
-                    <span class="text-xs">এসোসিয়েট: </span>
+                    <span class="text-xs">সংযুক্ত মাদরাসা: </span>
                     <span class="font-bold">{{ item.associated_total_students }}</span>
                   </div>
                 </td>
@@ -103,11 +101,16 @@
             </tbody>
           </table>
           <!-- Pagination (Demo) -->
-          <div class="flex items-center justify-between px-6 py-4 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
-            <span class="text-slate-500 dark:text-slate-400">১-১০ / মোট {{ props.filtered.length }} টি</span>
-            <div class="flex gap-2">
-              <button class="px-2 py-1 rounded bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-100 hover:text-indigo-600 dark:hover:bg-indigo-700 dark:hover:text-indigo-100 transition">←</button>
-              <button class="px-2 py-1 rounded bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-100 hover:text-indigo-600 dark:hover:bg-indigo-700 dark:hover:text-indigo-100 transition">→</button>
+          <div class="flex flex-col gap-2 px-6 py-4 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
+            <div class="flex items-center justify-between">
+              <span class="text-slate-500 dark:text-slate-400">১-১০ / মোট {{ props.filtered.length }} টি</span>
+              <div class="flex gap-2">
+                <button class="px-2 py-1 rounded bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-100 hover:text-indigo-600 dark:hover:bg-indigo-700 dark:hover:text-indigo-100 transition">←</button>
+                <button class="px-2 py-1 rounded bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-100 hover:text-indigo-600 dark:hover:bg-indigo-700 dark:hover:text-indigo-100 transition">→</button>
+              </div>
+            </div>
+            <div class="text-right text-base font-bold text-indigo-700 dark:text-indigo-300">
+              মোট ছাত্র: {{ totalStudents }}
             </div>
           </div>
         </div>
@@ -117,6 +120,11 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
+// সব এগ্রিমেন্টের মেইন ও এসোসিয়েট ছাত্রের মোট সংখ্যা
+const totalStudents = computed(() => {
+  return props.filtered.reduce((sum, item) => sum + (item.main_total_students || 0) + (item.associated_total_students || 0), 0);
+});
 import { useAgreements } from '@/views/Pages/markaz/composable/useAgreements';
 const { deleteAgreementById } = useAgreements();
 import SplitButton from 'primevue/splitbutton';

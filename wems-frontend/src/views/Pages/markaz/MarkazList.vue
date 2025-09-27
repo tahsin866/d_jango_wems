@@ -197,6 +197,11 @@ const {
   examName
 } = useAgreements();
 
+// ID source (change as needed)
+// import { useRoute } from 'vue-router';
+// const route = useRoute();
+// const userId = Number(route.params.id) || 22; // Default/fallback
+
 // Router and toast
 const router = useRouter();
 const toast = useToast();
@@ -225,7 +230,7 @@ const filteredAgreements = computed(() => {
 // Event handlers
 async function handleRefresh() {
   try {
-    await fetchAgreements();
+  await fetchAgreements();
     toast.add({
       severity: 'success',
       summary: 'রিফ্রেশ সম্পন্ন',
