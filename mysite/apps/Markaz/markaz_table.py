@@ -24,75 +24,84 @@ class MarkazApplicationListView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
+        import redis
+        import json
         user_id = request.user.id
-        applications = MarkazApplication.objects.filter(user_id=user_id).order_by('-created_at')
-        result = []
-        for app in applications:
-            # ... (your list code as before)
-            # Main MadrasaInfo fetch
-            main_madrasa = MainMadrasaInfo.objects.filter(markaz_application_id=app.id).first()
-            madrasa_id = main_madrasa.madrasa_id if main_madrasa else None
-            madrasa_name = None
-            main_total_students = 0
-            if main_madrasa:
-                main_total_students = sum([
-                    main_madrasa.fazilat or 0,
-                    main_madrasa.sanabiya_ulya or 0,
-                    main_madrasa.sanabiya or 0,
-                    main_madrasa.mutawassita or 0,
-                    main_madrasa.ibtedaiyyah or 0,
-                    main_madrasa.hifzul_quran or 0,
-                    main_madrasa.qirat or 0,
-                ])
-                school = School.objects.filter(id=madrasa_id).first()
-                madrasa_name = school.mname if school else None
+        cache_key = f"markaz_applications_{user_id}"
+        r = redis.Redis()
+        cached = r.get(cache_key)
+        if cached:
+            result = json.loads(cached)
+            print("Loaded from Redis cache")
+        else:
+            applications = MarkazApplication.objects.filter(user_id=user_id).order_by('-created_at')
+            result = []
+            for app in applications:
+                main_madrasa = MainMadrasaInfo.objects.filter(markaz_application_id=app.id).first()
+                madrasa_id = main_madrasa.madrasa_id if main_madrasa else None
+                madrasa_name = None
+                main_total_students = 0
+                if main_madrasa:
+                    main_total_students = sum([
+                        main_madrasa.fazilat or 0,
+                        main_madrasa.sanabiya_ulya or 0,
+                        main_madrasa.sanabiya or 0,
+                        main_madrasa.mutawassita or 0,
+                        main_madrasa.ibtedaiyyah or 0,
+                        main_madrasa.hifzul_quran or 0,
+                        main_madrasa.qirat or 0,
+                    ])
+                    school = School.objects.filter(id=madrasa_id).first()
+                    madrasa_name = school.mname if school else None
 
-            associated_madrasas = AssociatedMadrasa.objects.filter(markaz_application_id=app.id)
-            associated_list = []
-            associated_total_students = 0
-            for assoc in associated_madrasas:
-                assoc_madrasa_id = assoc.madrasa_id
-                assoc_madrasa_name = None
-                assoc_students = sum([
-                    assoc.fazilat or 0,
-                    assoc.sanabiya_ulya or 0,
-                    assoc.sanabiya or 0,
-                    assoc.mutawassita or 0,
-                    assoc.ibtedaiyyah or 0,
-                    assoc.hifzul_quran or 0,
-                    assoc.qirat or 0,
-                ])
-                associated_total_students += assoc_students
-                if assoc_madrasa_id:
-                    school = School.objects.filter(id=assoc_madrasa_id).first()
-                    assoc_madrasa_name = school.mname if school else None
-                associated_list.append({
-                    'id': assoc.id,
-                    'madrasa_id': assoc_madrasa_id,
-                    'madrasa_name': assoc_madrasa_name,
-                    'total_students': assoc_students,
+                associated_madrasas = AssociatedMadrasa.objects.filter(markaz_application_id=app.id)
+                associated_list = []
+                associated_total_students = 0
+                for assoc in associated_madrasas:
+                    assoc_madrasa_id = assoc.madrasa_id
+                    assoc_madrasa_name = None
+                    assoc_students = sum([
+                        assoc.fazilat or 0,
+                        assoc.sanabiya_ulya or 0,
+                        assoc.sanabiya or 0,
+                        assoc.mutawassita or 0,
+                        assoc.ibtedaiyyah or 0,
+                        assoc.hifzul_quran or 0,
+                        assoc.qirat or 0,
+                    ])
+                    associated_total_students += assoc_students
+                    if assoc_madrasa_id:
+                        school = School.objects.filter(id=assoc_madrasa_id).first()
+                        assoc_madrasa_name = school.mname if school else None
+                    associated_list.append({
+                        'id': assoc.id,
+                        'madrasa_id': assoc_madrasa_id,
+                        'madrasa_name': assoc_madrasa_name,
+                        'total_students': assoc_students,
+                    })
+
+                exam_name = None
+                if app.exam_id:
+                    exam = ExamSetup.objects.filter(id=app.exam_id).first()
+                    if exam:
+                        exam_name = exam.exam_name
+
+                result.append({
+                    'id': app.id,
+                    'user_id': app.user_id,
+                    'markaz_type': app.markaz_type,
+                    'created_at': str(app.created_at),
+                    'exam_id': app.exam_id,
+                    'exam_name': exam_name,
+                    'status': app.status,
+                    'main_madrasa_id': madrasa_id,
+                    'main_madrasa_name': madrasa_name,
+                    'main_total_students': main_total_students,
+                    'associated_madrasas': associated_list,
+                    'associated_total_students': associated_total_students,
                 })
-
-            exam_name = None
-            if app.exam_id:
-                exam = ExamSetup.objects.filter(id=app.exam_id).first()
-                if exam:
-                    exam_name = exam.exam_name
-
-            result.append({
-                'id': app.id,
-                'user_id': app.user_id,
-                'markaz_type': app.markaz_type,
-                'created_at': str(app.created_at),
-                'exam_id': app.exam_id,
-                'exam_name': exam_name,
-                'status': app.status,
-                'main_madrasa_id': madrasa_id,
-                'main_madrasa_name': madrasa_name,
-                'main_total_students': main_total_students,
-                'associated_madrasas': associated_list,
-                'associated_total_students': associated_total_students,
-            })
+            r.set(cache_key, json.dumps(result), ex=300)  # Cache for 5 minutes
+            print("Loaded from DB and cached in Redis")
         return Response({'success': True, 'data': result}, status=status.HTTP_200_OK)
 
 from django.utils.decorators import method_decorator

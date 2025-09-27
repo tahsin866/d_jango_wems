@@ -263,6 +263,9 @@ const routes = [
       },
 
       // Markaz Management (User Layout এর অধীনে)
+
+// মারকায সংক্রান্ত  রাউট
+
       {
         path: 'markaz/list',
         name: 'MarkazList',
@@ -275,6 +278,16 @@ const routes = [
         component: () => import('@/views/Pages/markaz/markazApply.vue'),
         meta: { title: 'মারকায আবেদন', requiresAuth: true, role: 'user' },
       },
+
+
+       {
+        path: 'markaz/edit/:id',
+        name: 'MarkazEdit',
+        component: () => import('@/views/Pages/markaz/MarkazEdit.vue'),
+      meta: { title: 'মারকায সম্পাদনা', requiresAuth: true, role: 'user' },
+      },
+
+
       {
         path: 'markaz/change',
         name: 'MarkazChange',
@@ -392,6 +405,11 @@ const routes = [
     path: '/dashboard',
     redirect: '/user/dashboard'
   },
+
+  // মারকায সংক্রান্ত  রাউট
+
+
+
   {
     path: '/markaz/MarkazList',
     redirect: '/user/markaz/list'
@@ -400,6 +418,13 @@ const routes = [
     path: '/markazApply',
     redirect: '/user/markaz/apply'
   },
+
+{
+    path: '/MarkazEdit/:id',
+    redirect: '/user/markaz/edit/:id'
+  },
+
+
   {
     path: '/markazChange',
     redirect: '/user/markaz/change'

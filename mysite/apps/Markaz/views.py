@@ -127,29 +127,21 @@ class MadrashaSelectByElhaq(APIView):
 
 class MadrasaSearchAPIView(APIView):
     def get(self, request):
-        query = request.GET.get('elhaq', '').strip()
-        cache_key = f"school_search:{query}"
-
-        # Redis connection (assumes settings.REDIS_URL is set)
-        redis_client = redis.StrictRedis.from_url(settings.REDIS_URL)
-
-        # Try Redis cache first
-        cached = redis_client.get(cache_key)
-        if cached:
-            import json
-            return Response(json.loads(cached))
-
-        # Exact match search
-        if query:
-            queryset = School.objects.filter(elhaqno__iexact=query)
-        else:
-            queryset = School.objects.all()[:30]
-
-        serializer = SchoolSelectSerializer(queryset, many=True)
-        data = serializer.data
-
-        # Save to Redis cache (expire in 1 hour)
         import json
-        redis_client.setex(cache_key, 3600, json.dumps(data))
-
-        return Response(data)
+        query = request.GET.get('elhaq', '').strip()
+        redis_client = redis.StrictRedis.from_url(settings.REDIS_URL)
+        # Cache key for all schools
+        all_schools_key = "school_table:all"
+        # Try to load all schools from Redis
+        cached_all = redis_client.get(all_schools_key)
+        if cached_all:
+            all_schools = json.loads(cached_all)
+        else:
+            all_schools = list(School.objects.all().values('id', 'mname', 'elhaqno'))
+            redis_client.setex(all_schools_key, 3600, json.dumps(all_schools))
+        # Filter by elhaq query (case-insensitive contains)
+        if query:
+            filtered = [s for s in all_schools if query.lower() in (s['elhaqno'] or '').lower()]
+        else:
+            filtered = all_schools[:30]
+        return Response(filtered)

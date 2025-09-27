@@ -127,6 +127,8 @@ const totalStudents = computed(() => {
 });
 import { useAgreements } from '@/views/Pages/markaz/composable/useAgreements';
 const { deleteAgreementById } = useAgreements();
+import { useRouter } from 'vue-router';
+const router = useRouter();
 import SplitButton from 'primevue/splitbutton';
 
 function formatDate(dateStr: string) {
@@ -168,7 +170,9 @@ function getMenuItems(item: Agreement) {
     {
       label: 'সম্পাদনা',
       icon: 'pi pi-pencil',
-      command: () => emit('edit', item)
+      command: () => {
+        router.push({ name: 'MarkazEdit', params: { id: item.id } });
+      }
     },
     {
       label: 'মুছুন',
