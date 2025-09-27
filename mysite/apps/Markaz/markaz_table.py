@@ -95,6 +95,10 @@ class MarkazApplicationListView(APIView):
             })
         return Response({'success': True, 'data': result}, status=status.HTTP_200_OK)
 
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+
+@method_decorator(csrf_exempt, name='dispatch')
 class MarkazApplicationDetailView(APIView):
     permission_classes = [AllowAny]
 
@@ -179,7 +183,7 @@ class MarkazApplicationDetailView(APIView):
             app = MarkazApplication.objects.get(id=pk)
             # Audit entry
             from mysite.apps.Markaz.models import MarkazApplicationAudit
-            MarkazApplicationAudit.objects.create(
+            audit = MarkazApplicationAudit.objects.create(
                 markaz_application=app,
                 action='delete',
                 ip_address=request.META.get('REMOTE_ADDR'),
@@ -187,7 +191,13 @@ class MarkazApplicationDetailView(APIView):
                 printed=app.printed,
                 created_at=timezone.now()
             )
+            print('Audit entry created:', audit.id, audit.action, audit.ip_address)
             app.delete()
             return Response({'success': True, 'message': 'Deleted successfully.'}, status=status.HTTP_200_OK)
         except MarkazApplication.DoesNotExist:
             return Response({'success': False, 'error': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            import traceback
+            print('Delete error:', str(e))
+            traceback.print_exc()
+            return Response({'success': False, 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

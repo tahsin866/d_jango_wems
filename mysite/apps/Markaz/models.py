@@ -66,3 +66,5 @@ class MarkazApplicationAudit(models.Model):
     status = models.CharField(max_length=32, blank=True, null=True)
     printed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table = 'markaz_application_audit'
