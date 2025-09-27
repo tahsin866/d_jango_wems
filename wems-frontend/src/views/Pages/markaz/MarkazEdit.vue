@@ -2,7 +2,56 @@
 import 'primeicons/primeicons.css';
 
 import { ref, computed, watch, onMounted } from 'vue'
-import axios from 'axios'
+import axios from '@/utils/axios'
+import { useRoute, useRouter } from 'vue-router';
+const route = useRoute();
+const router = useRouter();
+const id = route.params.id;
+const success = ref(false);
+const error = ref('');
+onMounted(async () => {
+  try {
+    // Edit page: fetch existing data for edit
+    const res = await axios.get(`/api/markaz/table/${id}/`);
+    if (res.data && res.data.data) {
+      // Populate form fields from API response
+      form.value.markaz_type = res.data.data.markaz_type;
+      form.value.fazilat = res.data.data.main_total_students; // Adjust as needed
+      form.value.exam_id = res.data.data.exam_id;
+      form.value.requirements = res.data.data.requirements || '';
+      // Populate other fields as needed
+      // Associated madrasas, attachments, etc.
+    }
+  } catch (e) {
+    error.value = 'ডাটা লোড করা যায়নি';
+  }
+});
+const updateForm = async () => {
+  error.value = '';
+  success.value = false;
+  try {
+    // Prepare payload as in backend
+    const payload = {
+      markaz_application: {
+        markaz_type: form.value.markaz_type,
+        requirements: form.value.requirements,
+        exam: form.value.exam_id,
+        // ...other fields
+      },
+      main_madrasa_info: {
+        madrasa: form.value.madrasa,
+        // ...other fields
+      },
+      associated_madrasas: form.value.associated_madrasas,
+      attachments: form.value.attachments
+    };
+    await axios.put(`/api/markaz/edit/${id}/`, payload);
+    success.value = true;
+    alert('আপডেট সফল হয়েছে!');
+  } catch (e) {
+    error.value = e?.response?.data?.error || 'আপডেট ব্যর্থ হয়েছে';
+  }
+};
 
 
 import CategorySelect from '@/views/Pages/markaz/Edit/CategorySelect.vue'
@@ -1019,12 +1068,12 @@ onMounted(() => {
                     @click="step = 2"
                   />
                   <Button
-                    label="আবেদন জমা দিন"
-                    icon="pi pi-check"
+                    label="আপডেট করুন"
+                    icon="pi pi-save"
                     iconPos="right"
                     class="p-button-success"
                     :loading="loading"
-                    @click="submitForm"
+                    @click="updateForm"
                   />
                 </div>
               </div>
