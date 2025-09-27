@@ -4,56 +4,8 @@ import 'primeicons/primeicons.css';
 import { ref, computed, watch, onMounted } from 'vue'
 import axios from '@/utils/axios'
 import { useRoute, useRouter } from 'vue-router';
-const route = useRoute();
-const router = useRouter();
-const id = route.params.id;
-const success = ref(false);
-const error = ref('');
-onMounted(async () => {
-  try {
-    // Edit page: fetch existing data for edit
-    const res = await axios.get(`/api/markaz/table/${id}/`);
-    if (res.data && res.data.data) {
-      // Populate form fields from API response
-      form.value.markaz_type = res.data.data.markaz_type;
-      form.value.fazilat = res.data.data.main_total_students; // Adjust as needed
-      form.value.exam_id = res.data.data.exam_id;
-      form.value.requirements = res.data.data.requirements || '';
-      // Populate other fields as needed
-      // Associated madrasas, attachments, etc.
-    }
-  } catch (e) {
-    error.value = 'ডাটা লোড করা যায়নি';
-  }
-});
-const updateForm = async () => {
-  error.value = '';
-  success.value = false;
-  try {
-    // Prepare payload as in backend
-    const payload = {
-      markaz_application: {
-        markaz_type: form.value.markaz_type,
-        requirements: form.value.requirements,
-        exam: form.value.exam_id,
-        // ...other fields
-      },
-      main_madrasa_info: {
-        madrasa: form.value.madrasa,
-        // ...other fields
-      },
-      associated_madrasas: form.value.associated_madrasas,
-      attachments: form.value.attachments
-    };
-    await axios.put(`/api/markaz/edit/${id}/`, payload);
-    success.value = true;
-    alert('আপডেট সফল হয়েছে!');
-  } catch (e) {
-    error.value = e?.response?.data?.error || 'আপডেট ব্যর্থ হয়েছে';
-  }
-};
 
-
+// Import your components
 import CategorySelect from '@/views/Pages/markaz/Edit/CategorySelect.vue'
 import MainMadrasaInfo from '@/views/Pages/markaz/Edit/MainMadrasaInfo.vue'
 import DynamicMadrasas from '@/views/Pages/markaz/Edit/DynamicMadrasas.vue'
@@ -62,14 +14,12 @@ import AttachmentSection from '@/views/Pages/markaz/Edit/AttachmentSection.vue'
 import TabView from 'primevue/tabview'
 import TabPanel from 'primevue/tabpanel'
 import Button from 'primevue/button'
-import ProgressBar from 'primevue/progressbar'
-import Card from 'primevue/card'
-import Tooltip from 'primevue/tooltip'
-import Badge from 'primevue/badge'
 
-// Remove inertia-related code, use only TypeScript + Vue
-// You may need to replace useForm and usePage with local refs
-
+const route = useRoute();
+const router = useRouter();
+const id = route.params.id;
+const success = ref(false);
+const error = ref('');
 const step = ref(0)
 const loading = ref(false);
 const formErrors = ref<string[]>([]);
@@ -81,48 +31,55 @@ const user_id = 1;
 const user_name = "Demo Madrasha";
 const exam_id = "";
 const exam_name = "";
-// Remove invalid token set, token should be set after login, not here
 
 const form = ref<{
-    user_id: number,
-    user_name: string,
-    exam_id: string,
-    exam_name: string,
-    markaz_type: string,
-    fazilat: string,
-    sanabiya_ulya: string,
-    sanabiya: string,
-    mutawassita: string,
-    ibtedaiyyah: string,
-    hifzul_quran: string,
-    qirat: string,
-    noc_file: File | Blob | null,
-    resolution_file: File | Blob | null,
-    requirements: string,
-    muhtamim_consent: File | Blob | null,
-    president_consent: File | Blob | null,
-    committee_resolution: File | Blob | null,
-    associated_madrasas: any[]
+  user_id: number,
+  user_name: string,
+  exam_id: string,
+  exam_name: string,
+  markaz_type: string,
+  fazilat: string,
+  sanabiya_ulya: string,
+  sanabiya: string,
+  mutawassita: string,
+  ibtedaiyyah: string,
+  hifzul_quran: string,
+  qirat: string,
+  noc_file: File | Blob | null,
+  resolution_file: File | Blob | null,
+  noc_file_path: string,
+  resolution_file_path: string,
+  requirements: string,
+  muhtamim_consent: File | Blob | null,
+  president_consent: File | Blob | null,
+  committee_resolution: File | Blob | null,
+  associated_madrasas: any[],
+  attachments: any[],
+  status: string
 }>({
-    user_id: user_id,
-    user_name: user_name,
-    exam_id: exam_id,
-    exam_name: exam_name,
-    markaz_type: "",
-    fazilat: '',
-    sanabiya_ulya: '',
-    sanabiya: '',
-    mutawassita: '',
-    ibtedaiyyah: '',
-    hifzul_quran: '',
-    qirat: '',
-    noc_file: null,
-    resolution_file: null,
-    requirements: '',
-    muhtamim_consent: null,
-    president_consent: null,
-    committee_resolution: null,
-    associated_madrasas: []
+  user_id: user_id,
+  user_name: user_name,
+  exam_id: exam_id,
+  exam_name: exam_name,
+  markaz_type: "",
+  fazilat: '',
+  sanabiya_ulya: '',
+  sanabiya: '',
+  mutawassita: '',
+  ibtedaiyyah: '',
+  hifzul_quran: '',
+  qirat: '',
+  noc_file: null,
+  resolution_file: null,
+  noc_file_path: '',
+  resolution_file_path: '',
+  requirements: '',
+  muhtamim_consent: null,
+  president_consent: null,
+  committee_resolution: null,
+  associated_madrasas: [],
+  attachments: [],
+  status: ''
 })
 
 const rows = ref([{
@@ -235,58 +192,54 @@ const committeeFile = ref<File | Blob | null>(null)
 const committeePreview = ref<string | null>(null)
 
 const handleFileUploadMumtahin = (event: Event | File | Blob, type: string) => {
-    try {
-        if (event instanceof File || event instanceof Blob) {
-            switch (type) {
-                case 'muhtamim':
-                    muhtamimFile.value = event;
-                    muhtamimPreview.value = URL.createObjectURL(event);
-                    break;
-                case 'president':
-                    presidentFile.value = event;
-                    presidentPreview.value = URL.createObjectURL(event);
-                    break;
-                case 'committee':
-                    committeeFile.value = event;
-                    committeePreview.value = URL.createObjectURL(event);
-                    break;
-            }
-            return;
-        }
-
-        let file = null;
-
-        if (event && event.files && event.files.length > 0) {
-            file = event.files[0];
-        } else if (event && event.target && event.target.files && event.target.files.length > 0) {
-            file = event.target.files[0];
-        } else if (event && event.originalEvent && event.originalEvent.target &&
-                   event.originalEvent.target.files && event.originalEvent.target.files.length > 0) {
-            file = event.originalEvent.target.files[0];
-        }
-
-        if (!file) {
-            console.error('No file found in event:', event);
-            return;
-        }
-
-        switch (type) {
-            case 'muhtamim':
-                muhtamimFile.value = file;
-                muhtamimPreview.value = URL.createObjectURL(file);
-                break;
-            case 'president':
-                presidentFile.value = file;
-                presidentPreview.value = URL.createObjectURL(file);
-                break;
-            case 'committee':
-                committeeFile.value = file;
-                committeePreview.value = URL.createObjectURL(file);
-                break;
-        }
-    } catch (error) {
-        console.error('Error in handleFileUploadMumtahin:', error);
+  try {
+    if (event instanceof File || event instanceof Blob) {
+      switch (type) {
+        case 'muhtamim':
+          muhtamimFile.value = event;
+          muhtamimPreview.value = URL.createObjectURL(event);
+          break;
+        case 'president':
+          presidentFile.value = event;
+          presidentPreview.value = URL.createObjectURL(event);
+          break;
+        case 'committee':
+          committeeFile.value = event;
+          committeePreview.value = URL.createObjectURL(event);
+          break;
+      }
+      return;
     }
+    let file: File | null = null;
+    const input = event as HTMLInputElement;
+    if (input && input.files && input.files.length > 0) {
+      file = input.files[0];
+    } else if ((event as any).target && (event as any).target.files && (event as any).target.files.length > 0) {
+      file = (event as any).target.files[0];
+    }
+
+    if (!file) {
+      console.error('No file found in event:', event);
+      return;
+    }
+
+    switch (type) {
+      case 'muhtamim':
+        muhtamimFile.value = file;
+        muhtamimPreview.value = URL.createObjectURL(file);
+        break;
+      case 'president':
+        presidentFile.value = file;
+        presidentPreview.value = URL.createObjectURL(file);
+        break;
+      case 'committee':
+        committeeFile.value = file;
+        committeePreview.value = URL.createObjectURL(file);
+        break;
+    }
+  } catch (error) {
+    console.error('Error in handleFileUploadMumtahin:', error);
+  }
 }
 
 const removeFileMumtahin = (type: string) => {
@@ -388,258 +341,49 @@ const filteredOptions = computed(() => (row: any) => {
 const selectOption = (madrasha: any, row: any) => {
     row.madrasa_Name = madrasha.name;
     row.madrasa_id = madrasha.id;
-    // The child component now handles setting the searchQuery text, this just handles the data
     row.isOpen = false;
 };
 
-// Remove inertia watch
 watch(() => form.value.markaz_type, (newType) => {
   if (newType === 'দরসিয়াত') {
-    form.value.hifzul_quran = null;
-    form.value.qirat = null;
+    form.value.hifzul_quran = '';
+    form.value.qirat = '';
   } else if (newType === 'তাহফিজুল কোরআন') {
-    form.value.fazilat = null;
-    form.value.sanabiya_ulya = null;
-    form.value.sanabiya = null;
-    form.value.mutawassita = null;
-    form.value.ibtedaiyyah = null;
-    form.value.qirat = null;
+    form.value.fazilat = '';
+    form.value.sanabiya_ulya = '';
+    form.value.sanabiya = '';
+    form.value.mutawassita = '';
+    form.value.ibtedaiyyah = '';
+    form.value.qirat = '';
   } else if (newType === 'কিরাআত') {
-    form.value.fazilat = null;
-    form.value.sanabiya_ulya = null;
-    form.value.sanabiya = null;
-    form.value.mutawassita = null;
-    form.value.ibtedaiyyah = null;
-    form.value.hifzul_quran = null;
+    form.value.fazilat = '';
+    form.value.sanabiya_ulya = '';
+    form.value.sanabiya = '';
+    form.value.mutawassita = '';
+    form.value.ibtedaiyyah = '';
+    form.value.hifzul_quran = '';
   }
-
   rows.value.forEach(row => {
     if (newType === 'দরসিয়াত') {
-    row.hifzul_quran = null;
-    row.qirat = null;
+      row.hifzul_quran = '';
+      row.qirat = '';
     } else if (newType === 'তাহফিজুল কোরআন') {
-    row.fazilat = null;
-    row.sanabiya_ulya = null;
-    row.sanabiya = null;
-    row.mutawassita = null;
-    row.ibtedaiyyah = null;
-    row.qirat = null;
+      row.fazilat = '';
+      row.sanabiya_ulya = '';
+      row.sanabiya = '';
+      row.mutawassita = '';
+      row.ibtedaiyyah = '';
+      row.qirat = '';
     } else if (newType === 'কিরাআত') {
-    row.fazilat = null;
-    row.sanabiya_ulya = null;
-    row.sanabiya = null;
-    row.mutawassita = null;
-    row.ibtedaiyyah = null;
-    row.hifzul_quran = null;
+      row.fazilat = '';
+      row.sanabiya_ulya = '';
+      row.sanabiya = '';
+      row.mutawassita = '';
+      row.ibtedaiyyah = '';
+      row.hifzul_quran = '';
     }
   });
 });
-
-const submitForm = async () => {
-  loading.value = true;
-  formErrors.value = [];
-  validationErrors.value = {};
-
-  // Check if user is logged in first
-  const token = localStorage.getItem('token');
-  if (!token) {
-    loading.value = false;
-    formErrors.value = ['আপনি লগইন করে নেই। অনুগ্রহ করে আগে লগইন করুন।'];
-    // Redirect to login page if needed
-    // await router.push('/signin');
-    return;
-  }
-
-  // Validation logic
-  if (!form.value.requirements) {
-    loading.value = false;
-    formErrors.value = ['মারকাজ প্রয়োজনীয়তা ব্যাখ্যা করুন'];
-    return;
-  }
-
-  if (!form.value.markaz_type) {
-    loading.value = false;
-    formErrors.value = ['মারকাযের স্তর নির্বাচন করুন'];
-    return;
-  }
-
-  // Markaz type specific validation
-  if (form.value.markaz_type === 'দরসিয়াত') {
-    if (form.value.fazilat === null) {
-      loading.value = false;
-      formErrors.value = ['ফাযীলাত ফিল্ড পূরণ করুন'];
-      return;
-    }
-    if (form.value.sanabiya_ulya === null) {
-      loading.value = false;
-      formErrors.value = ['সানাবিয়া উলইয়া ফিল্ড পূরণ করুন'];
-      return;
-    }
-  } else if (form.value.markaz_type === 'তাহফিজুল কোরআন') {
-    if (form.value.hifzul_quran === null) {
-      loading.value = false;
-      formErrors.value = ['হিফযুল কোরআন ফিল্ড পূরণ করুন'];
-      return;
-    }
-  } else if (form.value.markaz_type === 'কিরাআত') {
-    if (form.value.qirat === null) {
-      loading.value = false;
-      formErrors.value = ['কিরাআত ফিল্ড পূরণ করুন'];
-      return;
-    }
-  }
-
-  if (!nocFileForMadrahsa.value || !resolutionFileForMadrahsa.value) {
-    loading.value = false;
-    formErrors.value = ['মূল মাদ্রাসার সমস্ত প্রয়োজনীয় ফাইল আপলোড করুন'];
-    return;
-  }
-
-  // Validate associated madrasas
-  const invalidRows = rows.value.filter(row => {
-    // Common required fields
-    if (!row.madrasa_id) return true;
-    if (!row.files.noc || !row.files.resolution) return true;
-
-    // Darsiyat: All fields must be non-null/non-undefined and > 0
-    if (form.value.markaz_type === 'দরসিয়াত') {
-      if (
-        !isValidNumber(row.fazilat) ||
-        !isValidNumber(row.sanabiya_ulya) ||
-        !isValidNumber(row.sanabiya) ||
-        !isValidNumber(row.mutawassita) ||
-        !isValidNumber(row.ibtedaiyyah)
-      ) {
-        return true;
-      }
-    } else if (form.value.markaz_type === 'তাহফিজুল কোরআন') {
-      if (!isValidNumber(row.hifzul_quran)) {
-        return true;
-      }
-    } else if (form.value.markaz_type === 'কিরাআত') {
-      if (!isValidNumber(row.qirat)) {
-        return true;
-      }
-    }
-
-    return false;
-  });
-
-  // Helper function
-  function isValidNumber(val) {
-    return val !== null && val !== undefined && Number(val) > 0;
-  }
-
-  if (invalidRows.length > 0) {
-    loading.value = false;
-    formErrors.value = [`${invalidRows.length}টি সংযুক্ত মাদ্রাসার তথ্য অসম্পূর্ণ`];
-    return;
-  }
-
-  // Get user info from localStorage (যেমন আপনার login এ save করা হয়েছে)
-const userId = localStorage.getItem('user_id');
-// const token = localStorage.getItem('token');
-console.log('user_id:', userId, 'token:', token); // Debug log
-
-  // Prepare main madrasa info
-  const mainMadrasaInfo = {
-    madrasa: userId, // Use logged in user's ID (assuming it's school ID)
-    fazilat: form.value.fazilat,
-    sanabiya_ulya: form.value.sanabiya_ulya,
-    sanabiya: form.value.sanabiya,
-    mutawassita: form.value.mutawassita,
-    ibtedaiyyah: form.value.ibtedaiyyah,
-    hifzul_quran: form.value.hifzul_quran,
-    qirat: form.value.qirat,
-    noc_file_path: form.value.noc_file ? form.value.noc_file.name : '',
-    resolution_file_path: form.value.resolution_file ? form.value.resolution_file.name : ''
-  };
-
-  // Prepare associated madrasas
-  const associatedMadrasas = rows.value.map(row => ({
-    madrasa: row.madrasa_id,
-    fazilat: row.fazilat,
-    sanabiya_ulya: row.sanabiya_ulya,
-    sanabiya: row.sanabiya,
-    mutawassita: row.mutawassita,
-    ibtedaiyyah: row.ibtedaiyyah,
-    hifzul_quran: row.hifzul_quran,
-    qirat: row.qirat,
-    noc_file_path: row.files.noc ? row.files.noc.name : '',
-    resolution_file_path: row.files.resolution ? row.files.resolution.name : ''
-  }));
-
-  // Prepare attachments
-  const attachments = [];
-  if (muhtamimFile.value) attachments.push({ type: 'muhtamim_consent', file_path: muhtamimFile.value.name });
-  if (presidentFile.value) attachments.push({ type: 'president_consent', file_path: presidentFile.value.name });
-  if (committeeFile.value) attachments.push({ type: 'committee_resolution', file_path: committeeFile.value.name });
-
-  // Prepare markaz application
-  const markazApplication = {
-    user: userId,
-    exam: form.value.exam_id || null,
-    markaz_type: form.value.markaz_type,
-    requirements: form.value.requirements,
-    status: 'pending',
-    ip_address: window?.location?.hostname || '',
-    printed: false
-  };
-
-  const payload = {
-    markaz_application: markazApplication,
-    main_madrasa_info: mainMadrasaInfo,
-    associated_madrasas: associatedMadrasas,
-    attachments: attachments
-  };
-
-  try {
-    // Use axios (same as your login) with proper Authorization header
-    const response = await axios.post('http://127.0.0.1:8000/api/markaz/apply/', payload, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    loading.value = false;
-
-    if (response.data.success) {
-      formErrors.value = [];
-      alert('আবেদন সফলভাবে জমা হয়েছে!');
-      // Optionally redirect or reset form
-      // await router.push('/dashboard');
-      // resetForm();
-    } else {
-      formErrors.value = [response.data.error || 'আবেদন জমা দিতে সমস্যা হয়েছে'];
-    }
-
-  } catch (error) {
-    loading.value = false;
-    console.error('Submit error:', error);
-
-    if (error.response?.status === 401) {
-      formErrors.value = ['আপনার লগইন সেশন শেষ হয়ে গেছে। পুনরায় লগইন করুন।'];
-      // Clear invalid token
-      localStorage.removeItem('token');
-      localStorage.removeItem('user_id');
-      localStorage.removeItem('user_type');
-      localStorage.removeItem('permissions');
-      // Redirect to login
-      // await router.push('/signin');
-    } else if (error.response?.status === 403) {
-      formErrors.value = ['আপনার এই কাজের অনুমতি নেই।'];
-    } else if (error.response?.status >= 500) {
-      formErrors.value = ['সার্ভার ত্রুটি। পরে আবার চেষ্টা করুন।'];
-    } else if (error.request) {
-      formErrors.value = ['নেটওয়ার্ক ত্রুটি। ইন্টারনেট সংযোগ চেক করুন।'];
-    } else {
-      formErrors.value = ['আবেদন জমা দিতে সমস্যা হয়েছে: ' + (error.message || 'অজানা সমস্যা')];
-    }
-  }
-};
-
-
 
 const getCurrentDateTime = () => {
     return "2025-07-22 09:17:27";
@@ -649,106 +393,6 @@ const getCurrentUser = () => {
     return "tahsin866";
 }
 
-const handleConditionsAccepted = () => {
-    conditionsAgreed.value = true;
-}
-
-const isConditionsAccepted = computed(() => {
-    return conditionsAgreed.value;
-});
-
-const isStep1Valid = computed(() => {
-  try {
-    if (!form.value || !form.value.markaz_type) return false;
-
-    if (form.value.markaz_type === 'দরসিয়াত') {
-      return form.value.fazilat !== '' && form.value.fazilat !== null &&
-             form.value.sanabiya_ulya !== '' && form.value.sanabiya_ulya !== null &&
-             !!nocFileForMadrahsa.value && !!resolutionFileForMadrahsa.value;
-    } else if (form.value.markaz_type === 'তাহফিজুল কোরআন') {
-      return form.value.hifzul_quran !== '' && form.value.hifzul_quran !== null &&
-             !!nocFileForMadrahsa.value && !!resolutionFileForMadrahsa.value;
-    } else if (form.value.markaz_type === 'কিরাআত') {
-      return form.value.qirat !== '' && form.value.qirat !== null &&
-             !!nocFileForMadrahsa.value && !!resolutionFileForMadrahsa.value;
-    }
-
-    return false;
-  } catch (error) {
-    console.error('Error in isStep1Valid:', error);
-    return false;
-  }
-});
-
-const isStep2Valid = computed(() => {
-  try {
-    if (!rows?.value || rows.value.length === 0) return false;
-
-    return rows.value.every(row => {
-      // মাদরাসা আইডি এবং ফাইল চেক
-      if (!row.madrasa_id) return false;
-      if (!row.files?.noc || !row.files?.resolution) return false;
-
-      // মারকায টাইপ অনুযায়ী ভ্যালিডেশন
-      if (form?.value.markaz_type === 'দরসিয়াত') {
-        // শূন্য সহ যেকোনো ধনাত্মক সংখ্যা গ্রহণযোগ্য
-        return (row.fazilat !== null && row.fazilat !== undefined) &&
-               (row.sanabiya_ulya !== null && row.sanabiya_ulya !== undefined) &&
-               (row.sanabiya !== null && row.sanabiya !== undefined) &&
-               (row.mutawassita !== null && row.mutawassita !== undefined) &&
-               (row.ibtedaiyyah !== null && row.ibtedaiyyah !== undefined);
-      } else if (form?.value.markaz_type === 'তাহফিজুল কোরআন') {
-        return (row.hifzul_quran !== null && row.hifzul_quran !== undefined);
-      } else if (form?.value.markaz_type === 'কিরাআত') {
-        return (row.qirat !== null && row.qirat !== undefined);
-      }
-
-      return false;
-    });
-  } catch (error) {
-    console.error('Error in isStep2Valid:', error);
-    return false;
-  }
-});
-
-
-const isStep3Valid = computed(() => {
-  try {
-    return !!form.value.requirements;
-  } catch (error) {
-    console.error('Error in isStep3Valid:', error);
-    return false;
-  }
-});
-
-const canAccessStep = computed(() => {
-  try {
-    return {
-      0: true,
-      1: !!isConditionsAccepted.value,
-      2: (!!isConditionsAccepted.value && !!isStep1Valid.value),
-      3: (!!isConditionsAccepted.value && !!isStep1Valid.value && !!isStep2Valid.value)
-    };
-  } catch (error) {
-    console.error('Error in canAccessStep:', error);
-    return { 0: true, 1: false, 2: false, 3: false };
-  }
-});
-
-const getStepCompletionPercentage = computed(() => {
-    try {
-        let total = 0;
-        if (isConditionsAccepted?.value) total += 25;
-        if (isStep1Valid?.value) total += 25;
-        if (isStep2Valid?.value) total += 25;
-        if (isStep3Valid?.value) total += 25;
-        return Math.round(total);
-    } catch (error) {
-        console.error('Error in getStepCompletionPercentage:', error);
-        return 0;
-    }
-});
-
 const stepLabels = [
     { label: "শর্তাবলী", icon: "pi pi-info-circle" },
     { label: "ধরন ও মূল তথ্য", icon: "pi pi-file-edit" },
@@ -757,50 +401,129 @@ const stepLabels = [
 ];
 
 const getStepIcon = (index: number) => {
-    if (index === 0 && isConditionsAccepted.value) return "pi pi-check-circle text-gray-700";
-    if (index === 1 && isStep1Valid.value) return "pi pi-check-circle text-gray-700";
-    if (index === 2 && isStep2Valid.value) return "pi pi-check-circle text-gray-700";
-    if (index === 3 && isStep3Valid.value) return "pi pi-check-circle text-gray-700";
     return step.value === index ? "pi pi-spin pi-spinner text-gray-700" : "pi pi-circle-fill text-gray-400";
 };
 
+// Only ONE declaration for canAccessStep: here always all steps accessible
+const canAccessStep = computed(() => ({ 0: true, 1: true, 2: true, 3: true }));
+
+const getStepCompletionPercentage = computed(() => 100);
+
 const handleTabChange = (event: any) => {
-    // Only set step, do not call preventDefault or validate
     if (event && typeof event.index === 'number') {
         step.value = event.index;
     }
 };
-
 const goToNextStep = () => {
-  const nextStep = step.value + 1;
-  if (canAccessStep.value[nextStep]) {
-    step.value = nextStep;
-  }
+    step.value = step.value + 1;
 };
 
-// New code to fetch madrashas from API
-// (Already declared above, do not redeclare)
+onMounted(async () => {
+  try {
+    const res = await axios.get(`/api/markaz/full-detail/${id}/`);
+    if (res.data && res.data.data) {
+      const app = res.data.data.markaz_application || {};
+      const main = res.data.data.main_madrasa_info || {};
+      const associated = res.data.data.associated_madrasas || [];
+      const attachments = res.data.data.attachments || [];
+      form.value.markaz_type = app.markaz_type || '';
+      form.value.requirements = app.requirements || '';
+      form.value.exam_id = app.exam || '';
+      form.value.user_id = app.user || '';
+      form.value.status = app.status || '';
+      form.value.fazilat = main.fazilat ?? '';
+      form.value.sanabiya_ulya = main.sanabiya_ulya ?? '';
+      form.value.sanabiya = main.sanabiya ?? '';
+      form.value.mutawassita = main.mutawassita ?? '';
+      form.value.ibtedaiyyah = main.ibtedaiyyah ?? '';
+      form.value.hifzul_quran = main.hifzul_quran ?? '';
+      form.value.qirat = main.qirat ?? '';
+      form.value.noc_file_path = main.noc_file_path ?? '';
+      form.value.resolution_file_path = main.resolution_file_path ?? '';
+      form.value.associated_madrasas = associated.map(row => ({
+        ...row,
+        fazilat: row.fazilat !== undefined && row.fazilat !== null ? Number(row.fazilat) : null,
+        sanabiya_ulya: row.sanabiya_ulya !== undefined && row.sanabiya_ulya !== null ? Number(row.sanabiya_ulya) : null,
+        sanabiya: row.sanabiya !== undefined && row.sanabiya !== null ? Number(row.sanabiya) : null,
+        mutawassita: row.mutawassita !== undefined && row.mutawassita !== null ? Number(row.mutawassita) : null,
+        ibtedaiyyah: row.ibtedaiyyah !== undefined && row.ibtedaiyyah !== null ? Number(row.ibtedaiyyah) : null,
+        hifzul_quran: row.hifzul_quran !== undefined && row.hifzul_quran !== null ? Number(row.hifzul_quran) : null,
+        qirat: row.qirat !== undefined && row.qirat !== null ? Number(row.qirat) : null
+      }));
+      form.value.attachments = attachments;
+        // Sync rows.value with associated madrasas for DynamicMadrasas.vue
+        rows.value = associated.map(row => ({
+          searchQuery: row.madrasa_name || '', // Use backend-provided madrasa_name
+          madrasa_id: row.madrasa_id ?? null,
+          fazilat: row.fazilat !== undefined && row.fazilat !== null ? Number(row.fazilat) : null,
+          sanabiya_ulya: row.sanabiya_ulya !== undefined && row.sanabiya_ulya !== null ? Number(row.sanabiya_ulya) : null,
+          sanabiya: row.sanabiya !== undefined && row.sanabiya !== null ? Number(row.sanabiya) : null,
+          mutawassita: row.mutawassita !== undefined && row.mutawassita !== null ? Number(row.mutawassita) : null,
+          ibtedaiyyah: row.ibtedaiyyah !== undefined && row.ibtedaiyyah !== null ? Number(row.ibtedaiyyah) : null,
+          hifzul_quran: row.hifzul_quran !== undefined && row.hifzul_quran !== null ? Number(row.hifzul_quran) : null,
+          qirat: row.qirat !== undefined && row.qirat !== null ? Number(row.qirat) : null,
+          selectedMadrasha: null,
+          isOpen: false,
+          files: {
+            noc: null,
+            nocPreview: null,
+            resolution: null,
+            resolutionPreview: null
+          }
+        }));
+    }
+  } catch (e) {
+    error.value = 'ডাটা লোড করা যায়নি';
+  }
 
-// Parent component এ
-async function fetchMadrashas() {
   try {
     const response = await fetch('http://127.0.0.1:8000/api/markaz/search-madrasa/');
     if (response.ok) {
       const data = await response.json();
-            madrashas.value = data.map((item: any) => ({
-                id: item.id,
-                name: item.mname,
-                elhaqno: item.elhaqno || item.ElhaqNo || item.elhaq || '',
-            }));
+      madrashas.value = data.map((item: any) => ({
+        id: item.id,
+        name: item.mname,
+        elhaqno: item.elhaqno || item.ElhaqNo || item.elhaq || '',
+      }));
     }
   } catch (error) {
     console.error('Failed to fetch madrashas:', error);
   }
-}
-
-onMounted(() => {
-  fetchMadrashas();
 });
+
+const updateForm = async () => {
+  error.value = '';
+  success.value = false;
+  try {
+    const payload = {
+      markaz_application: {
+        markaz_type: form.value.markaz_type,
+        requirements: form.value.requirements,
+        exam: form.value.exam_id,
+        user: form.value.user_id,
+        status: form.value.status,
+      },
+      main_madrasa_info: {
+        fazilat: form.value.fazilat,
+        sanabiya_ulya: form.value.sanabiya_ulya,
+        sanabiya: form.value.sanabiya,
+        mutawassita: form.value.mutawassita,
+        ibtedaiyyah: form.value.ibtedaiyyah,
+        hifzul_quran: form.value.hifzul_quran,
+        qirat: form.value.qirat,
+        noc_file_path: form.value.noc_file_path,
+        resolution_file_path: form.value.resolution_file_path,
+      },
+      associated_madrasas: form.value.associated_madrasas,
+      attachments: form.value.attachments
+    };
+    await axios.put(`/api/markaz/edit/${id}/`, payload);
+    success.value = true;
+    alert('আপডেট সফল হয়েছে!');
+  } catch (e) {
+    error.value = e?.response?.data?.error || 'আপডেট ব্যর্থ হয়েছে';
+  }
+};
 </script>
 
 <template>

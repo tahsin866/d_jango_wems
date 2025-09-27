@@ -1,3 +1,6 @@
+from mysite.apps.Markaz.serializers import MarkazApplicationSerializer, MainMadrasaInfoSerializer, AssociatedMadrasaSerializer, AttachmentSerializer
+
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -58,3 +61,38 @@ class MarkazApplicationEditView(APIView):
             return Response({'success': True, 'message': 'Updated successfully.'}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'success': False, 'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class MarkazApplicationFullDetailView(APIView):
+    permission_classes = [AllowAny]
+    def get(self, request, pk=None):
+        if pk is None:
+            return Response({'success': False, 'error': 'No ID provided.'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            markaz_app = MarkazApplication.objects.get(id=pk)
+            main_madrasa = MainMadrasaInfo.objects.filter(markaz_application_id=pk).first()
+            associated_madrasas = AssociatedMadrasa.objects.filter(markaz_application_id=pk)
+            attachments = Attachment.objects.filter(markaz_application_id=pk)
+
+            # Add madrasa_name from School table for each associated madrasa
+            associated_list = []
+            from mysite.apps.school.models import School
+            for assoc in associated_madrasas:
+                assoc_data = AssociatedMadrasaSerializer(assoc).data
+                madrasa_id = assoc.madrasa_id
+                madrasa_name = None
+                if madrasa_id:
+                    school = School.objects.filter(id=madrasa_id).first()
+                    madrasa_name = school.mname if school else None
+                assoc_data['madrasa_name'] = madrasa_name
+                associated_list.append(assoc_data)
+
+            data = {
+                'markaz_application': MarkazApplicationSerializer(markaz_app).data,
+                'main_madrasa_info': MainMadrasaInfoSerializer(main_madrasa).data if main_madrasa else {},
+                'associated_madrasas': associated_list,
+                'attachments': AttachmentSerializer(attachments, many=True).data
+            }
+            return Response({'success': True, 'data': data}, status=status.HTTP_200_OK)
+        except MarkazApplication.DoesNotExist:
+            return Response({'success': False, 'error': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
