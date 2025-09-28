@@ -1,24 +1,23 @@
 <template>
-
     <div
       style="font-family: 'SolaimanLipi', sans-serif;"
-      class="py-12 bg-gray-50 dark:bg-slate-900 min-h-screen text-gray-800 dark:text-gray-200"
+      class="py-12 bg-gray-100  text-gray-800"
     >
-      <div class="mx-auto  sm:px-6 lg:px-8">
-        <div class="bg-white dark:bg-slate-800 overflow-hidden shadow-sm sm:rounded-lg border border-gray-200 dark:border-slate-700">
+      <div class="mx-auto sm:px-6 lg:px-8">
+        <div class="bg-white overflow-hidden shadow border border-gray-300 rounded-sm">
           <!-- Header -->
           <div
-            class="p-6 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+            class="p-6 bg-gradient-to-r from-gray-800 to-gray-700 border-b border-gray-300 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
           >
             <div>
-              <h2 class="text-2xl font-semibold leading-tight">মারকায আবেদন তালিকা</h2>
-              <p class="mt-1 text-md text-gray-500 dark:text-gray-400">সব আবেদন এখানে তালিকাভুক্ত থাকবে</p>
+              <h2 class="text-2xl font-bold leading-tight text-white">মারকায আবেদন তালিকা</h2>
+              <p class="mt-1 text-md text-gray-300">সব আবেদন এখানে তালিকাভুক্ত থাকবে</p>
             </div>
 
             <div class="flex items-center gap-3">
               <RouterLink
                 to="/markaz/change/form"
-                class="inline-flex items-center px-4 py-2 bg-gray-800 text-white rounded-sm text-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800"
+                class="inline-flex items-center px-4 py-2 bg-gray-700 text-white rounded-sm text-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-700 transition-all duration-200"
                 aria-label="মারকাজ পরিবর্তন ফরম"
               >
                 মারকাজ পরিবর্তন ফরম
@@ -26,7 +25,7 @@
 
               <button
                 type="button"
-                class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-sm text-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="inline-flex items-center px-4 py-2 bg-blue-700 text-white rounded-sm text-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
                 @click="createNew"
                 title="নতুন আবেদন"
               >
@@ -36,38 +35,38 @@
           </div>
 
           <!-- Table Container -->
-          <div class="p-6 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700">
-            <div class="overflow-x-auto">
-              <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
-                <thead class="bg-gray-50 dark:bg-slate-700">
+          <div class="p-6 bg-white border-b border-gray-300">
+            <div class="overflow-x-auto border border-gray-300 rounded-sm">
+              <table class="min-w-full divide-y divide-gray-300">
+                <thead class="bg-gray-100">
                   <tr>
-                    <th class="px-6 py-3 text-left text-md font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th class="px-6 py-3 text-left text-md font-bold text-gray-700 uppercase tracking-wider border-b border-gray-300">
                       আবেদন নং
                     </th>
-                    <th class="px-6 py-3 text-left text-md font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th class="px-6 py-3 text-left text-md font-bold text-gray-700 uppercase tracking-wider border-b border-gray-300">
                       বর্তমান স্তর
                     </th>
-                    <th class="px-6 py-3 text-left text-md font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th class="px-6 py-3 text-left text-md font-bold text-gray-700 uppercase tracking-wider border-b border-gray-300">
                       বর্তমান মাদরাসা
                     </th>
-                    <th class="px-6 py-3 text-left text-md font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th class="px-6 py-3 text-left text-md font-bold text-gray-700 uppercase tracking-wider border-b border-gray-300">
                       তারিখ
                     </th>
-                    <th class="px-6 py-3 text-left text-md font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th class="px-6 py-3 text-left text-md font-bold text-gray-700 uppercase tracking-wider border-b border-gray-300">
                       জয়েনিং তারিখ
                     </th>
-                    <th class="px-6 py-3 text-left text-md font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th class="px-6 py-3 text-left text-md font-bold text-gray-700 uppercase tracking-wider border-b border-gray-300">
                       স্ট্যাটাস
                     </th>
-                    <th class="px-6 py-3 text-left text-md font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th class="px-6 py-3 text-left text-md font-bold text-gray-700 uppercase tracking-wider border-b border-gray-300">
                       একশন
                     </th>
                   </tr>
                 </thead>
 
-                <tbody class="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-700">
+                <tbody class="bg-white divide-y divide-gray-300">
                   <tr v-if="items.length === 0">
-                    <td class="px-6 py-8 text-center text-md text-gray-500 dark:text-gray-400" colspan="7">
+                    <td class="px-6 py-8 text-center text-md text-gray-600" colspan="7">
                       কোনো আবেদন নেই।
                     </td>
                   </tr>
@@ -75,16 +74,16 @@
                   <tr
                     v-for="item in items"
                     :key="item.id"
-                    class="hover:bg-gray-50 dark:hover:bg-slate-700"
+                    class="hover:bg-gray-50"
                   >
-                    <td class="px-6 py-4 whitespace-nowrap text-md">{{ item.applicationNo }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-md">{{ item.currentLevel }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-md">{{ item.currentMadrasa }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-md">{{ formatDate(item.date) }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-md">{{ formatDate(item.joiningDate) }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
+                    <td class="px-6 py-4 whitespace-nowrap text-md border-b border-gray-200">{{ item.applicationNo }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-md border-b border-gray-200">{{ item.currentLevel }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-md border-b border-gray-200">{{ item.currentMadrasa }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-md border-b border-gray-200">{{ formatDate(item.date) }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-md border-b border-gray-200">{{ formatDate(item.joiningDate) }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap border-b border-gray-200">
                       <span
-                        class="px-2 inline-flex text-md leading-5 font-semibold rounded-full"
+                        class="px-2 inline-flex text-md leading-5 font-semibold rounded-sm"
                         :class="statusBadgeClass(item.status)"
                         role="status"
                         :aria-label="`স্ট্যাটাস: ${item.status}`"
@@ -93,15 +92,16 @@
                       </span>
                     </td>
 
-                    <td class="px-6 py-4 whitespace-nowrap text-md font-medium">
-                      <div class="flex items-center gap-2">
+                    <td class="px-6 py-4 whitespace-nowrap text-md font-medium border-b border-gray-200">
+                      <!-- Grouped Action Buttons -->
+                      <div class="inline-flex rounded-sm shadow-sm" role="group">
                         <button
                           @click="viewItem(item)"
-                          class="p-2 rounded hover:bg-gray-100 dark:hover:bg-slate-700 focus:outline-none"
+                          class="px-3 py-2 text-sm font-medium text-white bg-blue-700 border border-blue-700 rounded-l-sm hover:bg-blue-600 focus:z-10 focus:ring-2 focus:ring-blue-500 focus:bg-blue-600 transition-all duration-200"
                           title="View Details"
                           aria-label="বিস্তারিত দেখুন"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                           </svg>
@@ -109,22 +109,22 @@
 
                         <button
                           @click="updateItem(item)"
-                          class="p-2 rounded hover:bg-gray-100 dark:hover:bg-slate-700 focus:outline-none"
+                          class="px-3 py-2 text-sm font-medium text-white bg-amber-600 border-t border-b border-amber-600 hover:bg-amber-500 focus:z-10 focus:ring-2 focus:ring-amber-500 focus:bg-amber-500 transition-all duration-200"
                           title="Edit"
                           aria-label="সম্পাদনা করুন"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-600 dark:text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                           </svg>
                         </button>
 
                         <button
                           @click="deleteItem(item)"
-                          class="p-2 rounded hover:bg-gray-100 dark:hover:bg-slate-700 focus:outline-none"
+                          class="px-3 py-2 text-sm font-medium text-white bg-red-700 border border-red-700 rounded-r-sm hover:bg-red-600 focus:z-10 focus:ring-2 focus:ring-red-500 focus:bg-red-600 transition-all duration-200"
                           title="Delete"
                           aria-label="মুছুন"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600 dark:text-red-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
                         </button>
@@ -135,29 +135,34 @@
               </table>
             </div>
 
-            <!-- Inline Details Panel (replaces modal/drawer) -->
-            <div v-if="selectedItem" class="mt-6 p-4 rounded-md border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800">
-              <div class="flex items-start justify-between">
+            <!-- Inline Details Panel -->
+            <div v-if="selectedItem" class="mt-6 p-6 rounded-sm border border-gray-300 bg-gray-50 shadow-sm">
+              <div class="flex items-start justify-between border-b border-gray-300 pb-4 mb-4">
                 <div>
-                  <h3 class="text-lg font-semibold">আবেদন বিবরণ — {{ selectedItem.applicationNo }}</h3>
-                  <p class="text-md text-gray-600 dark:text-gray-400 mt-1">স্ট্যাটাস: {{ humanStatus(selectedItem.status) }}</p>
+                  <h3 class="text-xl font-bold text-gray-800">আবেদন বিবরণ — {{ selectedItem.applicationNo }}</h3>
+                  <p class="text-md text-gray-600 mt-1">স্ট্যাটাস: {{ humanStatus(selectedItem.status) }}</p>
                 </div>
 
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-3">
+                  <!-- Grouped Action Buttons in Details Panel -->
+                  <div class="inline-flex rounded-sm shadow-sm" role="group">
+                    <button
+                      @click="updateItem(selectedItem)"
+                      class="px-4 py-2 text-sm font-medium text-white bg-amber-600 border border-amber-600 rounded-l-sm hover:bg-amber-500 focus:z-10 focus:ring-2 focus:ring-amber-500 focus:bg-amber-500 transition-all duration-200"
+                    >
+                      সম্পাদনা করুন
+                    </button>
+
+                    <button
+                      @click="confirmDelete(selectedItem)"
+                      class="px-4 py-2 text-sm font-medium text-white bg-red-700 border border-red-700 rounded-r-sm hover:bg-red-600 focus:z-10 focus:ring-2 focus:ring-red-500 focus:bg-red-600 transition-all duration-200"
+                    >
+                      মুছুন
+                    </button>
+                  </div>
+
                   <button
-                    class="px-3 py-1 bg-amber-600 text-white rounded hover:bg-amber-700"
-                    @click="updateItem(selectedItem)"
-                  >
-                    সম্পাদনা করুন
-                  </button>
-                  <button
-                    class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
-                    @click="confirmDelete(selectedItem)"
-                  >
-                    মুছুন
-                  </button>
-                  <button
-                    class="px-3 py-1 bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-200"
+                    class="px-4 py-2 bg-gray-200 text-gray-800 rounded-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all duration-200"
                     @click="closeDetails"
                   >
                     বন্ধ
@@ -165,30 +170,30 @@
                 </div>
               </div>
 
-              <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                <div>
-                  <dt class="text-md text-gray-500 dark:text-gray-400">আবেদন নং</dt>
-                  <dd class="mt-1 text-md">{{ selectedItem.applicationNo }}</dd>
+              <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="border-b border-gray-200 pb-2">
+                  <dt class="text-md font-semibold text-gray-700">আবেদন নং</dt>
+                  <dd class="mt-1 text-md text-gray-800">{{ selectedItem.applicationNo }}</dd>
                 </div>
-                <div>
-                  <dt class="text-md text-gray-500 dark:text-gray-400">বর্তমান স্তর</dt>
-                  <dd class="mt-1 text-md">{{ selectedItem.currentLevel }}</dd>
+                <div class="border-b border-gray-200 pb-2">
+                  <dt class="text-md font-semibold text-gray-700">বর্তমান স্তর</dt>
+                  <dd class="mt-1 text-md text-gray-800">{{ selectedItem.currentLevel }}</dd>
                 </div>
-                <div>
-                  <dt class="text-md text-gray-500 dark:text-gray-400">বর্তমান মাদরাসা</dt>
-                  <dd class="mt-1 text-md">{{ selectedItem.currentMadrasa }}</dd>
+                <div class="border-b border-gray-200 pb-2">
+                  <dt class="text-md font-semibold text-gray-700">বর্তমান মাদরাসা</dt>
+                  <dd class="mt-1 text-md text-gray-800">{{ selectedItem.currentMadrasa }}</dd>
                 </div>
-                <div>
-                  <dt class="text-md text-gray-500 dark:text-gray-400">তারিখ</dt>
-                  <dd class="mt-1 text-md">{{ formatDate(selectedItem.date) }}</dd>
+                <div class="border-b border-gray-200 pb-2">
+                  <dt class="text-md font-semibold text-gray-700">তারিখ</dt>
+                  <dd class="mt-1 text-md text-gray-800">{{ formatDate(selectedItem.date) }}</dd>
                 </div>
-                <div>
-                  <dt class="text-md text-gray-500 dark:text-gray-400">জয়েনিং তারিখ</dt>
-                  <dd class="mt-1 text-md">{{ formatDate(selectedItem.joiningDate) }}</dd>
+                <div class="border-b border-gray-200 pb-2">
+                  <dt class="text-md font-semibold text-gray-700">জয়েনিং তারিখ</dt>
+                  <dd class="mt-1 text-md text-gray-800">{{ formatDate(selectedItem.joiningDate) }}</dd>
                 </div>
-                <div>
-                  <dt class="text-md text-gray-500 dark:text-gray-400">স্ট্যাটাস</dt>
-                  <dd class="mt-1 text-md">{{ humanStatus(selectedItem.status) }}</dd>
+                <div class="border-b border-gray-200 pb-2">
+                  <dt class="text-md font-semibold text-gray-700">স্ট্যাটাস</dt>
+                  <dd class="mt-1 text-md text-gray-800">{{ humanStatus(selectedItem.status) }}</dd>
                 </div>
               </dl>
             </div>
@@ -197,14 +202,12 @@
         </div>
       </div>
     </div>
-
 </template>
 
 <script setup lang="ts">
 // TypeScript SFC, prepared for editor / Vite / Volar type checking
 import { ref } from 'vue';
 import { useRouter, RouterLink } from 'vue-router';
-
 
 /**
  * Application item type
@@ -330,16 +333,16 @@ function humanStatus(status: string) {
 }
 
 /**
- * Badge classes (tailwind) with dark mode support
+ * Badge classes (tailwind) with classic design
  */
 function statusBadgeClass(status: string) {
   if (status === 'active') {
-    return 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100';
+    return 'bg-green-100 text-green-800 border border-green-300';
   }
   if (status === 'inactive') {
-    return 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100';
+    return 'bg-red-100 text-red-800 border border-red-300';
   }
   // pending / other
-  return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100';
+  return 'bg-yellow-100 text-yellow-800 border border-yellow-300';
 }
 </script>

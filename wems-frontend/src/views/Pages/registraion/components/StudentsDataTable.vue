@@ -192,7 +192,7 @@ const submitAllApplications = () => {
       }, 1200);
       confirmDialog.value.show = false;
     }
-  };
+  };cd
 };
 
 // CSV Export
