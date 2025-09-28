@@ -336,6 +336,7 @@ function handleMadrasaSelect(evt: any, row: RowType, index: number) {
   const selectedMadrasha = evt.value as MadrashaType;
   row.searchQuery = selectedMadrasha.name || '';
   row.madrasa_id = selectedMadrasha.id;
+  row.madrasa_Name = selectedMadrasha.name || '';
   row.selectedMadrasha = { ...selectedMadrasha, name: selectedMadrasha.name || '' };
   suggestionCache.value[index] = [];
   emit('select-option', { ...selectedMadrasha, name: selectedMadrasha.name || '' }, row);

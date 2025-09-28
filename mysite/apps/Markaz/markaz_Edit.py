@@ -59,6 +59,9 @@ class MarkazApplicationEditView(APIView):
                 # Update or create AssociatedMadrasas
                 for madrasa_data in associated_madrasas_data:
                     assoc_id = madrasa_data.get('id')
+                    # Remove extra fields not in model
+                    madrasa_data.pop('madrasa_name', None)
+                    madrasa_data.pop('elhaqno', None)
                     if assoc_id:
                         # Update existing
                         assoc_madrasa = AssociatedMadrasa.objects.filter(id=assoc_id, markaz_application_id=pk).first()

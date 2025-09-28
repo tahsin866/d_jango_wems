@@ -138,12 +138,13 @@ const removeRow = (index: number) => {
     }
 }
 
+
 // Watch for changes in rows and update form.value.associated_madrasas
 watch(rows, (newRows) => {
   form.value.associated_madrasas = newRows.map(row => ({
     id: row.id,
     madrasa_id: row.madrasa_id,
-    madrasa_name: row.madrasa_Name,
+    madrasa_name: row.madrasa_Name || row.searchQuery,
     fazilat: row.fazilat,
     sanabiya_ulya: row.sanabiya_ulya,
     sanabiya: row.sanabiya,
@@ -157,6 +158,12 @@ watch(rows, (newRows) => {
     resolution_file_path: row.files.resolution ? row.files.resolution.name : (row.resolution_file_path || '')
   }));
 }, { deep: true });
+function handleAttachmentEdit(e, idx) {
+  const file = e.target.files[0];
+  if (file) {
+    form.value.attachments[idx].new_file = file;
+  }
+}
 
 const handleFileUpload = (file: any, type: string, index: number) => {
     try {
