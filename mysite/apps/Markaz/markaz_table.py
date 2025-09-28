@@ -41,22 +41,33 @@ class MarkazApplicationListView(APIView):
                 madrasa_id = main_madrasa.madrasa_id if main_madrasa else None
                 madrasa_name = None
                 main_total_students = 0
+                main_class_counts = {}
                 if main_madrasa:
-                    main_total_students = sum([
-                        main_madrasa.fazilat or 0,
-                        main_madrasa.sanabiya_ulya or 0,
-                        main_madrasa.sanabiya or 0,
-                        main_madrasa.mutawassita or 0,
-                        main_madrasa.ibtedaiyyah or 0,
-                        main_madrasa.hifzul_quran or 0,
-                        main_madrasa.qirat or 0,
-                    ])
+                    main_class_counts = {
+                        'ফযীলত': main_madrasa.fazilat or 0,
+                        'সানাবিয়া উলইয়া': main_madrasa.sanabiya_ulya or 0,
+                        'সানাবিয়া': main_madrasa.sanabiya or 0,
+                        'মুতাওয়াসসিতা': main_madrasa.mutawassita or 0,
+                        'ইবতেদাইয়্যাহ': main_madrasa.ibtedaiyyah or 0,
+                        'হিফজুল কোরান': main_madrasa.hifzul_quran or 0,
+                        'কিরাআত': main_madrasa.qirat or 0,
+                    }
+                    main_total_students = sum(main_class_counts.values())
                     school = School.objects.filter(id=madrasa_id).first()
                     madrasa_name = school.mname if school else None
 
                 associated_madrasas = AssociatedMadrasa.objects.filter(markaz_application_id=app.id)
                 associated_list = []
                 associated_total_students = 0
+                associated_class_counts = {
+                    'ফযীলত': 0,
+                    'সানাবিয়া উলইয়া': 0,
+                    'সানাবিয়া': 0,
+                    'মুতাওয়াসসিতা': 0,
+                    'ইবতেদাইয়্যাহ': 0,
+                    'হিফজুল কোরান': 0,
+                    'কিরাআত': 0,
+                }
                 for assoc in associated_madrasas:
                     assoc_madrasa_id = assoc.madrasa_id
                     assoc_madrasa_name = None
@@ -69,6 +80,14 @@ class MarkazApplicationListView(APIView):
                         assoc.hifzul_quran or 0,
                         assoc.qirat or 0,
                     ])
+                    # Per-class count
+                    associated_class_counts['ফযীলত'] += assoc.fazilat or 0
+                    associated_class_counts['সানাবিয়া উলইয়া'] += assoc.sanabiya_ulya or 0
+                    associated_class_counts['সানাবিয়া'] += assoc.sanabiya or 0
+                    associated_class_counts['মুতাওয়াসসিতা'] += assoc.mutawassita or 0
+                    associated_class_counts['ইবতেদাইয়্যাহ'] += assoc.ibtedaiyyah or 0
+                    associated_class_counts['হিফজুল কোরান'] += assoc.hifzul_quran or 0
+                    associated_class_counts['কিরাআত'] += assoc.qirat or 0
                     associated_total_students += assoc_students
                     if assoc_madrasa_id:
                         school = School.objects.filter(id=assoc_madrasa_id).first()
@@ -97,8 +116,10 @@ class MarkazApplicationListView(APIView):
                     'main_madrasa_id': madrasa_id,
                     'main_madrasa_name': madrasa_name,
                     'main_total_students': main_total_students,
+                    'main_class_counts': main_class_counts,
                     'associated_madrasas': associated_list,
                     'associated_total_students': associated_total_students,
+                    'associated_class_counts': associated_class_counts,
                 })
             r.set(cache_key, json.dumps(result), ex=300)  # Cache for 5 minutes
             print("Loaded from DB and cached in Redis")
@@ -122,22 +143,33 @@ class MarkazApplicationDetailView(APIView):
             madrasa_id = main_madrasa.madrasa_id if main_madrasa else None
             madrasa_name = None
             main_total_students = 0
+            main_class_counts = {}
             if main_madrasa:
-                main_total_students = sum([
-                    main_madrasa.fazilat or 0,
-                    main_madrasa.sanabiya_ulya or 0,
-                    main_madrasa.sanabiya or 0,
-                    main_madrasa.mutawassita or 0,
-                    main_madrasa.ibtedaiyyah or 0,
-                    main_madrasa.hifzul_quran or 0,
-                    main_madrasa.qirat or 0,
-                ])
+                main_class_counts = {
+                    'ফযীলত': main_madrasa.fazilat or 0,
+                    'সানাবিয়া উলইয়া': main_madrasa.sanabiya_ulya or 0,
+                    'সানাবিয়া': main_madrasa.sanabiya or 0,
+                    'মুতাওয়াসসিতা': main_madrasa.mutawassita or 0,
+                    'ইবতেদাইয়্যাহ': main_madrasa.ibtedaiyyah or 0,
+                    'হিফজুল কোরান': main_madrasa.hifzul_quran or 0,
+                    'কিরাআত': main_madrasa.qirat or 0,
+                }
+                main_total_students = sum(main_class_counts.values())
                 school = School.objects.filter(id=madrasa_id).first()
                 madrasa_name = school.mname if school else None
 
             associated_madrasas = AssociatedMadrasa.objects.filter(markaz_application_id=app.id)
             associated_list = []
             associated_total_students = 0
+            associated_class_counts = {
+                'ফযীলত': 0,
+                'সানাবিয়া উলইয়া': 0,
+                'সানাবিয়া': 0,
+                'মুতাওয়াসসিতা': 0,
+                'ইবতেদাইয়্যাহ': 0,
+                'হিফজুল কোরান': 0,
+                'কিরাআত': 0,
+            }
             for assoc in associated_madrasas:
                 assoc_madrasa_id = assoc.madrasa_id
                 assoc_madrasa_name = None
@@ -150,6 +182,14 @@ class MarkazApplicationDetailView(APIView):
                     assoc.hifzul_quran or 0,
                     assoc.qirat or 0,
                 ])
+                # Per-class count
+                associated_class_counts['ফযীলত'] += assoc.fazilat or 0
+                associated_class_counts['সানাবিয়া উলইয়া'] += assoc.sanabiya_ulya or 0
+                associated_class_counts['সানাবিয়া'] += assoc.sanabiya or 0
+                associated_class_counts['মুতাওয়াসসিতা'] += assoc.mutawassita or 0
+                associated_class_counts['ইবতেদাইয়্যাহ'] += assoc.ibtedaiyyah or 0
+                associated_class_counts['হিফজুল কোরান'] += assoc.hifzul_quran or 0
+                associated_class_counts['কিরাআত'] += assoc.qirat or 0
                 associated_total_students += assoc_students
                 if assoc_madrasa_id:
                     school = School.objects.filter(id=assoc_madrasa_id).first()
@@ -178,8 +218,10 @@ class MarkazApplicationDetailView(APIView):
                 'main_madrasa_id': madrasa_id,
                 'main_madrasa_name': madrasa_name,
                 'main_total_students': main_total_students,
+                'main_class_counts': main_class_counts,
                 'associated_madrasas': associated_list,
                 'associated_total_students': associated_total_students,
+                'associated_class_counts': associated_class_counts,
             }
             return Response({'success': True, 'data': result}, status=status.HTTP_200_OK)
         except MarkazApplication.DoesNotExist:

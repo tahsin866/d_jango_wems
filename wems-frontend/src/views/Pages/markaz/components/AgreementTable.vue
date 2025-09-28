@@ -71,7 +71,7 @@
                   <div v-if="item.associated_madrasas && item.associated_madrasas.length" class="mt-1">
                     <span class="text-xl text-gray-500">সংযুক্ত মাদরাসা:</span>
                     <select class="ml-2 px-2 py-1 text-xl border border-gray-300 rounded-sm bg-white text-gray-700">
-                      <option v-for="(assoc, idx) in item.associated_madrasas" :key="idx">{{ assoc }}</option>
+                      <option v-for="(assoc, idx) in item.associated_madrasas" :key="idx">{{ assoc.madrasa_name }}</option>
                     </select>
                   </div>
                 </td>
@@ -152,10 +152,30 @@
             <span class="block text-lg text-gray-900">{{ currentItem?.exam_name || 'Demo পরীক্ষা' }}</span>
           </div>
           <div class="mb-4">
-            <span class="block text-lg font-medium text-gray-700 mb-1">ছাত্র সংখ্যা:</span>
-            <span class="block text-lg text-gray-900">
-              {{ currentItem?.main_total_students || 0 }}
-            </span>
+            <span class="block text-lg font-medium text-gray-700 mb-1">মুল মাদরাসার ছাত্র সংখ্যা:</span>
+            <ul class="text-lg text-gray-900">
+              <li v-if="currentItem?.main_class_counts">
+                <span v-for="(count, cls) in currentItem.main_class_counts" :key="cls" class="block">
+                  {{ cls }}: {{ count }}
+                </span>
+              </li>
+              <li v-else>
+                {{ currentItem?.main_total_students || 0 }}
+              </li>
+            </ul>
+          </div>
+          <div class="mb-4">
+            <span class="block text-lg font-medium text-gray-700 mb-1">সংযুক্ত মাদরাসার ছাত্র সংখ্যা:</span>
+            <ul class="text-lg text-gray-900">
+              <li v-if="currentItem?.associated_class_counts">
+                <span v-for="(count, cls) in currentItem.associated_class_counts" :key="cls" class="block">
+                  {{ cls }}: {{ count }}
+                </span>
+              </li>
+              <li v-else>
+                {{ currentItem?.associated_total_students || 0 }}
+              </li>
+            </ul>
           </div>
           <div class="mb-4">
             <span class="block text-lg font-medium text-gray-700 mb-1">স্ট্যাটাস:</span>
@@ -165,10 +185,13 @@
           </div>
           <div class="mb-4">
             <span class="block text-lg font-medium text-gray-700 mb-1">সংযুক্ত মাদরাসা:</span>
-            <ul class="text-lg text-gray-900">
-              <li v-for="(assoc, idx) in currentItem?.associated_madrasas || ['Demo সংযুক্ত ১','Demo সংযুক্ত ২']" :key="idx" class="py-1">
-                {{ assoc }}
+            <ul class="text-lg text-gray-900" v-if="currentItem?.associated_madrasas && currentItem.associated_madrasas.length">
+              <li v-for="(assoc, idx) in currentItem.associated_madrasas" :key="idx" class="py-1">
+                {{ assoc.madrasa_name || assoc }}
               </li>
+            </ul>
+            <ul class="text-lg text-gray-900" v-else>
+              <li>কোন সংযুক্ত মাদরাসা নেই</li>
             </ul>
           </div>
           <!-- Add more dummy info if needed -->
@@ -180,10 +203,12 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import type { Agreement } from '@/views/Pages/markaz/composable/useAgreements';
 const panelOpen = ref(false);
-const currentItem = ref();
+const currentItem = ref<Agreement | null>(null);
 
-function openPanel(item) {
+
+function openPanel(item: Agreement) {
   currentItem.value = item;
   panelOpen.value = true;
 }

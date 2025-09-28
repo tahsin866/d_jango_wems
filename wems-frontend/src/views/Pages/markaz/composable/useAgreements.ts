@@ -1,14 +1,23 @@
 import { ref } from 'vue';
 
+export type AssociatedMadrasa = {
+  id: number;
+  madrasa_id: number;
+  madrasa_name: string;
+  total_students: number;
+};
+
 export type Agreement = {
   id: number;
   application_date: string;
   markaz_type: string;
   main_madrasa: string;
-  associated_madrasas: string[];
+  associated_madrasas: AssociatedMadrasa[];
   exam_name: string;
   main_total_students: number;
   associated_total_students: number;
+  main_class_counts?: Record<string, number>;
+  associated_class_counts?: Record<string, number>;
   status: 'pending' | 'submitted' | 'processing' | 'approved' | 'rejected';
 };
 
@@ -64,10 +73,12 @@ export function useAgreements() {
         application_date: item.created_at,
         markaz_type: item.markaz_type,
         main_madrasa: item.main_madrasa_name,
-        associated_madrasas: item.associated_madrasas?.map((a: any) => a.madrasa_name) || [],
+        associated_madrasas: item.associated_madrasas || [],
         exam_name: item.exam_name,
         main_total_students: item.main_total_students,
         associated_total_students: item.associated_total_students,
+        main_class_counts: item.main_class_counts || {},
+        associated_class_counts: item.associated_class_counts || {},
         status: item.status,
       }));
       updateStats();

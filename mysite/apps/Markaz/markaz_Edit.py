@@ -129,13 +129,44 @@ class MarkazApplicationFullDetailView(APIView):
         main_madrasa_info_serializer = MainMadrasaInfoSerializer(main_madrasa_info) if main_madrasa_info else None
         associated_madrasas_serializer = AssociatedMadrasaSerializer(associated_madrasas, many=True)
         attachments_serializer = AttachmentSerializer(attachments, many=True)
-        
+
+        # Per-class counts for main madrasa
+        main_class_counts = {}
+        if main_madrasa_info:
+            main_class_counts = {
+                'ফযীলত': main_madrasa_info.fazilat or 0,
+                'সানাবিয়া উলইয়া': main_madrasa_info.sanabiya_ulya or 0,
+                'সানাবিয়া': main_madrasa_info.sanabiya or 0,
+                'মুতাওয়াসসিতা': main_madrasa_info.mutawassita or 0,
+                'ইবতেদাইয়্যাহ': main_madrasa_info.ibtedaiyyah or 0,
+                'হিফজুল কোরান': main_madrasa_info.hifzul_quran or 0,
+                'কিরাআত': main_madrasa_info.qirat or 0,
+            }
+        # Per-class counts for associated madrasas (total)
+        associated_class_counts = {
+            'ফযীলত': 0,
+            'সানাবিয়া উলইয়া': 0,
+            'সানাবিয়া': 0,
+            'মুতাওয়াসসিতা': 0,
+            'ইবতেদাইয়্যাহ': 0,
+            'হিফজুল কোরান': 0,
+            'কিরাআত': 0,
+        }
+        for assoc in associated_madrasas:
+            associated_class_counts['ফযীলত'] += assoc.fazilat or 0
+            associated_class_counts['সানাবিয়া উলইয়া'] += assoc.sanabiya_ulya or 0
+            associated_class_counts['সানাবিয়া'] += assoc.sanabiya or 0
+            associated_class_counts['মুতাওয়াসসিতা'] += assoc.mutawassita or 0
+            associated_class_counts['ইবতেদাইয়্যাহ'] += assoc.ibtedaiyyah or 0
+            associated_class_counts['হিফজুল কোরান'] += assoc.hifzul_quran or 0
+            associated_class_counts['কিরাআত'] += assoc.qirat or 0
         # Combine all data into a single response
         response_data = {
             'markaz_application': markaz_app_serializer.data,
             'main_madrasa_info': main_madrasa_info_serializer.data if main_madrasa_info_serializer else {},
+            'main_class_counts': main_class_counts,
             'associated_madrasas': associated_madrasas_serializer.data,
+            'associated_class_counts': associated_class_counts,
             'attachments': attachments_serializer.data
         }
-        
         return Response({'success': True, 'data': response_data}, status=status.HTTP_200_OK)
