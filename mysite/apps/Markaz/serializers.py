@@ -26,3 +26,10 @@ class AttachmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attachment
         fields = '__all__'
+
+class MarkazApplicationEditSerializer(serializers.ModelSerializer):
+    associated_madrasas = AssociatedMadrasaSerializer(many=True)
+
+    class Meta:
+        model = MarkazApplication
+        fields = ['markaz_type', 'requirements', 'exam', 'user', 'status', 'main_madrasa_info', 'associated_madrasas', 'deleted_madrasa_ids', 'attachments']

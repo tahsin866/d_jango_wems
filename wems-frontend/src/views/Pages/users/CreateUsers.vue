@@ -1,26 +1,28 @@
 <template>
-  <div style="font-family: 'SolaimanLipi', sans-serif;" class="py-12">
+  <div style="font-family: 'SolaimanLipi', sans-serif;" class="py-12 bg-gray-100">
     <div class="sm:px-6 lg:px-8">
-      <div class="border border-gray-300 bg-white shadow-lg rounded">
+      <div class="border border-gray-200 bg-white shadow-sm rounded-sm">
         <div class="p-6 bg-white border-b border-gray-200">
           <!-- Header -->
-          <div class="mb-6 flex items-center gap-2">
-            <i class="fas fa-users-cog text-indigo-500 text-xl"></i>
+          <div class="mb-6 flex items-center gap-3">
+            <div class="p-2 rounded-sm bg-gray-100">
+              <i class="fas fa-users-cog text-gray-700 text-xl"></i>
+            </div>
             <h2 class="text-xl font-bold text-gray-800 leading-tight tracking-tight">
               ইউজার ম্যানেজমেন্ট সিস্টেম
             </h2>
           </div>
-          <!-- Tab System - AdminLTE look -->
+          <!-- Tab System -->
           <div class="mb-6">
-            <div class="flex items-center border-b border-gray-200 bg-gray-50 rounded-t px-2 py-1">
+            <div class="flex items-center border-b border-gray-200 bg-gray-50 rounded-t-sm px-2 py-1">
               <button
                 v-for="tab in tabs"
                 :key="tab.value"
-                class="px-5 py-2 rounded-t font-semibold text-sm transition-all duration-150 focus:outline-none"
+                class="px-5 py-2 rounded-t-sm font-semibold text-sm transition-all duration-150 focus:outline-none"
                 :class="[
                   currentTab === tab.value
-                    ? 'bg-white border-l border-r border-t border-indigo-500 border-b-0 text-indigo-700 shadow'
-                    : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-100'
+                    ? 'bg-white border-l border-r border-t border-gray-300 border-b-0 text-gray-800 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
                 ]"
                 @click="currentTab = tab.value"
               >
@@ -29,7 +31,7 @@
             </div>
           </div>
           <!-- Tab Content -->
-          <div class="bg-white border rounded-b px-3 py-6 mt-0">
+          <div class="bg-white border rounded-b-sm px-3 py-6 mt-0">
             <UserTable
               v-if="currentTab === 'madrasa'"
               :admins="madrasaAdmins"
@@ -55,7 +57,7 @@
         </div>
       </div>
     </div>
-      </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -149,3 +151,29 @@ const designationOptionsOthers = [
   { name: 'যোন', value: 6 }
 ];
 </script>
+
+<style scoped>
+/* Professional styling enhancements */
+.transition-all {
+  transition: all 0.2s ease;
+}
+
+.shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.rounded-sm {
+  border-radius: 0.125rem;
+}
+
+/* Tab hover effects */
+button:hover {
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Custom focus styles for accessibility */
+button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(107, 114, 128, 0.3);
+}
+</style>

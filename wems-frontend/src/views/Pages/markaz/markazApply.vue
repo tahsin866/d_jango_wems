@@ -1,3 +1,5 @@
+
+
 <script setup lang="ts">
 import 'primeicons/primeicons.css';
 
@@ -20,7 +22,7 @@ import Badge from 'primevue/badge'
 
 // Remove inertia-related code, use only TypeScript + Vue
 // You may need to replace useForm and usePage with local refs
-
+const showSuccessModal = ref(false);
 const step = ref(0)
 const loading = ref(false);
 const formErrors = ref<string[]>([]);
@@ -557,7 +559,7 @@ console.log('user_id:', userId, 'token:', token); // Debug log
 
     if (response.data.success) {
       formErrors.value = [];
-      alert('আবেদন সফলভাবে জমা হয়েছে!');
+      showSuccessModal.value = true;
       // Optionally redirect or reset form
       // await router.push('/dashboard');
       // resetForm();
@@ -1062,4 +1064,41 @@ onMounted(() => {
       </div>
     </div>
   </div>
+  <transition name="fade">
+    <div v-if="showSuccessModal"
+    style="font-family: 'SolaimanLipi', sans-serif;"
+
+    class="fixed inset-0 z-50 flex items-center justify-center  bg-opacity-20 transition-opacity duration-300">
+      <div class="bg-white rounded-xl shadow-2xl p-6 max-w-xs w-full text-center animate-modal-open">
+        <div class="mb-3">
+          <i class="pi pi-check-circle text-green-500 text-3xl mb-2"></i>
+          <h2 class="text-lg font-bold text-green-700 mb-2">আবেদন সফলভাবে জমা হয়েছে!</h2>
+          <p class="text-gray-700 text-sm">আপনার আবেদন সফলভাবে জমা হয়েছে।</p>
+        </div>
+        <Button label="ঠিক আছে" class="p-button-success w-full mt-2" @click="showSuccessModal = false" />
+      </div>
+    </div>
+  </transition>
+
 </template>
+ <style scoped>
+  .fade-enter-active, .fade-leave-active {
+    transition: opacity 0.3s;
+  }
+  .fade-enter-from, .fade-leave-to {
+    opacity: 0;
+  }
+  .animate-modal-open {
+    animation: modalOpen 0.3s cubic-bezier(0.4,0,0.2,1);
+  }
+  @keyframes modalOpen {
+    0% {
+      transform: scale(0.9) translateY(20px);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
+  }
+  </style>

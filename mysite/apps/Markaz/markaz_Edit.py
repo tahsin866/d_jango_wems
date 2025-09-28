@@ -1,13 +1,13 @@
-from mysite.apps.Markaz.serializers import MarkazApplicationSerializer, MainMadrasaInfoSerializer, AssociatedMadrasaSerializer, AttachmentSerializer
+# mysite/apps/Markaz/views.py
 
-
+import json
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.db import transaction
 from django.conf import settings
 from .models import MarkazApplication, MainMadrasaInfo, AssociatedMadrasa, Attachment
-from mysite.apps.Markaz.serializers import MarkazApplicationSerializer, MainMadrasaInfoSerializer, AssociatedMadrasaSerializer, AttachmentSerializer
+from .serializers import MarkazApplicationSerializer, MainMadrasaInfoSerializer, AssociatedMadrasaSerializer, AttachmentSerializer
 from rest_framework.permissions import AllowAny
 
 class MarkazApplicationEditView(APIView):
@@ -15,40 +15,80 @@ class MarkazApplicationEditView(APIView):
     def put(self, request, pk=None):
         if pk is None:
             return Response({'success': False, 'error': 'No ID provided.'}, status=status.HTTP_400_BAD_REQUEST)
-        data = request.data
+        
+        # Parse JSON strings from FormData
+        def parse_json_field(field_name):
+            field_value = request.data.get(field_name)
+            if isinstance(field_value, str):
+                try:
+                    return json.loads(field_value)
+                except json.JSONDecodeError:
+                    return {}
+            return field_value or {}
+        
         try:
             with transaction.atomic():
+                # Parse JSON fields
+                markaz_app_data = parse_json_field('markaz_application')
+                main_madrasa_info_data = parse_json_field('main_madrasa_info')
+                associated_madrasas_data = parse_json_field('associated_madrasas')
+                deleted_madrasa_ids = parse_json_field('deleted_madrasa_ids')
+                attachments_data = parse_json_field('attachments')
+
                 # Update MarkazApplication
-                markaz_app_data = data.get('markaz_application') or {}
                 try:
                     markaz_app = MarkazApplication.objects.get(id=pk)
                 except MarkazApplication.DoesNotExist:
                     return Response({'success': False, 'error': 'MarkazApplication not found.'}, status=status.HTTP_404_NOT_FOUND)
+                
                 markaz_app_serializer = MarkazApplicationSerializer(markaz_app, data=markaz_app_data, partial=True)
                 markaz_app_serializer.is_valid(raise_exception=True)
                 markaz_app_serializer.save()
 
                 # Update MainMadrasaInfo
-                main_madrasa_info_data = data.get('main_madrasa_info', {})
                 main_madrasa = MainMadrasaInfo.objects.filter(markaz_application_id=pk).first()
                 if main_madrasa:
                     main_madrasa_serializer = MainMadrasaInfoSerializer(main_madrasa, data=main_madrasa_info_data, partial=True)
                     main_madrasa_serializer.is_valid(raise_exception=True)
                     main_madrasa_serializer.save()
 
-                # Update AssociatedMadrasas
-                associated_madrasas_data = data.get('associated_madrasas', [])
+                # Delete removed associated madrasas
+                for del_id in deleted_madrasa_ids:
+                    AssociatedMadrasa.objects.filter(id=del_id, markaz_application_id=pk).delete()
+
+                # Update or create AssociatedMadrasas
                 for madrasa_data in associated_madrasas_data:
                     assoc_id = madrasa_data.get('id')
                     if assoc_id:
+                        # Update existing
                         assoc_madrasa = AssociatedMadrasa.objects.filter(id=assoc_id, markaz_application_id=pk).first()
                         if assoc_madrasa:
+                            # Handle file uploads
+                            if f'noc_file_{assoc_id}' in request.FILES:
+                                madrasa_data['noc_file_path'] = request.FILES[f'noc_file_{assoc_id}']
+                            if f'resolution_file_{assoc_id}' in request.FILES:
+                                madrasa_data['resolution_file_path'] = request.FILES[f'resolution_file_{assoc_id}']
+                            
                             assoc_madrasa_serializer = AssociatedMadrasaSerializer(assoc_madrasa, data=madrasa_data, partial=True)
                             assoc_madrasa_serializer.is_valid(raise_exception=True)
                             assoc_madrasa_serializer.save()
+                    else:
+                        # Create new
+                        noc_file = madrasa_data.pop('noc_file', None)
+                        resolution_file = madrasa_data.pop('resolution_file', None)
+                        
+                        new_madrasa = AssociatedMadrasa.objects.create(
+                            markaz_application_id=pk,
+                            **madrasa_data
+                        )
+                        
+                        if noc_file:
+                            new_madrasa.noc_file_path = noc_file
+                        if resolution_file:
+                            new_madrasa.resolution_file_path = resolution_file
+                        new_madrasa.save()
 
                 # Update Attachments
-                attachments_data = data.get('attachments', [])
                 for attachment_data in attachments_data:
                     attach_id = attachment_data.get('id')
                     if attach_id:
@@ -62,37 +102,37 @@ class MarkazApplicationEditView(APIView):
         except Exception as e:
             return Response({'success': False, 'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-
 class MarkazApplicationFullDetailView(APIView):
     permission_classes = [AllowAny]
     def get(self, request, pk=None):
         if pk is None:
             return Response({'success': False, 'error': 'No ID provided.'}, status=status.HTTP_400_BAD_REQUEST)
+        
         try:
+            # Fetch the MarkazApplication instance
             markaz_app = MarkazApplication.objects.get(id=pk)
-            main_madrasa = MainMadrasaInfo.objects.filter(markaz_application_id=pk).first()
-            associated_madrasas = AssociatedMadrasa.objects.filter(markaz_application_id=pk)
-            attachments = Attachment.objects.filter(markaz_application_id=pk)
-
-            # Add madrasa_name from School table for each associated madrasa
-            associated_list = []
-            from mysite.apps.school.models import School
-            for assoc in associated_madrasas:
-                assoc_data = AssociatedMadrasaSerializer(assoc).data
-                madrasa_id = assoc.madrasa_id
-                madrasa_name = None
-                if madrasa_id:
-                    school = School.objects.filter(id=madrasa_id).first()
-                    madrasa_name = school.mname if school else None
-                assoc_data['madrasa_name'] = madrasa_name
-                associated_list.append(assoc_data)
-
-            data = {
-                'markaz_application': MarkazApplicationSerializer(markaz_app).data,
-                'main_madrasa_info': MainMadrasaInfoSerializer(main_madrasa).data if main_madrasa else {},
-                'associated_madrasas': associated_list,
-                'attachments': AttachmentSerializer(attachments, many=True).data
-            }
-            return Response({'success': True, 'data': data}, status=status.HTTP_200_OK)
         except MarkazApplication.DoesNotExist:
-            return Response({'success': False, 'error': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'success': False, 'error': 'MarkazApplication not found.'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Serialize the data
+        markaz_app_serializer = MarkazApplicationSerializer(markaz_app)
+        
+        # Fetch related data
+        main_madrasa_info = MainMadrasaInfo.objects.filter(markaz_application_id=pk).first()
+        associated_madrasas = AssociatedMadrasa.objects.filter(markaz_application_id=pk)
+        attachments = Attachment.objects.filter(markaz_application_id=pk)
+        
+        # Serialize related data
+        main_madrasa_info_serializer = MainMadrasaInfoSerializer(main_madrasa_info) if main_madrasa_info else None
+        associated_madrasas_serializer = AssociatedMadrasaSerializer(associated_madrasas, many=True)
+        attachments_serializer = AttachmentSerializer(attachments, many=True)
+        
+        # Combine all data into a single response
+        response_data = {
+            'markaz_application': markaz_app_serializer.data,
+            'main_madrasa_info': main_madrasa_info_serializer.data if main_madrasa_info_serializer else {},
+            'associated_madrasas': associated_madrasas_serializer.data,
+            'attachments': attachments_serializer.data
+        }
+        
+        return Response({'success': True, 'data': response_data}, status=status.HTTP_200_OK)

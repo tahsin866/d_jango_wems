@@ -1,30 +1,30 @@
 <template>
-  <div class="font-[SolaimanLipi] min-h-screen bg-gray-100 transition-colors duration-300">
-    <!-- AdminLTE Classic Header -->
-    <div class="bg-gray-800 border-b border-gray-900 shadow-lg py-6 px-8 flex items-center justify-between">
+  <div class="font-[SolaimanLipi] min-h-screen bg-gray-100">
+    <!-- Classic AdminLTE Header -->
+    <div class="bg-gray-900 border-b border-gray-800 shadow py-5 px-8 flex items-center justify-between">
       <div>
-        <h1 class="text-3xl font-extrabold text-white tracking-tight flex items-center">
-          <i class="fas fa-university mr-3 text-indigo-300"></i>
+        <h1 class="text-2xl font-bold text-white flex items-center">
+          <i class="fas fa-university mr-3 text-gray-300"></i>
           {{ examName }}
         </h1>
-        <p class="text-gray-200 mt-2 font-medium text-base">Markaz Management Dashboard</p>
+        <p class="text-gray-400 mt-1 text-sm">Markaz Management Dashboard</p>
       </div>
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-3">
         <input
           v-model="searchQuery"
-          class="px-4 py-2 rounded border border-gray-600 bg-gray-900 text-white text-base focus:border-indigo-400 focus:ring focus:ring-indigo-500 focus:ring-opacity-50"
+          class="px-4 py-2 rounded border border-gray-700 bg-gray-800 text-gray-200 text-sm focus:border-gray-600 focus:ring focus:ring-gray-700 focus:ring-opacity-50"
           :placeholder="`${examName} - খুঁজুন`"
         />
         <button
           @click="handleRefresh"
-          class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-indigo-700 rounded font-bold text-white shadow hover:bg-indigo-700 transition"
+          class="inline-flex items-center px-4 py-2 bg-gray-700 border border-gray-600 rounded font-medium text-gray-200 hover:bg-gray-600 transition"
         >
           <i class="fas fa-sync mr-2"></i>
           রিফ্রেশ
         </button>
         <button
           @click="onCreate"
-          class="inline-flex items-center px-4 py-2 bg-green-600 border border-green-700 rounded font-bold text-white shadow hover:bg-green-700 transition"
+          class="inline-flex items-center px-4 py-2 bg-gray-800 border border-gray-700 rounded font-medium text-white hover:bg-gray-700 transition"
         >
           <i class="fas fa-plus mr-2"></i>
           আবেদন করুন
@@ -32,67 +32,51 @@
       </div>
     </div>
 
-    <div class="mx-auto px-8 py-10 space-y-10 ">
-      <!-- Stats Cards - Classic Info Box -->
-  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-7">
-    <div
-      v-for="(stat, idx) in stats"
-      :key="idx"
-      class="bg-white border border-gray-300 rounded-lg shadow-sm p-0 transition hover:shadow-md"
-      style="min-width:220px;"
-    >
-      <!-- Card Header -->
-      <div class="flex items-center justify-between px-5 py-3 bg-gray-50 border-b border-gray-200 rounded-t">
-        <div class="flex items-center">
-          <i :class="`fas fa-${stat.icon} mr-2 text-gray-500`"></i>
-          <span class="font-semibold text-base text-gray-800">{{ stat.title }}</span>
-        </div>
-      </div>
-      <!-- Card Body -->
-      <div class="px-5 py-7 text-center">
-        <span class="text-2xl font-bold text-gray-900">{{ stat.value }}</span>
-        <span
-          class="ml-2 px-2 py-1 text-xs rounded font-bold inline-flex items-center border"
-          :class="stat.trendUp ? 'bg-gray-100 text-gray-700 border-gray-200' : 'bg-gray-100 text-gray-700 border-gray-200'"
+    <div class="mx-auto px-8 py-10 space-y-8">
+      <!-- Classic Stats Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <div
+          v-for="(stat, idx) in stats"
+          :key="idx"
+          class="bg-white border border-gray-300 rounded shadow p-0 transition hover:shadow-md"
+          style="min-width:220px;"
         >
-          <i
-            :class="stat.trendUp ? 'fas fa-arrow-up mr-1 text-gray-500' : 'fas fa-arrow-down mr-1 text-gray-500'"
-          ></i>
-          {{ stat.change }}
-        </span>
-        <div class="mt-4">
-          <div class="h-5 rounded bg-gray-100 border border-gray-300 shadow-inner flex items-center w-full">
-            <div
-              class="h-5 rounded-l transition-all duration-500 flex items-center bg-gray-300"
-              :style="{ width: Math.round((stat.trend[stat.trend.length - 1] / Math.max(...stat.trend)) * 100) + '%' }"
-            >
-              <span
-                class="pr-2 text-gray-900 font-bold text-xs"
-                v-if="((stat.trend[stat.trend.length - 1] / Math.max(...stat.trend)) * 100) > 15"
-              >
-                {{ Math.round((stat.trend[stat.trend.length - 1] / Math.max(...stat.trend)) * 100) }}%
-              </span>
+          <!-- Card Header -->
+          <div class="flex items-center justify-between px-5 py-3 bg-gray-50 border-b border-gray-200 rounded-t">
+            <div class="flex items-center">
+              <i :class="`fas fa-${stat.icon} mr-2 text-gray-500`"></i>
+              <span class="font-medium text-gray-700">{{ stat.title }}</span>
             </div>
           </div>
-          <div class="flex justify-between mt-1 text-xs text-gray-500">
-            <span>Min: {{ Math.min(...stat.trend) }}</span>
-            <span>Max: {{ Math.max(...stat.trend) }}</span>
+          <!-- Card Body -->
+          <div class="px-5 py-6 text-center">
+            <span class="text-3xl font-bold text-gray-900">{{ stat.value }}</span>
+            <div class="mt-4">
+              <div class="h-2 rounded bg-gray-100 border border-gray-300 shadow-inner flex items-center w-full">
+                <div
+                  class="h-2 rounded-l transition-all duration-500 flex items-center bg-gray-300"
+                  :style="{ width: Math.round((stat.trend[stat.trend.length - 1] / Math.max(...stat.trend)) * 100) + '%' }"
+                ></div>
+              </div>
+              <div class="flex justify-between mt-1 text-xs text-gray-500">
+                <span>Min: {{ Math.min(...stat.trend) }}</span>
+                <span>Max: {{ Math.max(...stat.trend) }}</span>
+              </div>
+            </div>
+          </div>
+          <!-- Card Footer -->
+          <div class="bg-gray-50 border-t border-gray-200 rounded-b px-5 py-2 flex items-center justify-between">
+            <span class="text-xs text-gray-600 flex items-center">
+              <i :class="`fas fa-${stat.icon} mr-1 text-gray-400`"></i>
+              {{ stat.title }}
+            </span>
+            <span class="text-xs text-gray-500">Info</span>
           </div>
         </div>
       </div>
-      <!-- Card Footer -->
-      <div class="bg-gray-50 border-t border-gray-200 rounded-b px-5 py-2 flex items-center justify-between">
-        <span class="text-xs text-gray-600 flex items-center">
-          <i :class="`fas fa-${stat.icon} mr-1 text-gray-400`"></i>
-          {{ stat.title }}
-        </span>
-        <span class="text-xs text-gray-500">Info</span>
-      </div>
-    </div>
-  </div>
 
       <!-- Table Box -->
-      <div class="bg-white rounded shadow-lg border border-gray-300 overflow-hidden">
+      <div class="bg-white rounded shadow border border-gray-300 overflow-hidden">
         <AgreementTable
           :loading="loading"
           :agreements="agreements"
@@ -105,7 +89,7 @@
       </div>
 
       <!-- Details panel below the table (inline, not modal) -->
-      <div v-if="selectedAgreement" class="bg-white border border-gray-300 rounded shadow-lg p-6">
+      <div v-if="selectedAgreement" class="bg-white border border-gray-300 rounded shadow p-6">
         <AgreementDetailsPanel
           :agreement="selectedAgreement"
           @close="selectedAgreement = null"
@@ -157,7 +141,7 @@ const stats = ref([
     value: '১৫৯',
     change: '+৫%',
     icon: 'file-alt',
-    color: 'indigo',
+    color: 'gray',
     trend: [120, 122, 130, 140, 145, 150, 159],
     trendUp: true
   },
@@ -166,7 +150,7 @@ const stats = ref([
     value: '৫২',
     change: '-৩%',
     icon: 'hourglass-half',
-    color: 'blue',
+    color: 'gray',
     trend: [60, 58, 55, 54, 53, 52, 52],
     trendUp: false
   },
@@ -175,7 +159,7 @@ const stats = ref([
     value: '১০৭',
     change: '+৮%',
     icon: 'check-circle',
-    color: 'green',
+    color: 'gray',
     trend: [80, 88, 90, 95, 100, 105, 107],
     trendUp: true
   },
@@ -184,7 +168,7 @@ const stats = ref([
     value: '০',
     change: '০%',
     icon: 'times-circle',
-    color: 'red',
+    color: 'gray',
     trend: [0,0,0,0,0,0,0],
     trendUp: false
   }
@@ -199,11 +183,6 @@ const {
   submitAgreementById,
   examName
 } = useAgreements();
-
-// ID source (change as needed)
-// import { useRoute } from 'vue-router';
-// const route = useRoute();
-// const userId = Number(route.params.id) || 22; // Default/fallback
 
 // Router and toast
 const router = useRouter();
@@ -233,7 +212,7 @@ const filteredAgreements = computed(() => {
 // Event handlers
 async function handleRefresh() {
   try {
-  await fetchAgreements();
+    await fetchAgreements();
     toast.add({
       severity: 'success',
       summary: 'রিফ্রেশ সম্পন্ন',
@@ -339,5 +318,5 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* AdminLTE flavor, minimal parent styles */
+/* Classic AdminLTE styling */
 </style>

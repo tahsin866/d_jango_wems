@@ -1,109 +1,108 @@
 <template>
   <div
-    class=" rounded-sm shadow"
-    :class="[!isDark ? 'bg-white' : 'dark:bg-slate-800']"
+    class="rounded border shadow"
+    :class="[!isDark ? 'bg-white' : 'bg-gray-800']"
   >
     <div
-      class="flex bg-gradient-to-r rounded-t-md gap-3 items-center px-6 py-3"
-      :class="[!isDark ? 'from-emerald-800 to-emerald-600' : 'dark:from-emerald-900 dark:to-emerald-700']"
+      class="flex bg-gray-800 rounded-t gap-3 items-center px-6 py-3"
     >
-      <i class="text-2xl text-white fa-user-circle fas"></i>
-      <h5 class="text-white text-xl">ব্যক্তিগত তথ্য</h5>
+      <i class="text-2xl text-gray-300 fa-user-circle fas"></i>
+      <h5 class="text-gray-200 text-xl">ব্যক্তিগত তথ্য</h5>
     </div>
 
     <div class="p-6">
       <!-- নাম -->
       <div class="grid grid-cols-1 gap-6 mb-6 md:grid-cols-3">
         <div class="relative">
-          <label :class="[!isDark ? 'text-gray-700' : 'dark:text-gray-200']" class="text-lg block font-medium mb-1">নাম (বাংলা)</label>
+          <label :class="[!isDark ? 'text-gray-700' : 'text-gray-300']" class="text-lg block font-medium mb-1">নাম (বাংলা)</label>
           <input v-model="local.name_bn" type="text" disabled
-            :class="[!isDark ? 'bg-emerald-50 border border-emerald-200 text-gray-700' : 'dark:bg-emerald-900 dark:border-emerald-800 dark:text-gray-200', 'rounded-md w-full cursor-not-allowed pl-10 pr-3 py-2']" />
-          <p :class="[!isDark ? 'text-gray-500' : 'dark:text-gray-400']" class="text-xs italic mt-1">* এই ফিল্ডটি পরিবর্তন করা যাবে না</p>
+            :class="[!isDark ? 'bg-gray-100 border border-gray-300 text-gray-700' : 'bg-gray-700 border border-gray-600 text-gray-300', 'rounded w-full cursor-not-allowed pl-10 pr-3 py-2']" />
+          <p :class="[!isDark ? 'text-gray-500' : 'text-gray-400']" class="text-xs italic mt-1">* এই ফিল্ডটি পরিবর্তন করা যাবে না</p>
         </div>
 
         <div class="relative">
-          <label :class="[!isDark ? 'text-gray-700' : 'dark:text-gray-200']" class="text-lg block font-medium mb-1">নাম (ইংরেজি)</label>
+          <label :class="[!isDark ? 'text-gray-700' : 'text-gray-300']" class="text-lg block font-medium mb-1">নাম (ইংরেজি)</label>
           <input v-model="local.name_en" type="text"
-            :class="[!isDark ? 'border border-emerald-200' : 'dark:border-emerald-800', 'rounded-md w-full focus:outline-none focus:ring-2 focus:ring-emerald-500 pl-10 pr-3 py-2', isDark ? 'dark:bg-slate-900 dark:text-gray-200' : '']" />
+            :class="[!isDark ? 'border border-gray-300' : 'border border-gray-600', 'rounded w-full focus:outline-none focus:ring-2 focus:ring-gray-500 pl-10 pr-3 py-2', isDark ? 'bg-gray-700 text-gray-300' : '']" />
         </div>
 
         <div class="relative">
-          <label :class="[!isDark ? 'text-gray-700' : 'dark:text-gray-200']" class="text-lg block font-medium mb-1">নাম (আরবি)</label>
+          <label :class="[!isDark ? 'text-gray-700' : 'text-gray-300']" class="text-lg block font-medium mb-1">নাম (আরবি)</label>
           <input v-model="local.name_ar" type="text" dir="rtl"
-            :class="[!isDark ? 'border border-emerald-200' : 'dark:border-emerald-800', 'rounded-md w-full focus:outline-none focus:ring-2 focus:ring-emerald-500 pl-10 pr-3 py-2', isDark ? 'dark:bg-slate-900 dark:text-gray-200' : '']" />
+            :class="[!isDark ? 'border border-gray-300' : 'border border-gray-600', 'rounded w-full focus:outline-none focus:ring-2 focus:ring-gray-500 pl-10 pr-3 py-2', isDark ? 'bg-gray-700 text-gray-300' : '']" />
         </div>
       </div>
 
       <!-- পিতার নাম -->
       <div class="grid grid-cols-1 gap-6 mb-6 md:grid-cols-3">
         <div class="relative">
-          <label :class="[!isDark ? 'text-gray-700' : 'dark:text-gray-200']" class="text-lg block font-medium mb-1">পিতার নাম (বাংলা)</label>
+          <label :class="[!isDark ? 'text-gray-700' : 'text-gray-300']" class="text-lg block font-medium mb-1">পিতার নাম (বাংলা)</label>
           <input v-model="local.father_name_bn" type="text" disabled
-            :class="[!isDark ? 'bg-emerald-50 border border-emerald-200 text-gray-700' : 'dark:bg-emerald-900 dark:border-emerald-800 dark:text-gray-200', 'rounded-md w-full cursor-not-allowed pl-10 pr-3 py-2']" />
-          <p :class="[!isDark ? 'text-gray-500' : 'dark:text-gray-400']" class="text-xs italic mt-1">* এই ফিল্ডটি পরিবর্তন করা যাবে না</p>
+            :class="[!isDark ? 'bg-gray-100 border border-gray-300 text-gray-700' : 'bg-gray-700 border border-gray-600 text-gray-300', 'rounded w-full cursor-not-allowed pl-10 pr-3 py-2']" />
+          <p :class="[!isDark ? 'text-gray-500' : 'text-gray-400']" class="text-xs italic mt-1">* এই ফিল্ডটি পরিবর্তন করা যাবে না</p>
         </div>
 
         <div class="relative">
-          <label :class="[!isDark ? 'text-gray-700' : 'dark:text-gray-200']" class="text-lg block font-medium mb-1">পিতার নাম (ইংরেজি)</label>
+          <label :class="[!isDark ? 'text-gray-700' : 'text-gray-300']" class="text-lg block font-medium mb-1">পিতার নাম (ইংরেজি)</label>
           <input v-model="local.father_name_en" type="text"
-            :class="[!isDark ? 'border border-emerald-200' : 'dark:border-emerald-800', 'rounded-md w-full focus:outline-none focus:ring-2 focus:ring-emerald-500 pl-10 pr-3 py-2', isDark ? 'dark:bg-slate-900 dark:text-gray-200' : '']" />
+            :class="[!isDark ? 'border border-gray-300' : 'border border-gray-600', 'rounded w-full focus:outline-none focus:ring-2 focus:ring-gray-500 pl-10 pr-3 py-2', isDark ? 'bg-gray-700 text-gray-300' : '']" />
         </div>
 
         <div class="relative">
-          <label :class="[!isDark ? 'text-gray-700' : 'dark:text-gray-200']" class="text-lg block font-medium mb-1">পিতার নাম (আরবি)</label>
+          <label :class="[!isDark ? 'text-gray-700' : 'text-gray-300']" class="text-lg block font-medium mb-1">পিতার নাম (আরবি)</label>
           <input v-model="local.father_name_ar" type="text" dir="rtl"
-            :class="[!isDark ? 'border border-emerald-200' : 'dark:border-emerald-800', 'rounded-md w-full focus:outline-none focus:ring-2 focus:ring-emerald-500 pl-10 pr-3 py-2', isDark ? 'dark:bg-slate-900 dark:text-gray-200' : '']" />
+            :class="[!isDark ? 'border border-gray-300' : 'border border-gray-600', 'rounded w-full focus:outline-none focus:ring-2 focus:ring-gray-500 pl-10 pr-3 py-2', isDark ? 'bg-gray-700 text-gray-300' : '']" />
         </div>
       </div>
 
       <!-- মাতার নাম -->
       <div class="grid grid-cols-1 gap-6 mb-6 md:grid-cols-3">
         <div class="relative">
-          <label :class="[!isDark ? 'text-gray-700' : 'dark:text-gray-200']" class="text-lg block font-medium mb-1">মাতার নাম (বাংলা)</label>
+          <label :class="[!isDark ? 'text-gray-700' : 'text-gray-300']" class="text-lg block font-medium mb-1">মাতার নাম (বাংলা)</label>
           <input v-model="local.mother_name_bn" type="text"
-            :class="[!isDark ? 'border border-emerald-200 text-gray-700' : 'dark:border-emerald-800 dark:bg-slate-900 dark:text-gray-200', 'rounded-md w-full pl-10 pr-3 py-2']" />
+            :class="[!isDark ? 'border border-gray-300 text-gray-700' : 'border border-gray-600 bg-gray-700 text-gray-300', 'rounded w-full pl-10 pr-3 py-2']" />
         </div>
 
         <div class="relative">
-          <label :class="[!isDark ? 'text-gray-700' : 'dark:text-gray-200']" class="text-lg block font-medium mb-1">মাতার নাম (ইংরেজি)</label>
+          <label :class="[!isDark ? 'text-gray-700' : 'text-gray-300']" class="text-lg block font-medium mb-1">মাতার নাম (ইংরেজি)</label>
           <input v-model="local.mother_name_en" type="text"
-            :class="[!isDark ? 'border border-emerald-200' : 'dark:border-emerald-800', 'rounded-md w-full focus:outline-none focus:ring-2 focus:ring-emerald-500 pl-10 pr-3 py-2', isDark ? 'dark:bg-slate-900 dark:text-gray-200' : '']" />
+            :class="[!isDark ? 'border border-gray-300' : 'border border-gray-600', 'rounded w-full focus:outline-none focus:ring-2 focus:ring-gray-500 pl-10 pr-3 py-2', isDark ? 'bg-gray-700 text-gray-300' : '']" />
         </div>
 
         <div class="relative">
-          <label :class="[!isDark ? 'text-gray-700' : 'dark:text-gray-200']" class="text-lg block font-medium mb-1">মাতার নাম (আরবি)</label>
+          <label :class="[!isDark ? 'text-gray-700' : 'text-gray-300']" class="text-lg block font-medium mb-1">মাতার নাম (আরবি)</label>
           <input v-model="local.mother_name_ar" type="text" dir="rtl"
-            :class="[!isDark ? 'border border-emerald-200' : 'dark:border-emerald-800', 'rounded-md w-full focus:outline-none focus:ring-2 focus:ring-emerald-500 pl-10 pr-3 py-2', isDark ? 'dark:bg-slate-900 dark:text-gray-200' : '']" />
+            :class="[!isDark ? 'border border-gray-300' : 'border border-gray-600', 'rounded w-full focus:outline-none focus:ring-2 focus:ring-gray-500 pl-10 pr-3 py-2', isDark ? 'bg-gray-700 text-gray-300' : '']" />
         </div>
       </div>
 
       <!-- জন্ম-তারিখ, জন্ম-নিবন্ধন ও NID -->
       <div class="grid grid-cols-1 gap-6 mb-6 md:grid-cols-3">
         <div class="relative">
-          <label :class="[!isDark ? 'text-gray-700' : 'dark:text-gray-200']" class="text-lg block font-medium mb-1">জন্ম-তারিখ</label>
+          <label :class="[!isDark ? 'text-gray-700' : 'text-gray-300']" class="text-lg block font-medium mb-1">জন্ম-তারিখ</label>
           <input v-model="local.Date_of_birth" type="date" disabled
-            :class="[!isDark ? 'border border-emerald-200' : 'dark:border-emerald-800 dark:bg-slate-900 dark:text-gray-200', 'rounded-md w-full pl-10 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500']" />
+            :class="[!isDark ? 'border border-gray-300' : 'border border-gray-600 bg-gray-700 text-gray-300', 'rounded w-full pl-10 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500']" />
         </div>
 
         <div class="relative">
-          <label :class="[!isDark ? 'text-gray-700' : 'dark:text-gray-200']" class="text-lg block font-medium mb-1">জন্ম-নিবন্ধন নম্বর</label>
+          <label :class="[!isDark ? 'text-gray-700' : 'text-gray-300']" class="text-lg block font-medium mb-1">জন্ম-নিবন্ধন নম্বর</label>
           <input v-model="local.BRN_no" type="text"
-            :class="[!isDark ? 'border border-emerald-200' : 'dark:border-emerald-800 dark:bg-slate-900 dark:text-gray-200', 'rounded-md w-full pl-10 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500']" />
+            :class="[!isDark ? 'border border-gray-300' : 'border border-gray-600 bg-gray-700 text-gray-300', 'rounded w-full pl-10 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500']" />
         </div>
 
         <div class="relative">
-          <label :class="[!isDark ? 'text-gray-700' : 'dark:text-gray-200']" class="text-lg block font-medium mb-1">জাতীয় পরিচয়পত্র নম্বর</label>
+          <label :class="[!isDark ? 'text-gray-700' : 'text-gray-300']" class="text-lg block font-medium mb-1">জাতীয় পরিচয়পত্র নম্বর</label>
           <input v-model="local.NID_no" type="text"
-            :class="[!isDark ? 'border border-emerald-200' : 'dark:border-emerald-800 dark:bg-slate-900 dark:text-gray-200', 'rounded-md w-full pl-10 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500']" />
+            :class="[!isDark ? 'border border-gray-300' : 'border border-gray-600 bg-gray-700 text-gray-300', 'rounded w-full pl-10 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500']" />
         </div>
       </div>
 
       <!-- ফোন নম্বর -->
       <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
         <div class="relative">
-          <label :class="[!isDark ? 'text-gray-700' : 'dark:text-gray-200']" class="text-lg block font-medium mb-1">অভিভাবকের ফোন নম্বর</label>
+          <label :class="[!isDark ? 'text-gray-700' : 'text-gray-300']" class="text-lg block font-medium mb-1">অভিভাবকের ফোন নম্বর</label>
           <input v-model="local.mobile_no" type="tel"
-            :class="[!isDark ? 'border border-emerald-200' : 'dark:border-emerald-800 dark:bg-slate-900 dark:text-gray-200', 'rounded-md w-full pl-10 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500']" />
+            :class="[!isDark ? 'border border-gray-300' : 'border border-gray-600 bg-gray-700 text-gray-300', 'rounded w-full pl-10 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500']" />
         </div>
       </div>
     </div>

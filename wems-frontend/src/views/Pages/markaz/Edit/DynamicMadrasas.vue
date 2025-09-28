@@ -52,6 +52,7 @@
                 <input
                   type="number"
                   v-model="row.fazilat"
+                  @input="emitUpdate(row, index)"
                   min="0"
                   placeholder="ছাত্র সংখ্যা লিখুন"
                   class="w-full h-10 rounded border border-gray-400 px-3 focus:border-indigo-500 focus:ring-indigo-500 font-bold text-gray-800 bg-gray-50 shadow"
@@ -63,6 +64,7 @@
                 <input
                   type="number"
                   v-model="row.sanabiya_ulya"
+                  @input="emitUpdate(row, index)"
                   min="0"
                   placeholder="ছাত্র সংখ্যা লিখুন"
                   class="w-full h-10 rounded border border-gray-400 px-3 focus:border-indigo-500 focus:ring-indigo-500 font-bold text-gray-800 bg-gray-50 shadow"
@@ -74,6 +76,7 @@
                 <input
                   type="number"
                   v-model="row.sanabiya"
+                  @input="emitUpdate(row, index)"
                   min="0"
                   placeholder="ছাত্র সংখ্যা লিখুন"
                   class="w-full h-10 rounded border border-gray-400 px-3 focus:border-indigo-500 focus:ring-indigo-500 font-bold text-gray-800 bg-gray-50 shadow"
@@ -85,6 +88,7 @@
                 <input
                   type="number"
                   v-model="row.mutawassita"
+                  @input="emitUpdate(row, index)"
                   min="0"
                   placeholder="ছাত্র সংখ্যা লিখুন"
                   class="w-full h-10 rounded border border-gray-400 px-3 focus:border-indigo-500 focus:ring-indigo-500 font-bold text-gray-800 bg-gray-50 shadow"
@@ -96,6 +100,7 @@
                 <input
                   type="number"
                   v-model="row.ibtedaiyyah"
+                  @input="emitUpdate(row, index)"
                   min="0"
                   placeholder="ছাত্র সংখ্যা লিখুন"
                   class="w-full h-10 rounded border border-gray-400 px-3 focus:border-indigo-500 focus:ring-indigo-500 font-bold text-gray-800 bg-gray-50 shadow"
@@ -109,6 +114,7 @@
               <input
                 type="number"
                 v-model="row.hifzul_quran"
+                @input="emitUpdate(row, index)"
                 min="0"
                 placeholder="ছাত্র সংখ্যা লিখুন"
                 class="w-full h-10 rounded border border-gray-400 px-3 focus:border-indigo-500 focus:ring-indigo-500 font-bold text-gray-800 bg-gray-50 shadow"
@@ -121,6 +127,7 @@
               <input
                 type="number"
                 v-model="row.qirat"
+                @input="emitUpdate(row, index)"
                 min="0"
                 placeholder="ছাত্র সংখ্যা লিখুন"
                 class="w-full h-10 rounded border border-gray-400 px-3 focus:border-indigo-500 focus:ring-indigo-500 font-bold text-gray-800 bg-gray-50 shadow"
@@ -151,7 +158,7 @@
                   <div v-if="row.files.nocPreview" class="flex items-center space-x-2">
                     <a :href="row.files.nocPreview" target="_blank" class="inline-flex items-center px-2 py-1 bg-indigo-50 border border-indigo-200 rounded text-xs text-indigo-700 font-bold">প্রিভিউ</a>
                     <button
-                      @click="emit('remove-file', 'noc', index)"
+                      @click="removeFile('noc', index)"
                       type="button"
                       class="bg-red-100 hover:bg-red-200 text-red-700 font-bold px-3 py-1 rounded border border-red-300 ml-1 text-xs flex items-center"
                     >
@@ -189,7 +196,7 @@
                   <div v-if="row.files.resolutionPreview" class="flex items-center space-x-2">
                     <a :href="row.files.resolutionPreview" target="_blank" class="inline-flex items-center px-2 py-1 bg-indigo-50 border border-indigo-200 rounded text-xs text-indigo-700 font-bold">প্রিভিউ</a>
                     <button
-                      @click="emit('remove-file', 'resolution', index)"
+                      @click="removeFile('resolution', index)"
                       type="button"
                       class="bg-red-100 hover:bg-red-200 text-red-700 font-bold px-3 py-1 rounded border border-red-300 ml-1 text-xs flex items-center"
                     >
@@ -249,6 +256,7 @@ export interface MadrashaType {
   elhaqno?: string | number;
 }
 export interface RowType {
+  id?: number | null;
   searchQuery?: string;
   madrasa_id?: number | string | null;
   fazilat?: number | null;
@@ -281,6 +289,7 @@ const emit = defineEmits<{
   (e: 'file-upload', file: File, type: 'noc' | 'resolution', index: number): void;
   (e: 'remove-file', type: 'noc' | 'resolution', index: number): void;
   (e: 'select-option', madrasha: MadrashaType, row: RowType): void;
+  (e: 'update-row', row: RowType, index: number): void;
 }>();
 
 const showDarsiyatFields = computed(() => props.markazType === 'দরসিয়াত');
@@ -327,6 +336,7 @@ function handleMadrasaSelect(evt: any, row: RowType, index: number) {
   row.selectedMadrasha = { ...selectedMadrasha, name: selectedMadrasha.name || '' };
   suggestionCache.value[index] = [];
   emit('select-option', { ...selectedMadrasha, name: selectedMadrasha.name || '' }, row);
+  emit('update-row', row, index);
 }
 function handleFileSelect(event: any, type: 'noc' | 'resolution', index: number) {
   let file: File | null = null;
@@ -334,7 +344,17 @@ function handleFileSelect(event: any, type: 'noc' | 'resolution', index: number)
   else if (event?.files?.length > 0) file = event.files[0];
   else if (event?.target?.files?.length > 0) file = event.target.files[0];
   else if (event?.originalEvent?.target?.files?.length > 0) file = event.originalEvent.target.files[0];
-  if (file) emit('file-upload', file, type, index);
+  if (file) {
+    emit('file-upload', file, type, index);
+    emit('update-row', props.rows[index], index);
+  }
+}
+function removeFile(type: 'noc' | 'resolution', index: number) {
+  emit('remove-file', type, index);
+  emit('update-row', props.rows[index], index);
+}
+function emitUpdate(row: RowType, index: number) {
+  emit('update-row', row, index);
 }
 type RequiredFieldName = 'fazilat' | 'sanabiya_ulya' | 'sanabiya' | 'mutawassita' | 'ibtedaiyyah' | 'hifzul_quran' | 'qirat';
 function isRequiredFieldEmpty(row: RowType, field: RequiredFieldName): boolean {

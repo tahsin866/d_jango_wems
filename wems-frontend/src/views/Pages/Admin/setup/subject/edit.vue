@@ -8,7 +8,7 @@
       <div class="mb-10">
         <div class="flex items-center justify-between">
           <div>
-            <h2 class="text-3xl font-bold text-gray-800 mb-2">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">
               বিষয় সেটিংস সম্পাদনা
             </h2>
             <p class="text-base text-gray-600">
@@ -18,7 +18,7 @@
           <button
             type="button"
             @click="$router.push('/admin/setup/list')"
-            class="inline-flex items-center px-5 py-2 rounded bg-white border border-gray-300 text-gray-800 shadow hover:bg-gray-50 transition"
+            class="inline-flex items-center px-5 py-2 rounded-sm bg-white border border-gray-300 text-gray-700 shadow-sm hover:bg-gray-50 transition"
           >
             <svg class="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -31,21 +31,21 @@
       <div id="flash-messages" class="mb-8"></div>
 
       <!-- Loading State -->
-      <div v-if="loading" class="bg-white shadow-lg rounded-lg border border-gray-200">
+      <div v-if="loading" class="bg-white shadow-sm rounded-sm border border-gray-200">
         <div class="p-8">
           <div class="animate-pulse">
-            <div class="h-5 bg-gray-200 rounded w-1/4 mb-5"></div>
-            <div class="h-10 bg-gray-200 rounded mb-5"></div>
-            <div class="h-5 bg-gray-200 rounded w-1/2 mb-5"></div>
-            <div class="h-10 bg-gray-200 rounded mb-5"></div>
+            <div class="h-5 bg-gray-200 rounded-sm w-1/4 mb-5"></div>
+            <div class="h-10 bg-gray-200 rounded-sm mb-5"></div>
+            <div class="h-5 bg-gray-200 rounded-sm w-1/2 mb-5"></div>
+            <div class="h-10 bg-gray-200 rounded-sm mb-5"></div>
           </div>
         </div>
       </div>
 
       <!-- Main Form Card -->
-      <div v-else class="bg-white shadow-xl rounded-xl border border-gray-300">
+      <div v-else class="bg-white shadow-sm rounded-sm border border-gray-200">
         <!-- Card Header -->
-        <div class="bg-gray-800 px-8 py-6 rounded-t-xl flex items-center">
+        <div class="bg-gray-800 px-8 py-6 rounded-t-sm flex items-center">
           <svg class="h-6 w-6 mr-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
@@ -53,11 +53,11 @@
         </div>
 
         <!-- Card Body -->
-        <div class="px-8 py-10 rounded-b-xl">
+        <div class="px-8 py-10 rounded-b-sm">
           <form @submit.prevent="submit" class="space-y-10">
             <!-- Basic Information Section -->
-            <div class="bg-gray-50 rounded-xl p-8 border border-gray-200">
-              <h4 class="text-xl font-semibold text-gray-900 mb-8 flex items-center">
+            <div class="bg-gray-50 rounded-sm p-8 border border-gray-200">
+              <h4 class="text-xl font-semibold text-gray-800 mb-8 flex items-center">
                 <svg class="h-6 w-6 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -74,7 +74,7 @@
                       type="text"
                       :value="marhalaName"
                       readonly
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-700 focus:outline-none cursor-not-allowed text-base"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-sm bg-gray-100 text-gray-700 focus:outline-none cursor-not-allowed text-base"
                     />
                     <svg class="absolute right-3 h-5 w-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -88,7 +88,7 @@
                   </label>
                   <select
                     v-model="form.subject_id"
-                    :class="['w-full px-4 py-3 border rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200', errors?.subject_id ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white']"
+                    :class="['w-full px-4 py-3 border rounded-sm text-base focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-all duration-200', errors?.subject_id ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white']"
                   >
                     <option value="" disabled>নির্বাচন করুন</option>
                     <option v-for="subject in subjects" :key="subject.id" :value="subject.id">
@@ -106,7 +106,7 @@
                   </label>
                   <select
                     v-model="form.syllabus_type"
-                    :class="['w-full px-4 py-3 border rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200', errors?.syllabus_type ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white']"
+                    :class="['w-full px-4 py-3 border rounded-sm text-base focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-all duration-200', errors?.syllabus_type ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white']"
                   >
                     <option value="" disabled>নির্বাচন করুন</option>
                     <option value="আবশ্যিক">আবশ্যিক</option>
@@ -117,8 +117,8 @@
             </div>
 
             <!-- Classification Section -->
-            <div class="bg-gray-50 rounded-xl p-8 border border-gray-200">
-              <h4 class="text-xl font-semibold text-gray-900 mb-8 flex items-center">
+            <div class="bg-gray-50 rounded-sm p-8 border border-gray-200">
+              <h4 class="text-xl font-semibold text-gray-800 mb-8 flex items-center">
                 <svg class="h-6 w-6 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                 </svg>
@@ -132,7 +132,7 @@
                   </label>
                   <select
                     v-model="form.markaz_type"
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-base focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-sm bg-white text-base focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-all duration-200"
                   >
                     <option value="" disabled>নির্বাচন করুন</option>
                     <option value="দরসিয়াত">দরসিয়াত</option>
@@ -147,7 +147,7 @@
                   </label>
                   <select
                     v-model="form.subject_type"
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-base focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-sm bg-white text-base focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-all duration-200"
                   >
                     <option value="" disabled>নির্বাচন করুন</option>
                     <option value="মিইয়ারী">মিইয়ারী</option>
@@ -161,7 +161,7 @@
                   </label>
                   <select
                     v-model="form.student_type"
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-base focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-sm bg-white text-base focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-all duration-200"
                   >
                     <option value="" disabled>নির্বাচন করুন</option>
                     <option value="ছাত্র">ছাত্র</option>
@@ -173,8 +173,8 @@
             </div>
 
             <!-- Assessment Section -->
-            <div class="bg-gray-50 rounded-xl p-8 border border-gray-200">
-              <h4 class="text-xl font-semibold text-gray-900 mb-8 flex items-center">
+            <div class="bg-gray-50 rounded-sm p-8 border border-gray-200">
+              <h4 class="text-xl font-semibold text-gray-800 mb-8 flex items-center">
                 <svg class="h-6 w-6 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" />
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
@@ -193,7 +193,7 @@
                       v-model="form.total_marks"
                       min="0"
                       max="1000"
-                      class="w-full px-4 py-3 pr-16 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200 text-base"
+                      class="w-full px-4 py-3 pr-16 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-all duration-200 text-base"
                       placeholder="যেমন: ১০০"
                     />
                     <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-base pointer-events-none">নম্বর</span>
@@ -210,7 +210,7 @@
                       v-model="form.pass_marks"
                       min="0"
                       :max="form.total_marks || 1000"
-                      class="w-full px-4 py-3 pr-16 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200 text-base"
+                      class="w-full px-4 py-3 pr-16 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-all duration-200 text-base"
                       placeholder="যেমন: ৪০"
                     />
                     <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-base pointer-events-none">নম্বর</span>
@@ -231,10 +231,10 @@
                         type="radio"
                         v-model="form.status"
                         value="active"
-                        class="h-5 w-5 text-green-600 focus:ring-green-500 border-gray-300"
+                        class="h-5 w-5 text-gray-600 focus:ring-gray-500 border-gray-300"
                       />
                       <span class="ml-3 text-base text-gray-700 flex items-center">
-                        <span class="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+                        <span class="w-3 h-3 bg-gray-600 rounded-full mr-2"></span>
                         সক্রিয়
                       </span>
                     </label>
@@ -243,10 +243,10 @@
                         type="radio"
                         v-model="form.status"
                         value="inactive"
-                        class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300"
+                        class="h-5 w-5 text-gray-600 focus:ring-gray-500 border-gray-300"
                       />
                       <span class="ml-3 text-base text-gray-700 flex items-center">
-                        <span class="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
+                        <span class="w-3 h-3 bg-gray-500 rounded-full mr-2"></span>
                         নিষ্ক্রিয়
                       </span>
                     </label>
@@ -264,7 +264,7 @@
                 <button
                   type="button"
                   @click="resetForm"
-                  class="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200"
+                  class="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200"
                 >
                   <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -275,10 +275,10 @@
                   type="submit"
                   :disabled="processing || !isFormValid"
                   :class="[
-                    'inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-lg shadow-lg transition-all duration-200',
+                    'inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-sm shadow-sm transition-all duration-200',
                     processing || !isFormValid
                       ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                      : 'bg-gray-800 text-white hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 hover:shadow-xl'
+                      : 'bg-gray-800 text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500'
                   ]"
                 >
                   <template v-if="processing">
@@ -469,13 +469,13 @@ const showFlashMessage = (type: 'success' | 'error', message: string): void => {
 
   const flashMessage = document.createElement('div')
 
-  const baseClasses = 'mb-6 border-l-4 p-6 rounded-r-xl relative transform transition-all duration-300 ease-in-out shadow-lg'
+  const baseClasses = 'mb-6 border-l-4 p-6 rounded-r-sm relative transform transition-all duration-300 ease-in-out shadow-sm'
 
   if (type === 'success') {
-    flashMessage.className = `${baseClasses} bg-green-50 border-green-400 text-green-800`
+    flashMessage.className = `${baseClasses} bg-gray-50 border-gray-400 text-gray-800`
     flashMessage.innerHTML = `
       <div class="flex items-center">
-        <svg class="w-6 h-6 mr-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-6 h-6 mr-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
         </svg>
         <div>
@@ -483,17 +483,17 @@ const showFlashMessage = (type: 'success' | 'error', message: string): void => {
           <p class="text-lg mt-1">${message}</p>
         </div>
       </div>
-      <button class="absolute top-3 right-3 p-2 hover:bg-green-100 rounded-full transition-colors duration-200" onclick="this.parentElement.remove()">
-        <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+      <button class="absolute top-3 right-3 p-2 hover:bg-gray-100 rounded-sm transition-colors duration-200" onclick="this.parentElement.remove()">
+        <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
         </svg>
       </button>
     `
   } else {
-    flashMessage.className = `${baseClasses} bg-red-50 border-red-400 text-red-800`
+    flashMessage.className = `${baseClasses} bg-gray-50 border-gray-400 text-gray-800`
     flashMessage.innerHTML = `
       <div class="flex items-center">
-        <svg class="w-6 h-6 mr-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-6 h-6 mr-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
         </svg>
         <div>
@@ -501,8 +501,8 @@ const showFlashMessage = (type: 'success' | 'error', message: string): void => {
           <p class="text-lg mt-1">${message}</p>
         </div>
       </div>
-      <button class="absolute top-3 right-3 p-2 hover:bg-red-100 rounded-full transition-colors duration-200" onclick="this.parentElement.remove()">
-        <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+      <button class="absolute top-3 right-3 p-2 hover:bg-gray-100 rounded-sm transition-colors duration-200" onclick="this.parentElement.remove()">
+        <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
         </svg>
       </button>
@@ -579,3 +579,47 @@ onMounted(() => {
   fetchSubjectData()
 })
 </script>
+
+<style scoped>
+/* Professional styling enhancements */
+.transition-all {
+  transition: all 0.2s ease;
+}
+
+.shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.rounded-sm {
+  border-radius: 0.125rem;
+}
+
+/* Custom focus styles for accessibility */
+input:focus, select:focus, button:focus {
+  outline: none;
+}
+
+/* Hover effect for buttons */
+button:hover {
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Form section styling */
+.bg-gray-50 {
+  background-color: #f9fafb;
+}
+
+/* Loading animation */
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}
+</style>

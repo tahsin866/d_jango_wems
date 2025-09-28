@@ -1,41 +1,41 @@
 <template>
   <div
     style="font-family: 'SolaimanLipi', sans-serif;"
-    class="bg-[#f4f6f9] text-[#222d32]"
+    class="bg-gray-100 text-gray-800"
   >
     <div class="mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <!-- Header -->
-      <div class="mb-8 bg-white rounded shadow-lg border border-[#d2d6de]">
-        <div class="flex flex-col md:flex-row items-center justify-between p-6 border-b border-[#d2d6de]">
+      <div class="mb-8 bg-white rounded border border-gray-300 shadow">
+        <div class="flex flex-col md:flex-row items-center justify-between p-6 border-b border-gray-200">
           <div class="flex items-center gap-3">
-            <div class="p-2 bg-[#e9ecef] rounded">
-              <svg class="w-8 h-8 text-[#3c8dbc]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="p-2 bg-gray-100 rounded">
+              <svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
             </div>
             <div>
-              <h2 class="text-2xl font-bold text-[#222d32]">পরীক্ষার ফি সেটআপ</h2>
-              <p class="text-gray-500 text-base">{{ examName }}</p>
+              <h2 class="text-2xl font-bold text-gray-900">পরীক্ষার ফি সেটআপ</h2>
+              <p class="text-gray-600 text-base">{{ examName }}</p>
             </div>
           </div>
           <div class="flex gap-4 mt-4 md:mt-0">
-            <div class="flex items-center gap-1 px-3 py-1.5 bg-[#f4f6f9] rounded text-base border border-[#d2d6de]">
-              <svg class="w-4 h-4 text-[#3c8dbc]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex items-center gap-1 px-3 py-1.5 bg-gray-100 rounded text-base border border-gray-300">
+              <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               {{ getCurrentDate() }}
             </div>
-            <div class="flex items-center gap-1 px-3 py-1.5 bg-[#f4f6f9] rounded text-base border border-[#d2d6de]">
-              <svg class="w-4 h-4 text-[#3c8dbc]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex items-center gap-1 px-3 py-1.5 bg-gray-100 rounded text-base border border-gray-300">
+              <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               {{ getCurrentTime() }}
             </div>
-            <div class="flex items-center gap-1 px-3 py-1.5 bg-[#f4f6f9] rounded text-base border border-[#d2d6de]">
-              <svg class="w-4 h-4 text-[#3c8dbc]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex items-center gap-1 px-3 py-1.5 bg-gray-100 rounded text-base border border-gray-300">
+              <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
@@ -44,20 +44,20 @@
           </div>
         </div>
         <!-- Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 bg-[#f4f6f9]">
-          <div class="flex flex-col items-center justify-center bg-white rounded shadow border border-[#d2d6de] p-4">
-            <div class="text-base text-gray-500 mb-1">মোট মারহালা</div>
-            <div class="text-xl font-semibold text-[#222d32]">{{ totalRecords }}</div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 bg-gray-50">
+          <div class="flex flex-col items-center justify-center bg-white rounded border border-gray-300 p-4">
+            <div class="text-base text-gray-600 mb-1">মোট মারহালা</div>
+            <div class="text-xl font-semibold text-gray-900">{{ totalRecords }}</div>
           </div>
-          <div class="flex flex-col items-center justify-center bg-white rounded shadow border border-[#d2d6de] p-4">
-            <div class="text-base text-gray-500 mb-1">মোট ছাত্র</div>
-            <div class="text-xl font-semibold text-[#222d32]">
+          <div class="flex flex-col items-center justify-center bg-white rounded border border-gray-300 p-4">
+            <div class="text-base text-gray-600 mb-1">মোট ছাত্র</div>
+            <div class="text-xl font-semibold text-gray-900">
               {{ totalRecords }}
             </div>
           </div>
-          <div class="flex flex-col items-center justify-center bg-white rounded shadow border border-[#d2d6de] p-4">
-            <div class="text-base text-gray-500 mb-1">গড় ফি (নিয়মিত)</div>
-            <div class="text-xl font-semibold text-[#222d32]">
+          <div class="flex flex-col items-center justify-center bg-white rounded border border-gray-300 p-4">
+            <div class="text-base text-gray-600 mb-1">গড় ফি (নিয়মিত)</div>
+            <div class="text-xl font-semibold text-gray-900">
               NA
             </div>
           </div>
@@ -69,12 +69,12 @@
         <input
           v-model="globalFilterValue"
           type="search"
-          class="block w-full md:w-96 p-2.5 border border-[#d2d6de] rounded bg-[#f4f6f9] focus:ring-[#3c8dbc] focus:border-[#3c8dbc] text-base"
+          class="block w-full md:w-96 p-2.5 border border-gray-300 rounded bg-white focus:ring-gray-500 focus:border-gray-500 text-base"
           placeholder="অনুসন্ধান করুন..."
         >
         <div class="flex gap-2">
           <button @click="exportToExcel"
-            class="flex items-center px-4 py-2 border border-[#3c8dbc] rounded bg-[#e9ecef] hover:bg-[#f4f6f9] text-[#3c8dbc] font-semibold">
+            class="flex items-center px-4 py-2 border border-gray-300 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium">
             <svg class="w-5 h-5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -82,7 +82,7 @@
             এক্সপোর্ট
           </button>
           <button @click="fetchOverview"
-            class="flex items-center px-4 py-2 border border-[#605ca8] rounded bg-[#e9ecef] hover:bg-[#f4f6f9] text-[#605ca8] font-semibold">
+            class="flex items-center px-4 py-2 border border-gray-300 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium">
             <svg class="w-5 h-5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -93,36 +93,36 @@
       </div>
 
       <!-- Data Table -->
-      <div class="bg-white rounded shadow-lg border border-[#d2d6de]">
+      <div class="bg-white rounded border border-gray-300 shadow">
         <div v-if="isLoading" class="flex items-center justify-center p-16">
-          <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#3c8dbc]"></div>
+          <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-500"></div>
         </div>
         <div v-else>
           <div class="overflow-x-auto max-w-full">
             <table class="min-w-max w-full border-collapse">
-              <thead class="bg-[#e9ecef] text-[#222d32] text-md uppercase tracking-wider">
+              <thead class="bg-gray-100 text-gray-800 text-md uppercase tracking-wider">
                 <tr>
-                  <th class="py-3 px-4 text-left font-bold whitespace-nowrap">পরীক্ষা</th>
-                  <th class="py-3 px-4 text-left font-bold whitespace-nowrap">ID</th>
-                  <th class="py-3 px-4 text-left font-bold whitespace-nowrap">নিয়মিত (শুরু)</th>
-                  <th class="py-3 px-4 text-left font-bold whitespace-nowrap">নিয়মিত (শেষ)</th>
-                  <th class="py-3 px-4 text-left font-bold whitespace-nowrap">নিয়মিত ফি</th>
-                  <th class="py-3 px-4 text-left font-bold whitespace-nowrap">বিলম্ব (শুরু)</th>
-                  <th class="py-3 px-4 text-left font-bold whitespace-nowrap">বিলম্ব (শেষ)</th>
-                  <th class="py-3 px-4 text-left font-bold whitespace-nowrap">বিলম্ব ফি</th>
-                  <th class="py-3 px-4 text-left font-bold whitespace-nowrap">অনিয়মিত ফি</th>
-                  <th class="py-3 px-4 text-left font-bold whitespace-nowrap">অনিয়মিত বিলম্ব ফি</th>
-                  <th class="py-3 px-4 text-left font-bold whitespace-nowrap">একশন</th>
+                  <th class="py-3 px-4 text-left font-semibold whitespace-nowrap">পরীক্ষা</th>
+                  <th class="py-3 px-4 text-left font-semibold whitespace-nowrap">ID</th>
+                  <th class="py-3 px-4 text-left font-semibold whitespace-nowrap">নিয়মিত (শুরু)</th>
+                  <th class="py-3 px-4 text-left font-semibold whitespace-nowrap">নিয়মিত (শেষ)</th>
+                  <th class="py-3 px-4 text-left font-semibold whitespace-nowrap">নিয়মিত ফি</th>
+                  <th class="py-3 px-4 text-left font-semibold whitespace-nowrap">বিলম্ব (শুরু)</th>
+                  <th class="py-3 px-4 text-left font-semibold whitespace-nowrap">বিলম্ব (শেষ)</th>
+                  <th class="py-3 px-4 text-left font-semibold whitespace-nowrap">বিলম্ব ফি</th>
+                  <th class="py-3 px-4 text-left font-semibold whitespace-nowrap">অনিয়মিত ফি</th>
+                  <th class="py-3 px-4 text-left font-semibold whitespace-nowrap">অনিয়মিত বিলম্ব ফি</th>
+                  <th class="py-3 px-4 text-left font-semibold whitespace-nowrap">একশন</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-[#d2d6de]">
+              <tbody class="divide-y divide-gray-200">
                 <tr
                   v-for="row in displayedRows"
                   :key="row.id"
-                  class="hover:bg-[#f4f6f9] transition"
+                  class="hover:bg-gray-50 transition"
                 >
-                  <td class="px-4 py-3 font-medium text-[#222d32] whitespace-nowrap">
-                    <span class="text-base text-gray-500">{{ row.marhala_name_bn }}</span>
+                  <td class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">
+                    <span class="text-base text-gray-600">{{ row.marhala_name_bn }}</span>
                   </td>
                   <td class="px-4 py-3 whitespace-nowrap">{{ row.id }}</td>
                   <td class="px-4 py-3 whitespace-nowrap">
@@ -131,7 +131,7 @@
                   <td class="px-4 py-3 whitespace-nowrap">
                     {{ getFeeField(row, 'reg_date_to') }}
                   </td>
-                  <td class="px-4 py-3 whitespace-nowrap font-bold">
+                  <td class="px-4 py-3 whitespace-nowrap font-medium">
                     {{ getFeeField(row, 'reg_regular_fee', true) }}
                   </td>
                   <td class="px-4 py-3 whitespace-nowrap">
@@ -140,26 +140,26 @@
                   <td class="px-4 py-3 whitespace-nowrap">
                     {{ getFeeField(row, 'late_date_to') }}
                   </td>
-                  <td class="px-4 py-3 whitespace-nowrap font-bold">
+                  <td class="px-4 py-3 whitespace-nowrap font-medium">
                     {{ getFeeField(row, 'late_regular_fee', true) }}
                   </td>
-                  <td class="px-4 py-3 whitespace-nowrap font-bold">
+                  <td class="px-4 py-3 whitespace-nowrap font-medium">
                     {{ getFeeField(row, 'reg_irregular_jemni', true) }}
                   </td>
-                  <td class="px-4 py-3 whitespace-nowrap font-bold">
+                  <td class="px-4 py-3 whitespace-nowrap font-medium">
                     {{ getFeeField(row, 'late_irregular_jemni', true) }}
                   </td>
                   <td class="px-4 py-3 whitespace-nowrap">
                     <div class="flex gap-2">
                       <RouterLink
                         :to="getOldRegistrationPath(row)"
-                        class="inline-flex items-center px-3 py-1.5 bg-[#3c8dbc] rounded text-base text-white hover:bg-[#367fa9] transition shadow-sm"
+                        class="inline-flex items-center px-3 py-1.5 bg-gray-700 rounded text-base text-white hover:bg-gray-800 transition"
                       >
                         নিবন্ধন
                       </RouterLink>
                       <RouterLink
                         :to="getRegistrationTablePath(row)"
-                        class="inline-flex items-center px-3 py-1.5 bg-[#605ca8] rounded text-base text-white hover:bg-[#483d8b] transition shadow-sm"
+                        class="inline-flex items-center px-3 py-1.5 bg-gray-600 rounded text-base text-white hover:bg-gray-700 transition"
                       >
                         তালিকা
                       </RouterLink>
@@ -171,36 +171,36 @@
           </div>
           <!-- Empty State -->
           <div v-if="displayedRows.length === 0" class="py-16 flex flex-col items-center justify-center">
-            <svg class="w-16 h-16 text-[#d2d6de]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
-            <h3 class="mt-2 text-base font-semibold text-[#222d32]">কোন রেকর্ড পাওয়া যায়নি</h3>
+            <h3 class="mt-2 text-base font-medium text-gray-900">কোন রেকর্ড পাওয়া যায়নি</h3>
             <p class="mt-1 text-base text-gray-500">আপনার অনুসন্ধানের সাথে মিলে এমন কোন তথ্য নেই।</p>
           </div>
           <!-- Pagination -->
-          <div class="border-t border-[#d2d6de]">
+          <div class="border-t border-gray-200">
             <div class="px-4 py-4 flex items-center justify-between">
               <div class="flex items-center">
-                <span class="text-base text-[#222d32] mr-2">প্রতি পৃষ্ঠায়:</span>
-                <select v-model="rowsPerPage" class="border border-[#d2d6de] rounded-md text-base p-1 focus:ring-[#3c8dbc] focus:border-[#3c8dbc]">
+                <span class="text-base text-gray-700 mr-2">প্রতি পৃষ্ঠায়:</span>
+                <select v-model="rowsPerPage" class="border border-gray-300 rounded-md text-base p-1 focus:ring-gray-500 focus:border-gray-500">
                   <option v-for="option in [5, 10, 20, 50]" :key="option" :value="option">{{ option }}</option>
                 </select>
-                <span class="ml-4 text-base text-[#222d32]">
+                <span class="ml-4 text-base text-gray-700">
                   {{ (currentPage - 1) * rowsPerPage + 1 }} - {{ Math.min(currentPage * rowsPerPage, totalRecords) }} / {{ totalRecords }}
                 </span>
               </div>
               <div class="flex items-center space-x-2">
                 <button @click="currentPage = 1" :disabled="currentPage === 1"
                   class="p-2 border rounded-md"
-                  :class="currentPage === 1 ? 'bg-[#e9ecef] text-[#b5bbc7] cursor-not-allowed' : 'bg-white text-[#222d32] hover:bg-[#f4f6f9]'">
+                  :class="currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7m0 0l7-7m-7 7h18" />
                   </svg>
                 </button>
                 <button @click="currentPage = Math.max(1, currentPage - 1)" :disabled="currentPage === 1"
                   class="p-2 border rounded-md"
-                  :class="currentPage === 1 ? 'bg-[#e9ecef] text-[#b5bbc7] cursor-not-allowed' : 'bg-white text-[#222d32] hover:bg-[#f4f6f9]'">
+                  :class="currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                   </svg>
@@ -209,24 +209,24 @@
                   <template v-for="page in getPageNumbers()" :key="page">
                     <button v-if="page !== '...'" @click="typeof page === 'number' && (currentPage = page)"
                       class="px-3 py-1 border rounded-md transition-colors"
-                      :class="currentPage === page ? 'bg-[#e9ecef] text-[#3c8dbc] border-[#3c8dbc]' : 'bg-white text-[#222d32] hover:bg-[#f4f6f9]'">
+                      :class="currentPage === page ? 'bg-gray-100 text-gray-700 border-gray-300' : 'bg-white text-gray-700 hover:bg-gray-50'">
                       {{ page }}
                     </button>
-                    <span v-else class="px-3 py-1 border border-[#d2d6de] rounded-md bg-white text-[#222d32]">
+                    <span v-else class="px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-700">
                       ...
                     </span>
                   </template>
                 </div>
                 <button @click="currentPage = Math.min(totalPages, currentPage + 1)" :disabled="currentPage === totalPages"
                   class="p-2 border rounded-md"
-                  :class="currentPage === totalPages ? 'bg-[#e9ecef] text-[#b5bbc7] cursor-not-allowed' : 'bg-white text-[#222d32] hover:bg-[#f4f6f9]'">
+                  :class="currentPage === totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                   </svg>
                 </button>
                 <button @click="currentPage = totalPages" :disabled="currentPage === totalPages"
                   class="p-2 border rounded-md"
-                  :class="currentPage === totalPages ? 'bg-[#e9ecef] text-[#b5bbc7] cursor-not-allowed' : 'bg-white text-[#222d32] hover:bg-[#f4f6f9]'">
+                  :class="currentPage === totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
                   </svg>
@@ -393,20 +393,5 @@ button, a, input, select {
 }
 tbody tr {
   transition: background-color 0.2s ease;
-}
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #f4f6f9;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb {
-  background: #c5c5c5;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #a0a0a0;
 }
 </style>

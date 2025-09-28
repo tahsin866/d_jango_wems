@@ -1,10 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-
-
-
-import AdminLayout from '@/components/layout/AdminLayout.vue';
 import StudentStatsCards from '@/views/Pages/registraion/components/StudentStatsCards.vue'
 import StudentSearchWizard from '@/views/Pages/registraion/components/StudentSearchWizard.vue'
 import StudentsDataTable from '@/views/Pages/registraion/components/StudentsDataTable.vue'
@@ -78,7 +74,7 @@ const refresh = () => fetchData()
 </script>
 
 <template>
-  <AdminLayout>
+
     <div class="p-4 mt-5 mx-auto">
       <StudentStatsCards :studentStats="studentStats" />
       <StudentSearchWizard v-model:filters="filters" />
@@ -97,5 +93,5 @@ const refresh = () => fetchData()
   @refresh="refresh"
 />
     </div>
-  </AdminLayout>
+
 </template>

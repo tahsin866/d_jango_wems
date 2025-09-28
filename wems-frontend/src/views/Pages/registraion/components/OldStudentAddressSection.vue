@@ -1,125 +1,93 @@
 <template>
-  <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-    <!-- Present Address -->
-    <div class="bg-white border border-emerald-100 rounded-md shadow">
-      <div class="bg-gradient-to-r rounded-t-md from-emerald-800 overflow-hidden px-6 py-3 relative to-emerald-600">
-        <div class="flex gap-3 items-center relative z-10">
-          <i class="text-2xl text-white fa-map-marker-alt fas"></i>
-          <h5 class="text-white text-xl">বর্তমান ঠিকানা</h5>
+  <div class="bg-white border border-gray-200 rounded-sm shadow-md overflow-hidden">
+    <div class="bg-gradient-to-r from-gray-700 to-gray-600 px-6 py-4 relative">
+      <div class="flex justify-between items-center relative z-10">
+        <div class="flex gap-4 items-center">
+          <div class="p-2 rounded-sm bg-white bg-opacity-20 backdrop-blur-sm">
+            <i class="text-2xl text-white" :class="addressType === 'present' ? 'fa-map-marker-alt' : 'fa-home'"></i>
+          </div>
+          <h5 class="text-white text-xl font-bold tracking-wide">
+            {{ addressType === 'present' ? 'বর্তমান ঠিকানা' : 'স্থায়ী ঠিকানা' }}
+          </h5>
         </div>
-      </div>
-      <div class="bg-opacity-5 bg-white p-6">
-        <div class="grid grid-cols-1 gap-4">
-          <div class="relative">
-            <label class="flex text-emerald-700 text-lg font-medium gap-2 items-center mb-1">বিভাগ</label>
-            <div class="relative">
-              <select
-                v-model="localPresent.division"
-                @change="onPresentDivisionChange"
-                class="bg-white border border-gray-200 rounded-sm w-full block focus:ring-[#2d6a4f] focus:ring-2 px-4 py-2"
-              >
-                <option value="">সকল</option>
-                <option v-for="division in divisions" :key="division.id" :value="String(division.id)">
-                  {{ division.Division }}
-                </option>
-              </select>
-            </div>
-          </div>
 
-          <div class="relative">
-            <label class="flex text-emerald-700 text-lg font-medium gap-2 items-center mb-1">জেলা</label>
-            <div class="relative">
-              <select
-                v-model="localPresent.district"
-                @change="onPresentDistrictChange"
-                :disabled="!localPresent.division"
-                class="bg-white border border-gray-200 rounded-sm w-full block focus:ring-[#2d6a4f] focus:ring-2 px-4 py-2"
-              >
-                <option value="">সকল</option>
-                <option v-for="district in presentDistricts" :key="district.DesID" :value="String(district.DesID)">
-                  {{ district.District }}
-                </option>
-              </select>
-            </div>
-          </div>
-
-          <div class="relative">
-            <label class="flex text-emerald-700 text-lg font-medium gap-2 items-center mb-1">থানা/উপজেলা</label>
-            <div class="relative">
-              <select
-                v-model="localPresent.Thana"
-                @change="onPresentThanaChange"
-                :disabled="!localPresent.district"
-                class="bg-white border border-gray-200 rounded-sm w-full block focus:ring-[#2d6a4f] focus:ring-2 px-4 py-2"
-              >
-                <option value="">সকল</option>
-                <option v-for="thana in presentThanas" :key="thana.Thana_ID" :value="String(thana.Thana_ID)">
-                  {{ thana.Thana }}
-                </option>
-              </select>
-            </div>
-          </div>
+        <div class="flex items-center space-x-3">
+          <span class="text-white font-medium">বর্তমান</span>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" v-model="isPermanent" class="sr-only peer">
+            <div class="w-12 h-6 bg-gray-300 peer-focus:ring-2 peer-focus:ring-gray-400 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-700"></div>
+          </label>
+          <span class="text-white font-medium">স্থায়ী</span>
         </div>
       </div>
     </div>
 
-    <!-- Permanent Address -->
-    <div class="bg-white border border-emerald-100 rounded-md shadow">
-      <div class="bg-gradient-to-r rounded-t-md from-emerald-800 overflow-hidden px-6 py-3 relative to-emerald-600">
-        <div class="flex gap-3 items-center relative z-10">
-          <i class="text-2xl text-white fa-home fas"></i>
-          <h5 class="text-white text-xl">স্থায়ী ঠিকানা</h5>
+    <div class="p-6 bg-gray-50">
+      <div class="grid grid-cols-1 gap-6">
+        <div class="relative">
+          <label class="flex text-gray-700 text-lg font-semibold gap-2 items-center mb-2">
+            <i class="fas fa-map-marked-alt" :class="[!isDark ? 'text-gray-600' : 'dark:text-gray-400']"></i>
+            বিভাগ
+          </label>
+          <div class="relative">
+            <select
+              v-model="currentAddress.division"
+              @change="onDivisionChange"
+              class="bg-white border border-gray-300 rounded-sm w-full block focus:ring-gray-500 focus:ring-2 px-4 py-3 shadow-sm transition-colors appearance-none"
+            >
+              <option value="">সকল</option>
+              <option v-for="division in divisions" :key="division.id" :value="String(division.id)">
+                {{ division.Division }}
+              </option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+              <i class="fas fa-chevron-down"></i>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="bg-opacity-5 bg-white p-6">
-        <div class="grid grid-cols-1 gap-4">
+
+        <div class="relative">
+          <label class="flex text-gray-700 text-lg font-semibold gap-2 items-center mb-2">
+            <i class="fas fa-city" :class="[!isDark ? 'text-gray-600' : 'dark:text-gray-400']"></i>
+            জেলা
+          </label>
           <div class="relative">
-            <label class="flex text-emerald-700 text-lg font-medium gap-2 items-center mb-1">বিভাগ</label>
-            <div class="relative">
-              <select
-                v-model="localPermanent.division"
-                @change="onPermanentDivisionChange"
-                class="bg-white border border-gray-200 rounded-sm w-full block focus:ring-[#2d6a4f] focus:ring-2 px-4 py-2"
-              >
-                <option value="">সকল</option>
-                <option v-for="division in divisions" :key="division.id" :value="String(division.id)">
-                  {{ division.Division }}
-                </option>
-              </select>
+            <select
+              v-model="currentAddress.district"
+              @change="onDistrictChange"
+              :disabled="!currentAddress.division"
+              class="bg-white border border-gray-300 rounded-sm w-full block focus:ring-gray-500 focus:ring-2 px-4 py-3 shadow-sm transition-colors appearance-none disabled:bg-gray-100 disabled:opacity-70"
+            >
+              <option value="">সকল</option>
+              <option v-for="district in currentDistricts" :key="district.DesID" :value="String(district.DesID)">
+                {{ district.District }}
+              </option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+              <i class="fas fa-chevron-down"></i>
             </div>
           </div>
+        </div>
 
+        <div class="relative">
+          <label class="flex text-gray-700 text-lg font-semibold gap-2 items-center mb-2">
+            <i class="fas fa-location-dot" :class="[!isDark ? 'text-gray-600' : 'dark:text-gray-400']"></i>
+            থানা/উপজেলা
+          </label>
           <div class="relative">
-            <label class="flex text-emerald-700 text-lg font-medium gap-2 items-center mb-1">জেলা</label>
-            <div class="relative">
-              <select
-                v-model="localPermanent.district"
-                @change="onPermanentDistrictChange"
-                :disabled="!localPermanent.division"
-                class="bg-white border border-gray-200 rounded-sm w-full block focus:ring-[#2d6a4f] focus:ring-2 px-4 py-2"
-              >
-                <option value="">সকল</option>
-                <option v-for="district in districts" :key="district.DesID" :value="String(district.DesID)">
-                  {{ district.District }}
-                </option>
-              </select>
-            </div>
-          </div>
-
-          <div class="relative">
-            <label class="flex text-emerald-700 text-lg font-medium gap-2 items-center mb-1">থানা/উপজেলা</label>
-            <div class="relative">
-              <select
-                v-model="localPermanent.Thana"
-                @change="onPermanentThanaChange"
-                :disabled="!localPermanent.district"
-                class="bg-white border border-gray-200 rounded-sm w-full block focus:ring-[#2d6a4f] focus:ring-2 px-4 py-2"
-              >
-                <option value="">সকল</option>
-                <option v-for="thana in thanas" :key="thana.Thana_ID" :value="String(thana.Thana_ID)">
-                  {{ thana.Thana }}
-                </option>
-              </select>
+            <select
+              v-model="currentAddress.Thana"
+              @change="onThanaChange"
+              :disabled="!currentAddress.district"
+              class="bg-white border border-gray-300 rounded-sm w-full block focus:ring-gray-500 focus:ring-2 px-4 py-3 shadow-sm transition-colors appearance-none disabled:bg-gray-100 disabled:opacity-70"
+            >
+              <option value="">সকল</option>
+              <option v-for="thana in currentThanas" :key="thana.Thana_ID" :value="String(thana.Thana_ID)">
+                {{ thana.Thana }}
+              </option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+              <i class="fas fa-chevron-down"></i>
             </div>
           </div>
         </div>
@@ -129,7 +97,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, watch } from 'vue';
+import { reactive, watch, computed, ref } from 'vue';
 
 type Division = { id: string | number; Division: string };
 type District = { DesID: string | number; District: string };
@@ -156,6 +124,10 @@ const emit = defineEmits<{
   (e: 'update:studentInfoForm', payload: StudentInfo): void;
 }>();
 
+// Toggle between present and permanent address
+const isPermanent = ref(false);
+const addressType = computed(() => isPermanent.value ? 'permanent' : 'present');
+
 // Local reactive copies to avoid mutating props directly
 const localPresent = reactive<Filters>({
   division: props.presentFilters?.division ?? '',
@@ -168,6 +140,11 @@ const localPermanent = reactive<Filters>({
   district: props.permanentFilters?.district ?? '',
   Thana: props.permanentFilters?.Thana ?? ''
 });
+
+// Current address data based on toggle
+const currentAddress = computed(() => isPermanent.value ? localPermanent : localPresent);
+const currentDistricts = computed(() => isPermanent.value ? props.districts : props.presentDistricts);
+const currentThanas = computed(() => isPermanent.value ? props.thanas : props.presentThanas);
 
 // Sync when parent updates props
 watch(
@@ -266,47 +243,78 @@ const emitUpdatedStudentInfoForPermanent = () => {
 };
 
 // Event handlers called from selects
-const onPresentDivisionChange = () => {
+const onDivisionChange = () => {
   // reset dependent selects
-  localPresent.district = '';
-  localPresent.Thana = '';
+  currentAddress.value.district = '';
+  currentAddress.value.Thana = '';
 
   // notify parent to load districts
-  emit('present-division-change');
-  // update studentInfo form fields and inform parent
-  emitUpdatedStudentInfoForPresent();
+  if (isPermanent.value) {
+    emit('permanent-division-change');
+    emitUpdatedStudentInfoForPermanent();
+  } else {
+    emit('present-division-change');
+    emitUpdatedStudentInfoForPresent();
+  }
 };
 
-const onPresentDistrictChange = () => {
+const onDistrictChange = () => {
   // reset thana
-  localPresent.Thana = '';
-  emit('present-district-change');
-  emitUpdatedStudentInfoForPresent();
+  currentAddress.value.Thana = '';
+
+  if (isPermanent.value) {
+    emit('permanent-district-change');
+    emitUpdatedStudentInfoForPermanent();
+  } else {
+    emit('present-district-change');
+    emitUpdatedStudentInfoForPresent();
+  }
 };
 
-const onPresentThanaChange = () => {
-  // just update studentInfo
-  emitUpdatedStudentInfoForPresent();
-};
-
-const onPermanentDivisionChange = () => {
-  localPermanent.district = '';
-  localPermanent.Thana = '';
-  emit('permanent-division-change');
-  emitUpdatedStudentInfoForPermanent();
-};
-
-const onPermanentDistrictChange = () => {
-  localPermanent.Thana = '';
-  emit('permanent-district-change');
-  emitUpdatedStudentInfoForPermanent();
-};
-
-const onPermanentThanaChange = () => {
-  emitUpdatedStudentInfoForPermanent();
+const onThanaChange = () => {
+  if (isPermanent.value) {
+    emitUpdatedStudentInfoForPermanent();
+  } else {
+    emitUpdatedStudentInfoForPresent();
+  }
 };
 </script>
 
 <style scoped>
-/* All styling via Tailwind utility classes in template */
+/* Professional styling enhancements */
+.transition-colors {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+.shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.rounded-sm {
+  border-radius: 0.125rem;
+}
+
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+}
+
+/* Custom select styling */
+select {
+  background-image: none;
+}
+
+/* Disabled state improvements */
+select:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Toggle switch styling */
+.peer:checked ~ .peer-checked\:after\:translate-x-full {
+  transform: translateX(100%);
+}
+
+.peer:checked ~ .peer-checked\:bg-gray-700 {
+  background-color: #374151;
+}
 </style>

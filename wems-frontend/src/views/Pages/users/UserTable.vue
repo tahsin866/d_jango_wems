@@ -1,7 +1,7 @@
 <template>
   <div>
-    <!-- AdminLTE Box Header -->
-    <div class="flex flex-col md:flex-row justify-between gap-4 mb-4 items-center border-b border-gray-300 bg-gray-50 rounded-t px-4 py-3">
+    <!-- Table Header -->
+    <div class="flex flex-col md:flex-row justify-between gap-4 mb-4 items-center border-b border-gray-200 bg-gray-50 rounded-t-sm px-4 py-3">
       <!-- Search -->
       <div class="flex-1">
         <div class="relative">
@@ -9,7 +9,7 @@
             <InputText
               v-model="filters['global'].value"
               :placeholder="`${tableTitle} থেকে ফোন নম্বর দিয়ে সার্চ করুন`"
-              class="w-full border border-gray-300 rounded px-3 py-2 focus:border-indigo-500 focus:ring-indigo-300 focus:ring-1 shadow-sm"
+              class="w-full border border-gray-300 rounded-sm px-3 py-2 focus:border-gray-400 focus:ring-gray-300 focus:ring-1 shadow-sm"
             />
             <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
           </span>
@@ -19,15 +19,15 @@
       <div>
         <RouterLink
           :to="createUserRoute"
-          class="inline-flex items-center px-4 py-2 bg-indigo-700 border border-indigo-800 rounded font-bold text-xs text-white uppercase tracking-wider hover:bg-indigo-800 shadow transition"
+          class="inline-flex items-center px-4 py-2 bg-gray-800 border border-gray-700 rounded-sm font-semibold text-xs text-white uppercase tracking-wider hover:bg-gray-700 shadow-sm transition"
         >
           <i class="fas fa-user-plus mr-2"></i>
           নতুন ইউজার
         </RouterLink>
       </div>
     </div>
-    <!-- AdminLTE Table -->
-    <div class="bg-white border border-gray-300 shadow-sm rounded-b px-2 pb-4">
+    <!-- Table -->
+    <div class="bg-white border border-gray-200 shadow-sm rounded-b-sm px-2 pb-4">
       <DataTable
         :value="admins"
         :paginator="true"
@@ -43,7 +43,7 @@
       >
         <Column field="profile_image" header="ছবি">
           <template #body="slotProps">
-            <div class="h-10 w-10 rounded-full overflow-hidden border border-gray-200 bg-gray-100">
+            <div class="h-10 w-10 rounded-sm overflow-hidden border border-gray-200 bg-gray-100">
               <img
                 :src="slotProps.data.profile_image ? slotProps.data.profile_image : 'https://randomuser.me/api/portraits/men/1.jpg'"
                 :alt="slotProps.data.name"
@@ -57,9 +57,8 @@
         <Column field="email" header="ইমেইল" :sortable="true" :filter="true" filterPlaceholder="ইমেইল খুঁজুন"/>
         <Column field="designation" header="পদবি" :sortable="true" :filter="true" filterMatchMode="equals">
           <template #body="slotProps">
-            <span class="px-2 py-1 inline-flex text-xs leading-5 font-bold rounded-full border border-gray-300"
-                  :class="getDesignationClass(slotProps.data.designation)">
-              <i class="fas fa-user-tag mr-1"></i>
+            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-sm border border-gray-300 bg-gray-100 text-gray-800">
+              <i class="fas fa-user-tag mr-1 text-gray-600"></i>
               {{ getDesignationText(slotProps.data.designation) }}
             </span>
           </template>
@@ -81,15 +80,15 @@
               <Toast />
               <Dialog v-model:visible="showModal" :style="{width: '450px'}" header="এডমিন ডিলিট করুন" :modal="true">
                 <div class="flex items-start">
-                  <i class="fas fa-exclamation-triangle mr-3 text-red-500" style="font-size: 2rem"></i>
+                  <i class="fas fa-exclamation-triangle mr-3 text-gray-600" style="font-size: 2rem"></i>
                   <div>
-                    <p class="text-sm text-gray-500">
+                    <p class="text-sm text-gray-600">
                       আপনি কি নিশ্চিত যে আপনি এই এডমিন ডিলিট করতে চান? এই কাজটি অপরিবর্তনীয়।
                     </p>
                   </div>
                 </div>
                 <template #footer>
-                  <Button label="বাতিল করুন" icon="pi pi-times" class="p-button-text" @click="showModal = false" />
+                  <Button label="বাতিল করুন" icon="pi pi-times" class="p-button-text p-button-secondary" @click="showModal = false" />
                   <Button label="ডিলিট করুন" icon="pi pi-check" class="p-button-danger" @click="deleteAdmin" />
                 </template>
               </Dialog>
@@ -97,7 +96,7 @@
                 label="সংশোধন"
                 @click="editUser(slotProps.data.id)"
                 :model="getActionItems(slotProps.data.id)"
-                class="p-button-sm  text-gray-700 font-semibold "
+                class="p-button-sm p-button-outlined text-gray-700 font-semibold border-gray-300"
               />
             </div>
           </template>
@@ -210,14 +209,92 @@ const getDesignationText = (designation: number) => {
 };
 
 const getDesignationClass = (designation: number) => {
-  switch (designation) {
-    case 1: return 'bg-purple-100 text-purple-800';
-    case 2: return 'bg-gray-100 text-gray-800';
-    case 3: return 'bg-blue-100 text-blue-800';
-    case 4: return 'bg-green-100 text-green-800';
-    case 5: return 'bg-pink-100 text-pink-800';
-    case 6: return 'bg-yellow-100 text-yellow-800';
-    default: return 'bg-gray-100 text-gray-800';
-  }
+  // All designations now use the same gray styling for a professional look
+  return 'bg-gray-100 text-gray-800';
 };
 </script>
+
+<style scoped>
+/* Professional styling enhancements */
+.transition-all {
+  transition: all 0.2s ease;
+}
+
+.shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.rounded-sm {
+  border-radius: 0.125rem;
+}
+
+/* Custom focus styles for accessibility */
+input:focus, select:focus, button:focus {
+  outline: none;
+}
+
+/* Hover effect for buttons */
+button:hover {
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* PrimeVue component overrides */
+:deep(.p-datatable .p-datatable-header) {
+  background-color: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+:deep(.p-datatable .p-datatable-thead > tr > th) {
+  background-color: #f9fafb;
+  color: #374151;
+  font-weight: 600;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr) {
+  transition: background-color 0.2s ease;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr:hover) {
+  background-color: #f9fafb;
+}
+
+:deep(.p-paginator) {
+  background-color: #fff;
+  border-top: 1px solid #e5e7eb;
+}
+
+:deep(.p-dropdown) {
+  border: 1px solid #d1d5db;
+  border-radius: 0.125rem;
+}
+
+:deep(.p-button) {
+  border-radius: 0.125rem;
+}
+
+:deep(.p-button-outlined) {
+  background-color: #fff;
+}
+
+:deep(.p-button-outlined:hover) {
+  background-color: #f9fafb;
+}
+
+:deep(.p-dialog) {
+  border-radius: 0.125rem;
+}
+
+:deep(.p-dialog .p-dialog-header) {
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+  border-top-left-radius: 0.125rem;
+  border-top-right-radius: 0.125rem;
+}
+
+:deep(.p-dialog .p-dialog-footer) {
+  border-top: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+  border-bottom-left-radius: 0.125rem;
+  border-bottom-right-radius: 0.125rem;
+}
+</style>

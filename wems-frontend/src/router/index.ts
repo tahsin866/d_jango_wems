@@ -354,10 +354,10 @@ const routes = [
         meta: { title: 'Old Student Registration', requiresAuth: true, role: 'user' },
       },
       {
-        path: 'registration/card',
-        name: 'RegistrationCard',
-        component: () => import('@/views/Pages/registraion/registraionCard.vue'),
-        meta: { title: 'Registration Card', requiresAuth: true, role: 'user' },
+        path: 'registration/list',
+        name: 'RegistrationList',
+        component: () => import('@/views/Pages/registraion/registrationTable.vue'),
+        meta: { title: 'registrationTable', requiresAuth: true, role: 'user' },
       },
       {
         path: 'registration/table',
@@ -450,7 +450,7 @@ const routes = [
     redirect: '/user/registration/overview'
   },
   {
-    path: '/registrationList',
+    path: '/registration/list',
     redirect: '/user/registration/list'
   },
   {

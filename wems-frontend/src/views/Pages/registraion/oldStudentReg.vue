@@ -1,22 +1,19 @@
 <template>
-  <AdminLayout>
     <div
       style="font-family: 'SolaimanLipi', sans-serif;"
-      class="mx-auto px-4 py-5 sm:px-6 lg:px-8"
-      :class="[!isDark ? 'bg-gray-50' : 'dark:bg-slate-900 text-gray-200']"
+      class="mx-auto px-4 py-3 sm:px-6 lg:px-8"
+      :class="[!isDark ? 'bg-gray-50' : 'bg-gray-900 text-gray-200']"
     >
-      <div class="rounded-md mt-5 overflow-hidden"
-        :class="[!isDark ? 'bg-white' : 'dark:bg-slate-800']">
+      <div class="rounded-sm mt-5 overflow-hidden"
+        :class="[!isDark ? 'bg-white' : 'bg-gray-800']">
         <!-- Stepper Header -->
         <div class="flex flex-col sm:flex-row justify-between items-center px-8 pt-8 pb-4"
-          :class="[!isDark ? 'bg-emerald-700' : 'dark:bg-emerald-800']">
+          :class="[!isDark ? 'bg-gray-800' : 'bg-gray-900']">
           <div class="flex items-center gap-4">
-            <i class="fa-solid fa-user-graduate text-3xl text-white"></i>
-            <h2 class="text-2xl font-bold text-white tracking-wide">ছাত্র তথ্য সম্পাদনা</h2>
+            <i class="fa-solid fa-user-graduate text-3xl text-gray-300"></i>
+            <h2 class="text-2xl font-bold text-gray-200 tracking-wide">ছাত্র তথ্য সম্পাদনা</h2>
           </div>
-          <div class="mt-4 sm:mt-0">
-            <span class="inline-block bg-white/10 text-white text-xs rounded-full px-3 py-1 font-semibold tracking-wider">Advanced Edit Mode</span>
-          </div>
+
         </div>
 
         <!-- Progress Bar -->
@@ -27,57 +24,59 @@
                 <div
                   :class="[
                     'w-8 h-8 flex items-center justify-center rounded-full text-base font-bold transition-all duration-300 shadow',
-                    currentTab === idx ? 'bg-emerald-500 text-white scale-110 shadow-lg ring-2 ring-emerald-700' :
-                      idx < currentTab ? 'bg-emerald-300 text-white' :
-                      'bg-gray-200 text-gray-400',
-                    isDark && (currentTab === idx || idx < currentTab) ? 'dark:bg-emerald-700 dark:text-white' : ''
+                    currentTab === idx ? 'bg-gray-600 text-white scale-110 shadow-lg ring-2 ring-gray-500' :
+                      idx < currentTab ? 'bg-gray-500 text-white' :
+                      'bg-gray-300 text-gray-600',
+                    isDark && (currentTab === idx || idx < currentTab) ? 'bg-gray-700 text-white' : ''
                   ]"
                 >{{ idx + 1 }}</div>
                 <span class="mt-1 text-xs font-medium"
                   :class="currentTab === idx
-                    ? isDark ? 'dark:text-emerald-300' : 'text-emerald-700'
-                    : isDark ? 'dark:text-gray-400' : 'text-gray-400'"
-                >{{ tab }}</span>
+                    ? isDark ? 'text-gray-300' : 'text-gray-700'
+                    : isDark ? 'text-gray-500' : 'text-gray-500'
+                ">{{ tab }}</span>
               </div>
               <template v-if="idx < tabs.length - 1">
                 <div class="w-6 h-1 rounded"
-                  :class="isDark ? 'dark:bg-emerald-700' : 'bg-gradient-to-r from-emerald-400 to-cyan-400'"></div>
+                  :class="isDark ? 'bg-gray-600' : 'bg-gray-500'"></div>
               </template>
             </template>
           </div>
-          <div class="w-full h-1 bg-gray-200 dark:bg-slate-700 rounded relative mb-2">
+          <div class="w-full h-1 bg-gray-200 rounded relative mb-2"
+            :class="isDark ? 'bg-gray-700' : ''">
             <div
-              class="h-1 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded transition-all duration-300 dark:bg-emerald-700"
+              class="h-1 bg-gray-600 rounded transition-all duration-300"
+              :class="isDark ? 'bg-gray-500' : ''"
               :style="{ width: ((currentTab + 1) / tabs.length * 100) + '%' }"
             ></div>
           </div>
         </div>
 
         <form @submit.prevent="submitStudentInfo" class="p-8 space-y-8 rounded-b-2xl">
-          <!-- Animated Tab Content (Tailwind-only transition classes) -->
+          <!-- Animated Tab Content -->
           <transition
-            enter-active-class="transition duration-300 ease-out"
-            enter-from-class="opacity-0 transform translate-y-6 scale-95"
-            enter-to-class="opacity-100 transform translate-y-0 scale-100"
-            leave-active-class="transition duration-200 ease-in"
-            leave-from-class="opacity-100 transform translate-y-0 scale-100"
-            leave-to-class="opacity-0 transform translate-y-6 scale-95"
+            enter-active-class="transition duration-500 ease-out"
+            enter-from-class="opacity-0 transform translate-y-8"
+            enter-to-class="opacity-100 transform translate-y-0"
+            leave-active-class="transition duration-300 ease-in"
+            leave-from-class="opacity-100 transform translate-y-0"
+            leave-to-class="opacity-0 transform -translate-y-8"
             mode="out-in"
           >
-            <div :key="currentTab">
+            <div :key="currentTab" class="min-h-[400px]">
               <!-- Tab 1: Personal Info -->
-              <div v-if="currentTab === 0">
+              <div v-if="currentTab === 0" class="fade-in">
                 <OldStudentPersonalInfo v-model="studentInfoForm" />
               </div>
               <!-- Tab 2: Past & Current Exam Info -->
-              <div v-if="currentTab === 1">
+              <div v-if="currentTab === 1" class="fade-in">
                 <OldStudentExamInfo
                   :pastExamForm="pastExamForm"
                   :currentExamForm="currentExamForm"
                 />
               </div>
               <!-- Tab 3: Address Section -->
-              <div v-if="currentTab === 2">
+              <div v-if="currentTab === 2" class="fade-in">
                 <OldStudentAddressSection
                   :divisions="divisions"
                   :presentFilters="presentFilters"
@@ -94,7 +93,7 @@
                 />
               </div>
               <!-- Tab 4: Attachments -->
-              <div v-if="currentTab === 3">
+              <div v-if="currentTab === 3" class="fade-in">
                 <OldStudentAttachments
                   :studentPhoto="studentPhoto"
                   :studentPhotoPreview="studentPhotoPreview"
@@ -105,21 +104,22 @@
                 />
               </div>
               <!-- Tab 5: Review & Submit -->
-              <div v-if="currentTab === 4">
+              <div v-if="currentTab === 4" class="fade-in">
                 <div
                   class="text-xl font-semibold mb-3 flex items-center gap-2"
-                  :class="isDark ? 'dark:text-emerald-300' : 'text-emerald-700'"
+                  :class="isDark ? 'text-gray-300' : 'text-gray-700'"
                 >
-                  <i class="fa-solid fa-circle-check text-2xl"
-                    :class="isDark ? 'dark:text-cyan-300' : 'text-cyan-700'"></i> তথ্য যাচাই ও সংরক্ষণ
+                  <i class="fa-solid fa-circle-check text-2xl text-gray-500"></i> তথ্য যাচাই ও সংরক্ষণ
                 </div>
                 <div class="mb-3"
-                  :class="isDark ? 'dark:text-gray-300' : 'text-gray-700'">
+                  :class="isDark ? 'text-gray-400' : 'text-gray-600'"
+                >
                   অনুগ্রহ করে পূর্বের সকল তথ্য যাচাই করুন। চাইলে আগের ধাপে ফিরে তথ্য পরিবর্তন করতে পারেন।
                 </div>
                 <div class="rounded-lg border border-dashed p-4"
-                  :class="isDark ? 'dark:border-emerald-700 dark:bg-emerald-900 text-emerald-300' : 'border-emerald-200 bg-emerald-50 text-emerald-800'">
-                  <i class="fa-solid fa-info-circle mr-2"></i>
+                  :class="isDark ? 'border-gray-600 bg-gray-700 text-gray-300' : 'border-gray-300 bg-gray-100 text-gray-700'"
+                >
+                  <i class="fa-solid fa-info-circle mr-2 text-gray-500"></i>
                   সকল তথ্য সঠিক থাকলে <b>সংরক্ষণ করুন</b> বাটনে ক্লিক করুন।
                 </div>
               </div>
@@ -130,8 +130,8 @@
           <div class="flex justify-between items-center mt-8">
             <button
               type="button"
-              class="flex items-center gap-2 px-6 py-2 rounded-md font-semibold"
-              :class="[isDark ? 'dark:text-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600' : 'text-gray-700 bg-gray-100 hover:bg-gray-200']"
+              class="flex items-center gap-2 px-6 py-2 rounded-md font-medium transition-colors"
+              :class="[isDark ? 'text-gray-300 bg-gray-700 hover:bg-gray-600' : 'text-gray-700 bg-gray-200 hover:bg-gray-300']"
               @click="prevTab"
               :disabled="currentTab === 0"
             >
@@ -141,8 +141,8 @@
               <button
                 v-if="currentTab < tabs.length - 1"
                 type="button"
-                class="flex items-center gap-2 px-8 py-2 rounded-md font-bold shadow"
-                :class="[isDark ? 'dark:bg-emerald-800 dark:text-white dark:hover:bg-emerald-900' : 'bg-emerald-600 text-white hover:bg-emerald-700']"
+                class="flex items-center gap-2 px-8 py-2 rounded-md font-bold shadow transition-colors"
+                :class="[isDark ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-600 text-white hover:bg-gray-500']"
                 @click="nextTab"
               >
                 পরবর্তী ধাপ <i class="fa-solid fa-arrow-right"></i>
@@ -150,8 +150,8 @@
               <button
                 v-else
                 type="submit"
-                class="flex items-center gap-2 px-10 py-2 rounded-md font-bold shadow"
-                :class="[isDark ? 'dark:bg-cyan-800 dark:text-white dark:hover:bg-cyan-900' : 'bg-cyan-700 text-white hover:bg-cyan-800']"
+                class="flex items-center gap-2 px-10 py-2 rounded-md font-bold shadow transition-colors"
+                :class="[isDark ? 'bg-gray-600 text-white hover:bg-gray-500' : 'bg-gray-500 text-white hover:bg-gray-400']"
               >
                 <i class="fa-solid fa-cloud-upload-alt"></i> সংরক্ষণ করুন
               </button>
@@ -160,11 +160,9 @@
         </form>
       </div>
     </div>
-  </AdminLayout>
 </template>
 
 <script setup lang="ts">
-import AdminLayout from '@/components/layout/AdminLayout.vue';
 import { ref, onMounted, computed } from 'vue';
 
 import OldStudentPersonalInfo from '@/views/Pages/registraion/components/OldStudentPersonalInfo.vue';
@@ -179,12 +177,12 @@ defineProps({
   modelValue: Object
 });
 
-// Dark mode detection (via Tailwind's .dark class or custom logic)
+// Dark mode detection
 const isDark = computed(() => {
   return document.documentElement.classList.contains('dark');
 });
 
-// Local state & forms (useForm kept for compatibility but submission is faked)
+// Local state & forms
 const pastExamForm = useForm({
   Name: '',
   Father: '',
@@ -254,13 +252,13 @@ const studentInfoForm = useForm({
   student_image: '',
 });
 
-// File Attachments (fake previews)
+// File Attachments
 const studentPhoto = ref<File | null>(null);
 const studentPhotoPreview = ref<string | null>(null);
 const nidAttachment = ref<File | null>(null);
 const nidAttachmentPreview = ref<string | null>(null);
 
-// Address Data (fake)
+// Address Data
 type Division = { id: string; Division: string };
 type District = { DesID: string; District: string };
 type Thana = { Thana_ID: string; Thana: string };
@@ -543,3 +541,20 @@ function useForm<T extends Record<string, unknown>>(arg0: T) {
   return ref({ ...arg0 });
 }
 </script>
+
+<style scoped>
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+</style>

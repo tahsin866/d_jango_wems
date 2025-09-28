@@ -1,7 +1,5 @@
 <script lang="ts" setup>
 import { ref, watch, computed, defineProps, defineEmits } from 'vue';
-
-import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
 import SplitButton from 'primevue/splitbutton';
 import axios from 'axios';
@@ -70,7 +68,7 @@ const dummyStudents: Student[] = [
     current_madrasha: 'কামিল মাদরাসা',
     exam_name_Bn: 'ফাজিল',
     current_class: '১০ম',
-    Date_of_birth: '২০০৬-০৮-22',
+    Date_of_birth: '২০০৬-০৮-২২',
     student_type: 'নিয়মিত',
     payment_status: 'Unpaid',
     is_paid: false,
@@ -108,8 +106,7 @@ const localFilters = ref<FilterType>({ ...(props.filters ?? {}) });
 watch(() => props.filters, (val) => { localFilters.value = { ...(val ?? {}) }; }, { deep: true });
 watch(localFilters, (val) => { emit('update:filters', val); }, { deep: true });
 
-// Confirm/Toast
-const confirm = useConfirm();
+// Toast
 const toast = useToast();
 const submitId = ref<number|null>(null);
 const deleteId = ref<number|null>(null);
@@ -155,14 +152,16 @@ const openDeleteConfirm = (event: Event, id: number) => {
     accept: () => { deleteStudent(); confirmDialog.value.show = false; }
   };
 };
-// Remove router.visit (inertia related) and use placeholder functions
+
+// Get dropdown menu items
 const getDropdownItems = (data: Student) => [
   { label: 'এডিট', icon: 'pi pi-pencil', command: () => editStudent(data.id) },
   { label: 'বিস্তারিত দেখুন', icon: 'pi pi-info-circle', command: () => viewStudent(data.id) },
   { separator: true },
   { label: 'মুছে ফেলুন', icon: 'pi pi-trash', command: (event: Event) => openDeleteConfirm(event, data.id) }
 ];
-// Dummy navigation logic (replace as needed)
+
+// Navigation functions
 const editStudent = (id: number) => {
   toast.add({ severity: 'info', summary: 'এডিট', detail: `${id} ছাত্র এডিট হবে (Demo)`, life: 2000 });
 };
@@ -170,7 +169,7 @@ const viewStudent = (id: number) => {
   toast.add({ severity: 'info', summary: 'বিস্তারিত', detail: `${id} ছাত্র বিস্তারিত দেখানো হবে (Demo)`, life: 2000 });
 };
 
-// Dummy submit/delete for demo
+// Action functions
 const submitApplication = () => {
   toast.add({ severity: 'success', summary: 'সফল', detail: 'আবেদন সফলভাবে সাবমিট করা হয়েছে', life: 3000 });
   emit('refresh');
@@ -230,5 +229,4 @@ watch(() => studentsData.value, () => { page.value = 1; });
 
 // Column toggler modal
 const showColumnToggler = ref(false);
-
 </script>

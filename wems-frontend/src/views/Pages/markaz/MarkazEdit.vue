@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import 'primeicons/primeicons.css';
-
 import { ref, computed, watch, onMounted } from 'vue'
 import axios from '@/utils/axios'
 import { useRoute, useRouter } from 'vue-router';
@@ -82,7 +81,11 @@ const form = ref<{
   status: ''
 })
 
+// Track deleted associated madrasa IDs
+const deletedMadrasaIds = ref<number[]>([]);
+
 const rows = ref([{
+    id: null, // Add id to track existing records
     fazilat: null,
     sanabiya_ulya: null,
     sanabiya: null,
@@ -104,6 +107,7 @@ const rows = ref([{
 
 const addRow = () => {
     rows.value.push({
+        id: null,
         fazilat: null,
         sanabiya_ulya: null,
         sanabiya: null,
@@ -126,9 +130,33 @@ const addRow = () => {
 
 const removeRow = (index: number) => {
     if (rows.value.length > 1) {
-        rows.value.splice(index, 1)
+        const row = rows.value[index];
+        if (row.id) {
+            deletedMadrasaIds.value.push(row.id);
+        }
+        rows.value.splice(index, 1);
     }
 }
+
+// Watch for changes in rows and update form.value.associated_madrasas
+watch(rows, (newRows) => {
+  form.value.associated_madrasas = newRows.map(row => ({
+    id: row.id,
+    madrasa_id: row.madrasa_id,
+    madrasa_name: row.madrasa_Name,
+    fazilat: row.fazilat,
+    sanabiya_ulya: row.sanabiya_ulya,
+    sanabiya: row.sanabiya,
+    mutawassita: row.mutawassita,
+    ibtedaiyyah: row.ibtedaiyyah,
+    hifzul_quran: row.hifzul_quran,
+    qirat: row.qirat,
+    noc_file: row.files.noc,
+    resolution_file: row.files.resolution,
+    noc_file_path: row.files.noc ? row.files.noc.name : (row.noc_file_path || ''),
+    resolution_file_path: row.files.resolution ? row.files.resolution.name : (row.resolution_file_path || '')
+  }));
+}, { deep: true });
 
 const handleFileUpload = (file: any, type: string, index: number) => {
     try {
@@ -453,6 +481,7 @@ onMounted(async () => {
       form.value.attachments = attachments;
         // Sync rows.value with associated madrasas for DynamicMadrasas.vue
         rows.value = associated.map(row => ({
+          id: row.id,
           searchQuery: row.madrasa_name || '', // Use backend-provided madrasa_name
           madrasa_id: row.madrasa_id ?? null,
           fazilat: row.fazilat !== undefined && row.fazilat !== null ? Number(row.fazilat) : null,
@@ -491,48 +520,119 @@ onMounted(async () => {
   }
 });
 
+// In MarkazEdit.vue, update the updateForm function
+
 const updateForm = async () => {
   error.value = '';
   success.value = false;
+  loading.value = true;
   try {
-    const payload = {
-      markaz_application: {
-        markaz_type: form.value.markaz_type,
-        requirements: form.value.requirements,
-        exam: form.value.exam_id,
-        user: form.value.user_id,
-        status: form.value.status,
-      },
-      main_madrasa_info: {
-        fazilat: form.value.fazilat !== '' ? Number(form.value.fazilat) : null,
-        sanabiya_ulya: form.value.sanabiya_ulya !== '' ? Number(form.value.sanabiya_ulya) : null,
-        sanabiya: form.value.sanabiya !== '' ? Number(form.value.sanabiya) : null,
-        mutawassita: form.value.mutawassita !== '' ? Number(form.value.mutawassita) : null,
-        ibtedaiyyah: form.value.ibtedaiyyah !== '' ? Number(form.value.ibtedaiyyah) : null,
-        hifzul_quran: form.value.hifzul_quran !== '' ? Number(form.value.hifzul_quran) : null,
-        qirat: form.value.qirat !== '' ? Number(form.value.qirat) : null,
-        noc_file_path: form.value.noc_file_path,
-        resolution_file_path: form.value.resolution_file_path,
-      },
-      associated_madrasas: form.value.associated_madrasas.map(row => ({
-        ...row,
-        fazilat: row.fazilat !== '' && row.fazilat !== null ? Number(row.fazilat) : null,
-        sanabiya_ulya: row.sanabiya_ulya !== '' && row.sanabiya_ulya !== null ? Number(row.sanabiya_ulya) : null,
-        sanabiya: row.sanabiya !== '' && row.sanabiya !== null ? Number(row.sanabiya) : null,
-        mutawassita: row.mutawassita !== '' && row.mutawassita !== null ? Number(row.mutawassita) : null,
-        ibtedaiyyah: row.ibtedaiyyah !== '' && row.ibtedaiyyah !== null ? Number(row.ibtedaiyyah) : null,
-        hifzul_quran: row.hifzul_quran !== '' && row.hifzul_quran !== null ? Number(row.hifzul_quran) : null,
-        qirat: row.qirat !== '' && row.qirat !== null ? Number(row.qirat) : null,
-      })),
-      attachments: form.value.attachments
+    const formData = new FormData();
+
+    // Helper function to safely stringify JSON
+    const safeStringify = (obj) => {
+      try {
+        return JSON.stringify(obj);
+      } catch (e) {
+        console.error("Error stringifying JSON:", e);
+        return "{}";
+      }
     };
-    await axios.put(`/api/markaz/edit/${id}/`, payload);
+
+    // Markaz Application data
+    formData.append('markaz_application', safeStringify({
+      markaz_type: form.value.markaz_type,
+      requirements: form.value.requirements,
+      exam: form.value.exam_id,
+      user: form.value.user_id,
+      status: form.value.status,
+    }));
+
+    // Main Madrasa Info
+    formData.append('main_madrasa_info', safeStringify({
+      fazilat: form.value.fazilat !== '' ? Number(form.value.fazilat) : null,
+      sanabiya_ulya: form.value.sanabiya_ulya !== '' ? Number(form.value.sanabiya_ulya) : null,
+      sanabiya: form.value.sanabiya !== '' ? Number(form.value.sanabiya) : null,
+      mutawassita: form.value.mutawassita !== '' ? Number(form.value.mutawassita) : null,
+      ibtedaiyyah: form.value.ibtedaiyyah !== '' ? Number(form.value.ibtedaiyyah) : null,
+      hifzul_quran: form.value.hifzul_quran !== '' ? Number(form.value.hifzul_quran) : null,
+      qirat: form.value.qirat !== '' ? Number(form.value.qirat) : null,
+      noc_file_path: form.value.noc_file_path,
+      resolution_file_path: form.value.resolution_file_path,
+    }));
+
+    // Associated Madrasas
+    const associatedMadrasas = form.value.associated_madrasas.map(row => ({
+      id: row.id,
+      madrasa_id: row.madrasa_id,
+      madrasa_name: row.madrasa_name,
+      fazilat: row.fazilat !== '' && row.fazilat !== null ? Number(row.fazilat) : null,
+      sanabiya_ulya: row.sanabiya_ulya !== '' && row.sanabiya_ulya !== null ? Number(row.sanabiya_ulya) : null,
+      sanabiya: row.sanabiya !== '' && row.sanabiya !== null ? Number(row.sanabiya) : null,
+      mutawassita: row.mutawassita !== '' && row.mutawassita !== null ? Number(row.mutawassita) : null,
+      ibtedaiyyah: row.ibtedaiyyah !== '' && row.ibtedaiyyah !== null ? Number(row.ibtedaiyyah) : null,
+      hifzul_quran: row.hifzul_quran !== '' && row.hifzul_quran !== null ? Number(row.hifzul_quran) : null,
+      qirat: row.qirat !== '' && row.qirat !== null ? Number(row.qirat) : null,
+      noc_file_path: row.noc_file_path,
+      resolution_file_path: row.resolution_file_path
+    }));
+
+    formData.append('associated_madrasas', safeStringify(associatedMadrasas));
+    formData.append('deleted_madrasa_ids', safeStringify(deletedMadrasaIds.value));
+
+    // Attachments
+    formData.append('attachments', safeStringify(form.value.attachments));
+
+    // Files for main madrasa
+    if (form.value.noc_file) {
+      formData.append('noc_file', form.value.noc_file);
+    }
+    if (form.value.resolution_file) {
+      formData.append('resolution_file', form.value.resolution_file);
+    }
+
+    // Files for associated madrasas
+    form.value.associated_madrasas.forEach((row) => {
+      if (row.noc_file instanceof File) {
+        formData.append(`noc_file_${row.id}`, row.noc_file);
+      }
+      if (row.resolution_file instanceof File) {
+        formData.append(`resolution_file_${row.id}`, row.resolution_file);
+      }
+    });
+
+    // Other attachments
+    if (form.value.muhtamim_consent) {
+      formData.append('muhtamim_consent', form.value.muhtamim_consent);
+    }
+    if (form.value.president_consent) {
+      formData.append('president_consent', form.value.president_consent);
+    }
+    if (form.value.committee_resolution) {
+      formData.append('committee_resolution', form.value.committee_resolution);
+    }
+
+    await axios.put(`/api/markaz/edit/${id}/`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+
     success.value = true;
     alert('আপডেট সফল হয়েছে!');
+    deletedMadrasaIds.value = [];
   } catch (e) {
+    console.error("Update error:", e);
     error.value = e?.response?.data?.error || 'আপডেট ব্যর্থ হয়েছে';
+  } finally {
+    loading.value = false;
   }
 };
+
+
+
+
+
 </script>
 
 <template>

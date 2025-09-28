@@ -2,31 +2,30 @@
   <aside
     style="font-family: 'SolaimanLipi', sans-serif;"
     :class="[
-      'fixed flex flex-col top-0 left-0 h-screen transition-all duration-300 z-50 bg-[#222d32] text-[#b8c7ce] shadow-xl border-r border-[#1a2226]',
-  isMobileOpen ? 'translate-x-0 w-[300px]' : '-translate-x-full',
-  isExpanded || isMobileOpen || isHovered ? 'lg:w-[290px]' : 'lg:w-[60px]',
+      'fixed flex flex-col top-0 left-0 h-screen transition-all duration-300 z-50 bg-gray-800 text-gray-300 shadow-lg border-r border-gray-700',
+      isMobileOpen ? 'translate-x-0 w-[280px]' : '-translate-x-full',
+      isExpanded || isMobileOpen || isHovered ? 'lg:w-[290px]' : 'lg:w-[60px]',
       'lg:translate-x-0'
     ]"
     @mouseenter="!isExpanded && (isHovered = true)"
     @mouseleave="isHovered = false"
   >
     <!-- Sidebar Header / Logo -->
-    <div class="flex items-center justify-center h-16 border-b border-[#1a2226] bg-gradient-to-r from-[#222d32] to-[#294358] px-3">
+    <div class="flex items-center justify-center h-16 border-b border-gray-700 bg-gray-900 px-3">
       <template v-if="isExpanded || isHovered || isMobileOpen">
-        <h1 class="text-xl font-extrabold text-[#b8c7ce] tracking-wide font-sans" style="letter-spacing: 1px;">
-
+        <h1 class="text-xl font-bold text-gray-200 tracking-wide font-sans" style="letter-spacing: 1px;">
           <span class="ml-2">মাদরাসা</span>
         </h1>
       </template>
       <template v-else>
-        <div class="w-10 h-10 bg-[#3c8dbc] rounded-lg flex items-center justify-center border-2 border-white/30 shadow-inner">
-          <span class="text-white text-lg font-extrabold">M</span>
+        <div class="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center border border-gray-600">
+          <span class="text-gray-200 text-lg font-bold">M</span>
         </div>
       </template>
     </div>
 
     <!-- Navigation -->
-    <div class="flex-1 overflow-y-auto bg-[#222d32] classic-scrollbar">
+    <div class="flex-1 overflow-y-auto bg-gray-800 classic-scrollbar">
       <nav class="py-4">
         <ul class="space-y-1 px-2">
           <li v-for="(item, index) in menuItems" :key="item.label">
@@ -35,10 +34,10 @@
               <button
                 @click="toggleSubmenu(index)"
                 :class="[
-                  'w-full flex items-center text-left px-3 py-2 rounded font-semibold transition-all duration-150 group classic-menu-btn',
+                  'w-full flex items-center text-left px-3 py-2 rounded font-medium transition-all duration-150 group classic-menu-btn',
                   isSubmenuOpen(index)
-                    ? 'bg-[#1a2226] text-[#f4f6f9] border-l-4 border-[#3c8dbc] shadow'
-                    : 'hover:bg-[#293846] hover:text-white',
+                    ? 'bg-gray-700 text-gray-100 border-l-4 border-gray-500'
+                    : 'hover:bg-gray-700 hover:text-gray-100',
                   !isExpanded && !isHovered ? 'justify-center' : ''
                 ]"
                 style="letter-spacing: 0.5px;"
@@ -49,7 +48,7 @@
                 <span v-if="isExpanded || isHovered || isMobileOpen" class="flex-1 text-left font-sans">{{ item.label }}</span>
                 <ChevronDownIcon
                   v-if="isExpanded || isHovered || isMobileOpen"
-                  class="ml-2 w-4 h-4 text-[#b8c7ce] transition-transform"
+                  class="ml-2 w-4 h-4 text-gray-400 transition-transform"
                   :class="{ 'rotate-180': isSubmenuOpen(index) }"
                 />
               </button>
@@ -57,7 +56,7 @@
                 <ul
                   v-show="isSubmenuOpen(index) && (isExpanded || isHovered || isMobileOpen)"
                   class="pl-8 mt-2 space-y-1 classic-submenu"
-                  style="border-left:2px solid #3c8dbc;"
+                  style="border-left:2px solid #4b5563;"
                 >
                   <li v-for="subItem in item.items" :key="subItem.label">
                     <router-link
@@ -65,8 +64,8 @@
                       :class="[
                         'flex items-center px-3 py-2 rounded font-medium transition-all duration-150 classic-submenu-btn',
                         isActive(subItem.to)
-                          ? 'bg-[#3c8dbc] text-white font-bold shadow'
-                          : 'hover:bg-[#1a2226] hover:text-white'
+                          ? 'bg-gray-700 text-gray-100 font-medium'
+                          : 'hover:bg-gray-700 hover:text-gray-100'
                       ]"
                     >
                       <span class="w-4 h-4 mr-3 flex items-center justify-center">
@@ -75,9 +74,9 @@
                       <span class="flex-1 text-left font-sans">{{ subItem.label }}</span>
                       <div class="flex items-center gap-1">
                         <span v-if="subItem.new"
-                          class="px-2 py-1 text-xs font-bold bg-[#00a65a] text-white rounded-full">NEW</span>
+                          class="px-2 py-1 text-xs font-medium bg-gray-600 text-gray-100 rounded">NEW</span>
                         <span v-if="subItem.pro"
-                          class="px-2 py-1 text-xs font-bold bg-[#f39c12] text-white rounded-full">PRO</span>
+                          class="px-2 py-1 text-xs font-medium bg-gray-600 text-gray-100 rounded">PRO</span>
                       </div>
                     </router-link>
                   </li>
@@ -89,10 +88,10 @@
               v-else-if="item.to"
               :to="item.to"
               :class="[
-                'w-full flex items-center px-3 py-2 rounded font-semibold transition-all duration-150 classic-menu-btn',
+                'w-full flex items-center px-3 py-2 rounded font-medium transition-all duration-150 classic-menu-btn',
                 isActive(item.to)
-                  ? 'bg-[#3c8dbc] text-white font-bold shadow'
-                  : 'hover:bg-[#293846] hover:text-white',
+                  ? 'bg-gray-700 text-gray-100 font-medium'
+                  : 'hover:bg-gray-700 hover:text-gray-100',
                 !isExpanded && !isHovered ? 'justify-center' : ''
               ]"
               style="letter-spacing: 0.5px;"
@@ -171,13 +170,13 @@ const menuItems: MenuItem[] = [
     ]
   },
   {
-    label: 'মারকায সংক্রান্ত',
+    label: 'মারকায় সংক্রান্ত',
     icon: markRaw(BoxCubeIcon),
     key: 'markaz',
     items: [
-      { label: 'মারকায আবেদন', icon: markRaw(SendIcon), to: '/user/markaz/list' },
-      { label: 'মারকায পরিবর্তন', icon: markRaw(RefreshIcon), to: '/user/markaz/change' },
-      { label: 'মারকায সেটাপ', icon: markRaw(BoxCubeIcon), to: '/user/markaz/setup' },
+      { label: 'মারকায় আবেদন', icon: markRaw(SendIcon), to: '/user/markaz/list' },
+      { label: 'মারকায় পরিবর্তন', icon: markRaw(RefreshIcon), to: '/user/markaz/change' },
+      { label: 'মারকায় সেটাপ', icon: markRaw(BoxCubeIcon), to: '/user/markaz/setup' },
       { label: 'মারহালা পরিবর্তন', icon: markRaw(RefreshIcon), to: '/user/marhala/change' },
       { label: 'মন্জুরিপত্র আবেদন', icon: markRaw(DocsIcon), to: '/user/confirmation' }
     ]
@@ -317,24 +316,24 @@ const startTransition = (el: Element) => {
 <style scoped>
 .classic-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: #888 #222d32;
+  scrollbar-color: #6b7280 #1f2937;
   max-height: 100%;
 }
 .classic-scrollbar::-webkit-scrollbar {
-  width: 7px;
+  width: 6px;
 }
 .classic-scrollbar::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 8px;
+  background: #6b7280;
+  border-radius: 4px;
 }
 .classic-scrollbar::-webkit-scrollbar-track {
-  background: #222d32;
-  border-radius: 8px;
+  background: #1f2937;
+  border-radius: 4px;
 }
 
 .slide-fade-enter-active,
 .slide-fade-leave-active {
-  transition: all 0.18s cubic-bezier(.25,.8,.25,1);
+  transition: all 0.18s ease-in-out;
 }
 .slide-fade-enter-from,
 .slide-fade-leave-to {
@@ -344,26 +343,24 @@ const startTransition = (el: Element) => {
 
 .classic-menu-btn {
   border-left: 3px solid transparent;
-  box-shadow: none;
 }
 .classic-menu-btn:active, .classic-menu-btn:focus {
   outline: none;
-  border-left: 3px solid #3c8dbc;
+  border-left: 3px solid #4b5563;
 }
-.classic-menu-btn.bg-[#3c8dbc] {
-  border-left: 3px solid #367fa9;
-  background: linear-gradient(90deg,#3c8dbc, #367fa9 80%);
+.classic-menu-btn.bg-gray-700 {
+  border-left: 3px solid #4b5563;
 }
 
 .classic-submenu {
-  background: #222d32;
-  border-radius: 0 0 7px 7px;
-  box-shadow: 0 4px 12px -3px #222d32a0;
+  background: #1f2937;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 .classic-submenu-btn {
   border-left: 2px solid transparent;
 }
-.classic-submenu-btn.bg-[#3c8dbc] {
-  border-left: 2px solid #367fa9;
+.classic-submenu-btn.bg-gray-700 {
+  border-left: 2px solid #4b5563;
 }
 </style>
