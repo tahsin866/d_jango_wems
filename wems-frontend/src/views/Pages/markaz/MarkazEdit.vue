@@ -352,19 +352,16 @@ interface MadrashaType {
 
 const madrashas = ref<MadrashaType[]>([]);
 
-const filteredOptions = computed(() => (row: any) => {
-    if (!row.searchQuery) return [];
-    return madrashas.value.filter(madrasha => {
-        const name = (madrasha.name || '').toLowerCase();
-        const elhaqNo = (madrasha.ElhaqNo || '').toString().toLowerCase();
-        const searchQuery = row.searchQuery.toLowerCase().trim();
-        const normalizedElhaqNo = elhaqNo.replace(/[`']/g, '').replace(/\s+/g, '');
-        const normalizedSearchQuery = searchQuery.replace(/[`']/g, '').replace(/\s+/g, '');
-        if (normalizedElhaqNo.includes(normalizedSearchQuery)) return true;
-        const searchWords = searchQuery.split(' ');
-        return searchWords.every(word => name.includes(word));
-    });
+const filteredOptions = computed(() => (row) => {
+  if (!row.searchQuery) return [];
+  return madrashas.value.filter(madrasha => {
+    const name = (madrasha.name || '').toLowerCase();
+    const elhaqNo = (madrasha.elhaqno || '').toString().toLowerCase();
+    const searchQuery = row.searchQuery.toLowerCase().trim();
+    return name.includes(searchQuery) || elhaqNo.includes(searchQuery);
+  });
 });
+
 
 const selectOption = (madrasha: any, row: any) => {
     row.madrasa_Name = madrasha.name;

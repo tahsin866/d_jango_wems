@@ -324,6 +324,9 @@ async function searchMadrasas(event: any, index: number) {
   }
 }
 function getSuggestions(index: number): MadrashaType[] {
+  if (props.filteredOptions) {
+    return props.filteredOptions(props.rows[index]);
+  }
   return suggestionCache.value[index] || [];
 }
 function preloadSuggestions(index: number) {

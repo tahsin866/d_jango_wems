@@ -18,9 +18,16 @@ class MainMadrasaInfoSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class AssociatedMadrasaSerializer(serializers.ModelSerializer):
+    madrasa_name = serializers.CharField(source='madrasa.mname', read_only=True)
+    elhaqno = serializers.CharField(source='madrasa.elhaqno', read_only=True)
+
     class Meta:
         model = AssociatedMadrasa
-        fields = '__all__'
+        fields = [
+            'id', 'fazilat', 'sanabiya_ulya', 'sanabiya', 'mutawassita', 'ibtedaiyyah',
+            'hifzul_quran', 'qirat', 'noc_file_path', 'resolution_file_path',
+            'markaz_application', 'madrasa', 'madrasa_name', 'elhaqno'
+        ]
 
 class AttachmentSerializer(serializers.ModelSerializer):
     class Meta:
