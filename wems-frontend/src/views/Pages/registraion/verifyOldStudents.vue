@@ -20,7 +20,7 @@
                   <span v-if="marhalaName">{{ marhalaName }}</span>
                   <span v-else class="text-red-500">মারহালা নাম পাওয়া যায়নি</span>
                 </h1>
-                <p class="text-gray-600 text-sm md:text-base">পুরাতন শিক্ষার্থী নিবন্ধন সিস্টেম</p>
+                <p class="text-gray-600 text-lg md:text-base">পুরাতন শিক্ষার্থী নিবন্ধন সিস্টেম</p>
                 <p class="text-gray-500 text-xs mt-1">{{ getCurrentDate() }} • {{ currentUser }}</p>
               </div>
             </div>
@@ -61,8 +61,8 @@
               </svg>
             </div>
             <div class="ml-3">
-              <h3 class="text-sm font-medium text-red-800">ত্রুটি!</h3>
-              <div class="mt-1 text-sm text-red-700">{{ errorMessage }}</div>
+              <h3 class="text-lg font-medium text-red-800">ত্রুটি!</h3>
+              <div class="mt-1 text-lg text-red-700">{{ errorMessage }}</div>
             </div>
             <button @click="showError = false" class="ml-auto rounded-md p-1.5 text-red-400 hover:bg-red-100">
               <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -87,7 +87,7 @@
             <div class="grid grid-cols-1 gap-6 md:grid-cols-4">
               <!-- MARHALA -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">মারহালা</label>
+                <label class="block text-lg font-medium text-gray-700 mb-1">মারহালা</label>
                 <div class="relative z-10">
                   <select
                     v-model="selectedMarhala"
@@ -105,7 +105,7 @@
 
               <!-- YEAR -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">পাশের সন</label>
+                <label class="block text-lg font-medium text-gray-700 mb-1">পাশের সন</label>
                 <div class="relative z-10">
                   <select
                     v-model="selectedYear"
@@ -123,7 +123,7 @@
 
               <!-- ROLL -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">রোল নম্বর</label>
+                <label class="block text-lg font-medium text-gray-700 mb-1">রোল নম্বর</label>
                 <input
                   v-model="rollNumber"
                   type="text"
@@ -135,7 +135,7 @@
 
               <!-- REGISTRATION -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">রেজিস্ট্রেশন নম্বর</label>
+                <label class="block text-lg font-medium text-gray-700 mb-1">রেজিস্ট্রেশন নম্বর</label>
                 <input
                   v-model="registrationNumber"
                   type="text"
@@ -159,7 +159,7 @@
                 @click="searchStudents"
                 :disabled="loading"
                 type="button"
-                class="inline-flex items-center px-6 py-3 bg-gray-700 hover:bg-gray-800 rounded text-sm font-medium text-white disabled:opacity-60 disabled:cursor-not-allowed"
+                class="inline-flex items-center px-6 py-3 bg-gray-700 hover:bg-gray-800 rounded text-lg font-medium text-white disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <svg v-if="loading" class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -196,42 +196,42 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <!-- Student Basic Info -->
                   <div>
-                    <h5 class="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-2">শিক্ষার্থীর মৌলিক তথ্য</h5>
+                    <h5 class="text-lg font-semibold text-gray-700 uppercase tracking-wider mb-2">শিক্ষার্থীর মৌলিক তথ্য</h5>
                     <dl class="space-y-2">
                       <div class="flex">
-                        <dt class="w-24 flex-shrink-0 text-sm font-medium text-gray-600">পিতা:</dt>
-                        <dd class="text-sm text-gray-900">{{ student.Father }}</dd>
+                        <dt class="w-24 flex-shrink-0 text-lg font-medium text-gray-600">পিতা:</dt>
+                        <dd class="text-lg text-gray-900">{{ student.Father }}</dd>
                       </div>
                       <div class="flex">
-                        <dt class="w-24 flex-shrink-0 text-sm font-medium text-gray-600">মাতা:</dt>
-                        <dd class="text-sm text-gray-900">{{ student.Mother || 'N/A' }}</dd>
+                        <dt class="w-24 flex-shrink-0 text-lg font-medium text-gray-600">মাতা:</dt>
+                        <dd class="text-lg text-gray-900">{{ student.Mother || 'N/A' }}</dd>
                       </div>
                       <div class="flex">
-                        <dt class="w-24 flex-shrink-0 text-sm font-medium text-gray-600">জন্ম-তারিখ:</dt>
-                        <dd class="text-sm text-gray-900">{{ student.DateofBirth || 'N/A' }}</dd>
+                        <dt class="w-24 flex-shrink-0 text-lg font-medium text-gray-600">জন্ম-তারিখ:</dt>
+                        <dd class="text-lg text-gray-900">{{ student.DateofBirth || 'N/A' }}</dd>
                       </div>
                     </dl>
                   </div>
 
                   <!-- Academic Info -->
                   <div>
-                    <h5 class="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-2">একাডেমিক তথ্য</h5>
+                    <h5 class="text-lg font-semibold text-gray-700 uppercase tracking-wider mb-2">একাডেমিক তথ্য</h5>
                     <dl class="space-y-2">
                       <div class="flex">
-                        <dt class="w-24 flex-shrink-0 text-sm font-medium text-gray-600">ক্লাস:</dt>
-                        <dd class="text-sm text-gray-900">{{ student.Class }}</dd>
+                        <dt class="w-24 flex-shrink-0 text-lg font-medium text-gray-600">ক্লাস:</dt>
+                        <dd class="text-lg text-gray-900">{{ student.Class }}</dd>
                       </div>
                       <div class="flex">
-                        <dt class="w-24 flex-shrink-0 text-sm font-medium text-gray-600">রোল:</dt>
-                        <dd class="text-sm text-gray-900">{{ student.Roll }}</dd>
+                        <dt class="w-24 flex-shrink-0 text-lg font-medium text-gray-600">রোল:</dt>
+                        <dd class="text-lg text-gray-900">{{ student.Roll }}</dd>
                       </div>
                       <div class="flex">
-                        <dt class="w-24 flex-shrink-0 text-sm font-medium text-gray-600">রেজিঃ নং:</dt>
-                        <dd class="text-sm text-gray-900">{{ student.reg_id }}</dd>
+                        <dt class="w-24 flex-shrink-0 text-lg font-medium text-gray-600">রেজিঃ নং:</dt>
+                        <dd class="text-lg text-gray-900">{{ student.reg_id }}</dd>
                       </div>
                       <div class="flex">
-                        <dt class="w-24 flex-shrink-0 text-sm font-medium text-gray-600">ফলাফল:</dt>
-                        <dd class="text-sm">
+                        <dt class="w-24 flex-shrink-0 text-lg font-medium text-gray-600">ফলাফল:</dt>
+                        <dd class="text-lg">
                           <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border" :class="getDivisionBadge(student.Division)">
                             {{ student.Division || 'N/A' }}
                           </span>
@@ -242,22 +242,22 @@
 
                   <!-- Institution Info -->
                   <div>
-                    <h5 class="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-2">প্রতিষ্ঠানের তথ্য</h5>
+                    <h5 class="text-lg font-semibold text-gray-700 uppercase tracking-wider mb-2">প্রতিষ্ঠানের তথ্য</h5>
                     <dl class="space-y-2">
                       <div class="flex items-start">
-                        <dt class="w-24 flex-shrink-0 text-sm font-medium text-gray-600">মাদরাসা:</dt>
-                        <dd class="text-sm text-gray-900">{{ student.Madrasha || 'N/A' }}</dd>
+                        <dt class="w-24 flex-shrink-0 text-lg font-medium text-gray-600">মাদরাসা:</dt>
+                        <dd class="text-lg text-gray-900">{{ student.Madrasha || 'N/A' }}</dd>
                       </div>
                       <div class="flex items-start">
-                        <dt class="w-24 flex-shrink-0 text-sm font-medium text-gray-600">মারকায:</dt>
-                        <dd class="text-sm text-gray-900">{{ student.Markaj || 'N/A' }}</dd>
+                        <dt class="w-24 flex-shrink-0 text-lg font-medium text-gray-600">মারকায:</dt>
+                        <dd class="text-lg text-gray-900">{{ student.Markaj || 'N/A' }}</dd>
                       </div>
                     </dl>
 
                     <div class="pt-4">
                       <router-link
                         :to="getEditUrl(student)"
-                        class="w-full inline-flex items-center justify-center px-4 py-2.5 bg-gray-700 hover:bg-gray-800 text-white rounded text-sm font-medium"
+                        class="w-full inline-flex items-center justify-center px-4 py-2.5 bg-gray-700 hover:bg-gray-800 text-white rounded text-lg font-medium"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-white" viewBox="0 0 20 20" fill="currentColor">
                           <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
@@ -279,7 +279,7 @@
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
           <p class="mt-4 text-lg font-medium text-gray-700">ডাটা লোড হচ্ছে...</p>
-          <p class="mt-2 text-sm text-gray-500">অনুগ্রহ করে অপেক্ষা করুন</p>
+          <p class="mt-2 text-lg text-gray-500">অনুগ্রহ করে অপেক্ষা করুন</p>
         </div>
 
         <div v-else-if="searchPerformed && hasSearchCriteria && students.length === 0" class="bg-white rounded-lg shadow p-8 text-center mt-6">
@@ -289,7 +289,7 @@
             </svg>
           </div>
           <h3 class="text-lg font-medium text-gray-900">কোন ডাটা পাওয়া যায়নি</h3>
-          <p class="mt-2 text-sm text-gray-500">আপনার অনুসন্ধান অনুযায়ী কোন ফলাফল পাওয়া যায়নি।</p>
+          <p class="mt-2 text-lg text-gray-500">আপনার অনুসন্ধান অনুযায়ী কোন ফলাফল পাওয়া যায়নি।</p>
           <button @click="resetSearch" class="mt-4 inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded">
             ফিল্টার রিসেট করুন
           </button>
@@ -339,12 +339,14 @@ onMounted(async () => {
     marhalaName.value = 'মারহালা';
   }
 
-  // Optionally, fetch years from API if available
-  // Example: const yearsRes = await axios.get('/api/years/'); years.value = yearsRes.data;
-  // Otherwise, keep years static or empty
-  years.value = [];
+  // Fetch years from backend API
+  try {
+    const yearsRes = await axios.get('/api/admin/registration/oldstudent/years/');
+    years.value = yearsRes.data;
+  } catch {
+    years.value = [];
+  }
 
-  // Remove the setTimeout for fadeIn to make the form load immediately
   fadeIn.value = true;
 });
 const students = ref<Student[]>([]);
@@ -415,7 +417,7 @@ const searchStudents = async () => {
       registration: registrationNumber.value,
       marhalaId: currentMarhalaId.value
     };
-    const res = await axios.get('/api/old-students/', { params });
+  const res = await axios.get('/api/admin/registration/oldstudent/search/', { params });
     students.value = res.data || [];
 
     if (students.value.length === 0) {

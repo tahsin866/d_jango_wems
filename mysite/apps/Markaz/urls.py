@@ -1,12 +1,17 @@
 from django.urls import path
-from .views import MadrashaSelectByElhaq, MarkazApplicationCreateView
-from .markaz_table import MarkazApplicationListView, MarkazApplicationDetailView
-from mysite.apps.Markaz.markaz_Edit import MarkazApplicationFullDetailView, MarkazApplicationEditView
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
+from .views import (
+    MadrashaSelectByElhaq,
+    MadrasaSearchAPIView,
+    MarkazApplicationCreateView,
+    MarkazApplicationListView,
+    MarkazApplicationDetailView,
+    MarkazApplicationFullDetailView,
+    MarkazApplicationEditView,
+)
 
 urlpatterns = [
     path('search-madrasa/', MadrashaSelectByElhaq.as_view(), name='search-madrasa'),
+    path('search-madrasa-cache/', MadrasaSearchAPIView.as_view(), name='search-madrasa-cache'),
     path('apply/', MarkazApplicationCreateView.as_view(), name='markaz-apply'),
     path('table/', MarkazApplicationListView.as_view(), name='markaz-table'),
     path('table/<int:pk>/', MarkazApplicationDetailView.as_view(), name='markaz-table-detail'),

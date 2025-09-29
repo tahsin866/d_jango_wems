@@ -1,6 +1,7 @@
 from django.http import JsonResponse
-from django.contrib.auth.models import User
 from .decorators import admin_required, madrasa_required
+from mysite.apps.admin.registration.OldStudent.models import student_basic, student_results
+from mysite.apps.users.models import User  # or the actual model names
 
 @admin_required
 def admin_dashboard_api(request):

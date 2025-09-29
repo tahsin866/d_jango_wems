@@ -69,8 +69,8 @@
                     <span class="font-medium">{{ item.main_madrasa }}</span>
                   </div>
                   <div v-if="item.associated_madrasas && item.associated_madrasas.length" class="mt-1">
-                    <span class="text-xl text-gray-600">সংযুক্ত মাদরাসা:</span>
-                    <select class="ml-2 px-2 py-1 text-xl border border-gray-300 rounded-sm bg-white text-gray-700">
+                    <span class="text-md text-gray-600">সংযুক্ত মাদরাসা:</span>
+                    <select class="ml-2 px-2 py-1 text-md border border-gray-300 rounded-sm bg-white text-gray-700">
                       <option v-for="(assoc, idx) in item.associated_madrasas" :key="idx">{{ assoc.madrasa_name }}</option>
                     </select>
                   </div>

@@ -50,6 +50,7 @@ urlpatterns = [
 
     # Registration Overview API
     path('api/admin/registration/overview/', include('mysite.apps.admin.registration.overview.urls')),
+    path('api/admin/registration/', include('mysite.apps.admin.registration.urls')),
 ]
 
 # Add media files serving in development

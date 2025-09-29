@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'mysite.apps.CentralExam',  # Central Exam app
     'mysite.apps.Markaz',  # Markaz app added
     'mysite.apps.admin.registration.overview',  # Registration Overview app
+    'mysite.apps.admin.registration.OldStudent',  # OldStudent app for unmanaged models
 ]
 
 MIDDLEWARE = [

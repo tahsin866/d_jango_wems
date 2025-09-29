@@ -21,14 +21,14 @@
     <section class="bg-white border-b border-gray-200 px-8 py-5 shadow-sm">
       <div class="flex flex-wrap gap-6 items-center">
         <div class="flex flex-col">
-          <label class="text-gray-700 font-medium mb-1 text-sm">অনুসন্ধান</label>
+          <label class="text-gray-700 font-medium mb-1 text-lg">অনুসন্ধান</label>
           <div class="relative">
             <input
               type="text"
               v-model="searchQuery"
               @keyup.enter="fetchExamSetups"
               placeholder="পরীক্ষার নাম দিয়ে অনুসন্ধান করুন..."
-              class="w-72 px-4 py-2.5 border border-gray-300 rounded-sm focus:ring-2 focus:ring-gray-400 focus:border-transparent bg-white text-sm"
+              class="w-72 px-4 py-2.5 border border-gray-300 rounded-sm focus:ring-2 focus:ring-gray-400 focus:border-transparent bg-white text-lg"
             />
             <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
               <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -38,30 +38,30 @@
           </div>
         </div>
         <div class="flex flex-col">
-          <label class="text-gray-700 font-medium mb-1 text-sm">কেন্দ্রীয় পরীক্ষার তালিকা</label>
+          <label class="text-gray-700 font-medium mb-1 text-lg">কেন্দ্রীয় পরীক্ষার তালিকা</label>
           <select
             v-model="selectedClass"
-            class="w-56 px-4 py-2.5 border border-gray-300 rounded-sm focus:ring-2 focus:ring-gray-400 focus:border-transparent bg-white text-sm"
+            class="w-56 px-4 py-2.5 border border-gray-300 rounded-sm focus:ring-2 focus:ring-gray-400 focus:border-transparent bg-white text-lg"
           >
             <option value="">সকল পরীক্ষা</option>
             <option v-for="exam in availableExamNames" :key="exam" :value="exam">{{ exam }}</option>
           </select>
         </div>
         <div class="flex flex-col">
-          <label class="text-gray-700 font-medium mb-1 text-sm">ইয়ার</label>
+          <label class="text-gray-700 font-medium mb-1 text-lg">ইয়ার</label>
           <select
             v-model="selectedYear"
-            class="w-40 px-4 py-2.5 border border-gray-300 rounded-sm focus:ring-2 focus:ring-gray-400 focus:border-transparent bg-white text-sm"
+            class="w-40 px-4 py-2.5 border border-gray-300 rounded-sm focus:ring-2 focus:ring-gray-400 focus:border-transparent bg-white text-lg"
           >
             <option value="">সকল বছর</option>
             <option v-for="year in availableYears" :key="year" :value="year">{{ year }}</option>
           </select>
         </div>
         <div class="flex flex-col">
-          <label class="text-gray-700 font-medium mb-1 text-sm">ইংরেজি বর্ষ</label>
+          <label class="text-gray-700 font-medium mb-1 text-lg">ইংরেজি বর্ষ</label>
           <select
             v-model="selectedStatus"
-            class="w-40 px-4 py-2.5 border border-gray-300 rounded-sm focus:ring-2 focus:ring-gray-400 focus:border-transparent bg-white text-sm"
+            class="w-40 px-4 py-2.5 border border-gray-300 rounded-sm focus:ring-2 focus:ring-gray-400 focus:border-transparent bg-white text-lg"
           >
             <option value="">সকল অবস্থা</option>
             <option value="active">সক্রিয়</option>
@@ -72,7 +72,7 @@
         <div class="flex items-end space-x-3 ml-auto">
           <button
             @click="clearFilters"
-            class="bg-white border border-gray-300 text-gray-700 px-4 py-2.5 rounded-sm shadow-sm font-medium hover:bg-gray-50 transition duration-200 flex items-center text-sm"
+            class="bg-white border border-gray-300 text-gray-700 px-4 py-2.5 rounded-sm shadow-sm font-medium hover:bg-gray-50 transition duration-200 flex items-center text-lg"
           >
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -81,7 +81,7 @@
           </button>
           <button
             @click="fetchExamSetups"
-            class="bg-gray-800 text-white px-4 py-2.5 rounded-sm shadow-sm font-medium hover:bg-gray-700 transition duration-200 flex items-center text-sm"
+            class="bg-gray-800 text-white px-4 py-2.5 rounded-sm shadow-sm font-medium hover:bg-gray-700 transition duration-200 flex items-center text-lg"
           >
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -105,7 +105,7 @@
               পরীক্ষার তালিকা <span class="text-gray-500 font-normal">({{ filteredExams.length }} টি রেকর্ড)</span>
             </h3>
           </div>
-          <div class="text-sm text-gray-500">
+          <div class="text-lg text-gray-500">
             tahsin866 | {{ new Date().toLocaleString('bn-BD') }}
           </div>
         </div>
@@ -114,16 +114,16 @@
           <table class="w-full">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider border-b border-gray-200">পরীক্ষার নাম</th>
-                <th class="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider border-b border-gray-200">ক্রম</th>
-                <th class="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider border-b border-gray-200">ইংরেজি বর্ষ</th>
-                <th class="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider border-b border-gray-200">হিজরি বর্ষ</th>
-                <th class="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider border-b border-gray-200">তারিখ/সময়</th>
-                <th class="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider border-b border-gray-200">সংশোধন</th>
-                <th class="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider border-b border-gray-200">নিবন্ধন সেটাপ</th>
-                <th class="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider border-b border-gray-200">অন্তর্ভুক্তি সেটাপ</th>
-                <th class="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider border-b border-gray-200">অন্যান্য সেটাপ</th>
-                <th class="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider border-b border-gray-200">একশন</th>
+                <th class="px-6 py-3 text-left text-lg font-medium text-gray-700 uppercase tracking-wider border-b border-gray-200">পরীক্ষার নাম</th>
+                <th class="px-6 py-3 text-left text-lg font-medium text-gray-700 uppercase tracking-wider border-b border-gray-200">ক্রম</th>
+                <th class="px-6 py-3 text-left text-lg font-medium text-gray-700 uppercase tracking-wider border-b border-gray-200">ইংরেজি বর্ষ</th>
+                <th class="px-6 py-3 text-left text-lg font-medium text-gray-700 uppercase tracking-wider border-b border-gray-200">হিজরি বর্ষ</th>
+                <th class="px-6 py-3 text-left text-lg font-medium text-gray-700 uppercase tracking-wider border-b border-gray-200">তারিখ/সময়</th>
+                <th class="px-6 py-3 text-left text-lg font-medium text-gray-700 uppercase tracking-wider border-b border-gray-200">সংশোধন</th>
+                <th class="px-6 py-3 text-left text-lg font-medium text-gray-700 uppercase tracking-wider border-b border-gray-200">নিবন্ধন সেটাপ</th>
+                <th class="px-6 py-3 text-left text-lg font-medium text-gray-700 uppercase tracking-wider border-b border-gray-200">অন্তর্ভুক্তি সেটাপ</th>
+                <th class="px-6 py-3 text-left text-lg font-medium text-gray-700 uppercase tracking-wider border-b border-gray-200">অন্যান্য সেটাপ</th>
+                <th class="px-6 py-3 text-center text-lg font-medium text-gray-700 uppercase tracking-wider border-b border-gray-200">একশন</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 bg-white">
@@ -139,11 +139,11 @@
                 </td>
               </tr>
               <tr v-for="exam in paginatedExams" :key="exam.id" class="hover:bg-gray-50 transition-colors duration-150" v-else-if="!isLoading">
-                <td class="px-6 py-3 text-sm font-medium text-gray-900">{{ formatExamName(exam) }}</td>
-                <td class="px-6 py-3"><span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">{{ exam.id }}</span></td>
-                <td class="px-6 py-3"><span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">{{ exam.english_year }}</span></td>
-                <td class="px-6 py-3"><span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">{{ exam.arabic_year }}</span></td>
-                <td class="px-6 py-3"><span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">{{ new Date(exam.created_at).toLocaleDateString('bn-BD') }}</span></td>
+                <td class="px-6 py-3 text-lg font-medium text-gray-900">{{ formatExamName(exam) }}</td>
+                <td class="px-6 py-3"><span class="inline-flex items-center px-2.5 py-0.5 rounded text-xl font-medium bg-gray-100 text-gray-800">{{ exam.id }}</span></td>
+                <td class="px-6 py-3"><span class="inline-flex items-center px-2.5 py-0.5 rounded text-xl font-medium bg-gray-100 text-gray-800">{{ exam.english_year }}</span></td>
+                <td class="px-6 py-3"><span class="inline-flex items-center px-2.5 py-0.5 rounded text-xl font-medium bg-gray-100 text-gray-800">{{ exam.arabic_year }}</span></td>
+                <td class="px-6 py-3"><span class="inline-flex items-center px-2.5 py-0.5 rounded text-xl font-medium bg-gray-100 text-gray-800">{{ new Date(exam.created_at).toLocaleDateString('bn-BD') }}</span></td>
                 <td class="px-6 py-3">
                   <RouterLink :to="`/central/exam/edit/${exam.id}`" class="inline-flex items-center justify-center w-7 h-7 rounded-sm bg-gray-200 text-gray-700 hover:bg-gray-300" title="সংশোধন">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -151,14 +151,14 @@
                     </svg>
                   </RouterLink>
                 </td>
-                <td class="px-6 py-3">
+                <td  class="px-6 py-3 ">
                   <SplitButton
                     :model="[
                       { label: 'নিবন্ধন তৈরি', icon: 'pi pi-plus', command: () => onInclusionCreate() },
                       { label: 'সংশোধন', icon: 'pi pi-pencil', command: () => onEdit(exam.id) }
                     ]"
                     label="নিবন্ধন"
-                    class="p-button-sm p-button-outlined bg-gray-800 text-white border-none text-xs"
+                    class="p-button-sm p-button-outlined bg-gray-800 text-white border-none text-xl rounded-sm"
                   />
                 </td>
                 <td class="px-6 py-3">
@@ -168,7 +168,7 @@
                       { label: 'সংশোধন', icon: 'pi pi-pencil', command: () => router.push('/central/exam/FeeSetups') }
                     ]"
                     label="অন্তর্ভুক্তি"
-                    class="p-button-sm p-button-outlined bg-gray-700 text-white border-none text-xs"
+                    class="p-button-sm p-button-outlined bg-gray-700 text-white border-none text-xl"
                   />
                 </td>
                 <td class="px-6 py-3">
@@ -178,7 +178,7 @@
                       { label: 'সংশোধন', icon: 'pi pi-pencil', command: () => onOtherEdit(exam) }
                     ]"
                     label="অন্যান্য"
-                    class="p-button-sm p-button-outlined bg-gray-600 text-white border-none text-xs"
+                    class="p-button-sm p-button-outlined bg-gray-600 text-white border-none text-xl"
                   />
                 </td>
                 <td class="px-6 py-3 text-center">
@@ -199,20 +199,20 @@
                     <h3 class="text-lg font-semibold text-gray-800 mb-2">
                       {{ searchQuery || selectedYear || selectedStatus || selectedClass ? 'কোনো ফলাফল পাওয়া যায়নি' : 'কোনো পরীক্ষা সেটআপ নেই' }}
                     </h3>
-                    <p class="text-gray-500 mb-4 text-sm">
+                    <p class="text-gray-500 mb-4 text-lg">
                       {{ searchQuery || selectedYear || selectedStatus || selectedClass ? 'আপনার ফিল্টার পরিবর্তন করে আবার চেষ্টা করুন' : 'নতুন পরীক্ষা সেটআপ তৈরি করুন' }}
                     </p>
                     <button
                       v-if="searchQuery || selectedYear || selectedStatus || selectedClass"
                       @click="clearFilters"
-                      class="bg-gray-800 text-white px-4 py-2 rounded-sm hover:bg-gray-700 transition duration-200 text-sm"
+                      class="bg-gray-800 text-white px-4 py-2 rounded-sm hover:bg-gray-700 transition duration-200 text-lg"
                     >
                       সব ফিল্টার মুছুন
                     </button>
                     <RouterLink
                       v-else
                       to="/central/exam/create"
-                      class="bg-gray-800 text-white px-4 py-2 rounded-sm hover:bg-gray-700 transition duration-200 text-sm"
+                      class="bg-gray-800 text-white px-4 py-2 rounded-sm hover:bg-gray-700 transition duration-200 text-lg"
                     >
                       নতুন পরীক্ষা তৈরি করুন
                     </RouterLink>
@@ -225,7 +225,7 @@
         <!-- Pagination -->
         <div class="bg-gray-50 px-6 py-4 border-t border-gray-200" v-if="!isLoading && filteredExams.length > 0">
           <div class="flex items-center justify-between">
-            <div class="text-sm text-gray-700">
+            <div class="text-lg text-gray-700">
               পেজ {{ totalPages }} টি এর মধ্যে {{ Math.min((currentPage - 1) * 10 + 1, filteredExams.length) }} - {{ Math.min(currentPage * 10, filteredExams.length) }} দেখানো হচ্ছে (মোট {{ filteredExams.length }} টি)
             </div>
             <div class="flex items-center space-x-1">
@@ -233,7 +233,7 @@
                 :disabled="currentPage === 1"
                 @click="previousPage"
                 :class="[
-                  'px-3 py-1 rounded-sm text-sm font-medium transition duration-200',
+                  'px-3 py-1 rounded-sm text-lg font-medium transition duration-200',
                   currentPage === 1
                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                     : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
@@ -248,7 +248,7 @@
                 :key="page"
                 @click="goToPage(page)"
                 :class="[
-                  'px-3 py-1 rounded-sm text-sm font-medium transition duration-200',
+                  'px-3 py-1 rounded-sm text-lg font-medium transition duration-200',
                   currentPage === page
                     ? 'bg-gray-800 text-white'
                     : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
@@ -260,7 +260,7 @@
                 :disabled="currentPage === totalPages"
                 @click="nextPage"
                 :class="[
-                  'px-3 py-1 rounded-sm text-sm font-medium transition duration-200',
+                  'px-3 py-1 rounded-sm text-lg font-medium transition duration-200',
                   currentPage === totalPages
                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                     : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
