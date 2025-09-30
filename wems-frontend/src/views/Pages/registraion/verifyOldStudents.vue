@@ -3,12 +3,12 @@
       <div class="mx-auto px-4 sm:px-6 lg:px-8 ">
         <!-- Header -->
         <div
-          class="bg-white rounded-lg shadow mb-6"
+          class="bg-white rounded-sm shadow mb-6"
           :class="fadeIn ? 'opacity-100' : 'opacity-0'"
         >
           <div class="p-6 md:p-8 flex flex-col md:flex-row justify-between items-center">
             <div class="flex items-center mb-4 md:mb-0">
-              <div class="p-3 bg-gray-100 rounded-lg mr-4">
+              <div class="p-3 bg-gray-100 rounded-sm mr-4">
                 <svg class="w-10 h-10 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 14l9-5-9-5-9 5 9 5z" />
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
@@ -54,26 +54,11 @@
 
         <!-- Error Message Alert -->
         <div v-if="showError" class="mb-6 bg-red-50 border-l-4 border-red-400 p-4 rounded">
-          <div class="flex">
-            <div class="flex-shrink-0">
-              <svg class="h-6 w-6 text-red-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M6.938 19h10.124C18.5 19 19.5 17.167 18.73 15L13.732 4c-.77-1.333-2.694-1.333-3.464 0L5.27 15C4.5 17.167 5.5 19 6.938 19z" />
-              </svg>
-            </div>
-            <div class="ml-3">
-              <h3 class="text-lg font-medium text-red-800">ত্রুটি!</h3>
-              <div class="mt-1 text-lg text-red-700">{{ errorMessage }}</div>
-            </div>
-            <button @click="showError = false" class="ml-auto rounded-md p-1.5 text-red-400 hover:bg-red-100">
-              <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-              </svg>
-            </button>
-          </div>
+          <div class="mt-1 text-lg text-red-700">{{ errorMessage }}</div>
         </div>
 
         <!-- Search Card -->
-        <div class="bg-white rounded-lg shadow mb-6 overflow-visible" :class="fadeIn ? 'opacity-100' : 'opacity-0'">
+        <div class="bg-white rounded-sm shadow mb-6 overflow-visible" :class="fadeIn ? 'opacity-100' : 'opacity-0'">
           <div class="px-6 py-4 border-b border-gray-200">
             <div class="flex items-center">
               <svg class="h-6 w-6 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -176,7 +161,7 @@
 
         <!-- Student Detail Section (shown when studentBasic is available) -->
         <div v-if="studentBasic" class="transition-opacity" :class="isSearching ? 'opacity-0' : 'opacity-100'">
-          <div class="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
+          <div class="bg-white rounded-sm shadow border border-gray-200 overflow-hidden">
             <!-- Student Header -->
             <div class="bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-4 flex justify-between items-center">
               <div class="flex items-center">
@@ -187,7 +172,7 @@
                 </div>
                 <h4 class="ml-3 text-xl font-bold text-white truncate">{{ studentBasic.student_name_bn }}</h4>
               </div>
-              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white bg-opacity-20 text-white">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-700 bg-opacity-20 text-white">
                 রোল: {{ studentBasic.roll_no }}
               </span>
             </div>
@@ -196,7 +181,7 @@
             <div class="p-6">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <!-- Basic Info Card -->
-                <div class="bg-blue-50 rounded-lg p-5 border border-blue-100 shadow-sm">
+                <div class="bg-blue-50 rounded-sm p-5 border border-blue-100 shadow-sm">
                   <h5 class="text-lg font-semibold text-blue-800 uppercase tracking-wider mb-4 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
@@ -220,7 +205,7 @@
                 </div>
 
                 <!-- Academic Info Card -->
-                <div class="bg-green-50 rounded-lg p-5 border border-green-100 shadow-sm">
+                <div class="bg-green-50 rounded-sm p-5 border border-green-100 shadow-sm">
                   <h5 class="text-lg font-semibold text-green-800 uppercase tracking-wider mb-4 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-green-600" viewBox="0 0 20 20" fill="currentColor">
                       <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
@@ -249,7 +234,7 @@
               </div>
 
               <!-- Results Section -->
-              <div class="bg-gray-50 rounded-lg p-5 border border-gray-200 shadow-sm">
+              <div class="bg-gray-50 rounded-sm p-5 border border-gray-200 shadow-sm">
                 <h5 class="text-lg font-semibold text-gray-800 uppercase tracking-wider mb-4 flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-600" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
@@ -292,7 +277,7 @@
 
                 <!-- Institution Info -->
                 <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div class="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                  <div class="bg-white rounded-sm p-4 border border-gray-200 shadow-sm">
                     <h6 class="text-sm font-medium text-gray-700 mb-2 flex items-center">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
@@ -301,7 +286,7 @@
                     </h6>
                     <p class="text-sm text-gray-900">{{ studentResultsData.madrasha || 'N/A' }}</p>
                   </div>
-                  <div class="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                  <div class="bg-white rounded-sm p-4 border border-gray-200 shadow-sm">
                     <h6 class="text-sm font-medium text-gray-700 mb-2 flex items-center">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
@@ -310,7 +295,7 @@
                     </h6>
                     <p class="text-sm text-gray-900">{{ studentResultsData.markaj || 'N/A' }}</p>
                   </div>
-                  <div class="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                  <div class="bg-white rounded-sm p-4 border border-gray-200 shadow-sm">
                     <h6 class="text-sm font-medium text-gray-700 mb-2 flex items-center">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
@@ -345,7 +330,7 @@
         </div>
 
         <!-- Loading / Empty Search Results -->
-        <div v-else-if="loading" class="bg-white rounded-lg shadow p-8 text-center mt-6">
+        <div v-else-if="loading" class="bg-white rounded-sm shadow p-8 text-center mt-6">
           <svg class="animate-spin h-12 w-12 text-gray-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -354,7 +339,7 @@
           <p class="mt-2 text-lg text-gray-500">অনুগ্রহ করে অপেক্ষা করুন</p>
         </div>
 
-        <div v-else-if="searchPerformed && hasSearchCriteria && !studentBasic" class="bg-white rounded-lg shadow p-8 text-center mt-6">
+        <div v-else-if="searchPerformed && hasSearchCriteria && !studentBasic" class="bg-white rounded-sm shadow p-8 text-center mt-6">
           <div class="mx-auto h-24 w-24 flex items-center justify-center rounded-full bg-gray-100 mb-4">
             <svg class="h-16 w-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -491,11 +476,11 @@ const searchStudents = async () => {
 
   try {
     const params = {
-      marhala: selectedMarhala.value,
+      marhala: selectedMarhala.value, // এখানে cid যাবে
       year: selectedYear.value,
       roll: rollNumber.value,
       registration: registrationNumber.value,
-      marhalaId: currentMarhalaId.value
+      marhalaId: currentMarhalaId.value // backend-এ header_marhala_id হিসেবে যাবে
     };
     const res = await axios.get('/api/admin/registration/oldstudent/search/', { params });
     if (res.data && res.data.student_basic) {
@@ -514,16 +499,12 @@ const searchStudents = async () => {
         };
       }
       showError.value = false;
+    } else if (res.data && res.data.error) {
+      showErrorMessage(res.data.error); // eligibility error দেখান
     } else {
-      studentBasic.value = null;
-      studentResults.value = [];
-      studentResultsData.value = {};
       showErrorMessage('রেজাল্ট পাওয়া যায়নি');
     }
   } catch {
-    studentBasic.value = null;
-    studentResults.value = [];
-    studentResultsData.value = {};
     showErrorMessage('একটি ত্রুটি ঘটেছে');
   } finally {
     setTimeout(() => {
@@ -547,7 +528,6 @@ const resetSearch = () => {
 };
 
 /* --- Router-link targets (use route() helper when available otherwise fallback paths) --- */
-
 const listUrl = computed(() => {
   return { path: '/students/list' };
 });

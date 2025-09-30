@@ -10,10 +10,16 @@ class OldStudentSearchView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
+        # Extra logic: If header marhala_id==9 and cid==3, block result
+        header_marhala_id = request.GET.get('marhalaId')
+        marhala = request.GET.get('marhala')
+        block_irregular_for_fazilat = False
+        if header_marhala_id == '9' and marhala == '3':
+            block_irregular_for_fazilat = True
+
         year_str = request.GET.get('year')
         roll_no = request.GET.get('roll')
         reg_no = request.GET.get('registration')
-        marhala_id = request.GET.get('marhalaId')
 
         # Extract English year from formatted string
         try:
@@ -21,11 +27,11 @@ class OldStudentSearchView(APIView):
         except Exception:
             return Response({'error': 'Invalid year format.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not all([year, roll_no, reg_no, marhala_id]):
-            return Response({'error': 'year, roll_no, reg_no, and marhalaId are required.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not all([year, roll_no, reg_no, marhala]):
+            return Response({'error': 'year, roll_no, reg_no, and marhala are required.'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Redis cache key (unique per student)
-        cache_key = f"student_data:{year}:{roll_no}:{reg_no}:{marhala_id}"
+        cache_key = f"student_data:{year}:{roll_no}:{reg_no}:{marhala}"
         cached_data = cache.get(cache_key)
         if cached_data:
             return Response(cached_data, status=status.HTTP_200_OK)
@@ -36,7 +42,7 @@ class OldStudentSearchView(APIView):
             year=year,
             roll_no=roll_no,
             reg_no=reg_no,
-            marhala_id=marhala_id
+            cid=marhala  # এখন cid দিয়ে সার্চ হবে
         )
 
         # Fetch related student_results from DB
@@ -86,16 +92,26 @@ class OldStudentSearchView(APIView):
             })
 
         # Determine irregular type
-        result_type = 'নিয়মিত'
-        if (zero_count + below_threshold_count) in [1,2] and (
-            any(r.get('division') == 'রাসিব' for r in results_raw) or absent_count > 0):
-            result_type = 'অনিয়মিত (যেমনই)'
-        elif (zero_count + below_threshold_count) >= 3 or (zero_count == 1 and below_threshold_count > 1):
-            result_type = 'অনিয়মিত (অন্যান্য)'
+            # Eligibility logic: Only allow 'নিয়মিত' if DB marhala_id == cid == 3 and year >= 2024 and not irregular
+            result_type = 'নিয়মিত'
+            if (zero_count + below_threshold_count) in [1,2] and (
+                any(r.get('division') == 'রাসিব' for r in results_raw) or absent_count > 0):
+                result_type = 'অনিয়মিত (যেমনই)'
+            elif (zero_count + below_threshold_count) >= 3 or (zero_count == 1 and below_threshold_count > 1):
+                result_type = 'অনিয়মিত (অন্যান্য)'
 
-        # Set result_type for all subjects
-        for s in subjects:
-            s['result_type'] = result_type
+            # Eligibility: marhala=3 এবং marhalaId=9 হলে, subjects-এ result_type 'অনিয়মিত' (যেমনই/অন্যান্য) অথবা division=='রাসিব' অথবা absence=='অনুপস্থিত' পাওয়া গেলে error response
+            if header_marhala_id == '9' and marhala == '3':
+                for s in subjects:
+                    s['result_type'] = result_type if result_type == 'নিয়মিত' else 'অনিয়মিত (অন্যান্য)'
+                found_rasib = any(s.get('division') == 'রাসিব' for s in subjects)
+                found_absent = any(s.get('absence') == 'অনুপস্থিত' for s in subjects)
+                found_irregular = any(s.get('result_type', '').startswith('অনিয়মিত') for s in subjects)
+                if found_rasib or found_absent or found_irregular:
+                    return Response({'error': 'আপনি ফযিলত মারহালায় পরীক্ষাদেওয়ার জন্য উপযুক্ত নন'}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                for s in subjects:
+                    s['result_type'] = result_type
 
         grouped_result = {
             **common_info,
