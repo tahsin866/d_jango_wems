@@ -249,7 +249,7 @@
                         <th scope="col" class="px-4 py-3 text-left text-lg font-semibold text-gray-700 uppercase tracking-wider">বিষয়</th>
                         <th scope="col" class="px-4 py-3 text-left text-lg font-semibold text-gray-700 uppercase tracking-wider">প্রাপ্ত নম্বর</th>
                         <th scope="col" class="px-4 py-3 text-left text-lg font-semibold text-gray-700 uppercase tracking-wider">ডিভিশন</th>
-                        <th scope="col" class="px-4 py-3 text-left text-lg font-semibold text-gray-700 uppercase tracking-wider">ফলাফলের ধরণ</th>
+                        <th scope="col" class="px-4 py-3 text-left text-lg font-semibold text-gray-700 uppercase tracking-wider">পরীক্ষার্থীর ধরণ</th>
                       </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
@@ -360,7 +360,8 @@ import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 
-type Student = {
+// Type definitions
+interface Student {
   id: number;
   Name: string;
   Father?: string;
@@ -376,7 +377,48 @@ type Student = {
   year?: string;
   marhalaId?: string;
   CID?: string;
-};
+}
+
+interface StudentBasic {
+  id: number;
+  student_name_bn: string;
+  father_name_bn: string;
+  mother_name_bn?: string;
+  date_of_birth?: string;
+  roll_no: string;
+  reg_no: string;
+  year: string;
+  marhala_id: string;
+}
+
+interface StudentResult {
+  label: string;
+  value: number;
+  division: string;
+  result_type: string;
+}
+
+interface StudentResultsData {
+  madrasha?: string;
+  markaj?: string;
+  class_name?: string;
+}
+
+interface MarhalaOption {
+  id: string;
+  name: string;
+}
+
+interface ApiResponse {
+  student_basic?: StudentBasic;
+  student_results?: {
+    subjects?: StudentResult[];
+    madrasha?: string;
+    markaj?: string;
+    class_name?: string;
+  };
+  error?: string;
+}
 
 const examName = ref<string>('পরীক্ষা নাম');
 const marhalaName = ref<string>('মারহালা নাম');
@@ -422,11 +464,17 @@ const selectedYear = ref<string>('');
 const rollNumber = ref<string>('');
 const registrationNumber = ref<string>('');
 
+// Student data refs with proper types
+const student = ref<Student | null>(null);
+const studentBasic = ref<StudentBasic | null>(null);
+const studentResults = ref<StudentResult[]>([]);
+const studentResultsData = ref<StudentResultsData>({});
+
 // current user (fake)
-const currentUser = 'tahsin866';
+const currentUser: string = 'tahsin866';
 
 /* --- Computed / Derived --- */
-const availableMarhalas = computed(() => {
+const availableMarhalas = computed<MarhalaOption[]>(() => {
   const allMarhalas = [
     { id: '2', name: 'ফযীলত' },
     { id: '3', name: 'সানাবিয়া উলইয়া' },
@@ -451,7 +499,7 @@ const hasSearchCriteria = computed(() => {
 });
 
 /* --- Functions for UI behavior --- */
-const showErrorMessage = (message: string) => {
+const showErrorMessage = (message: string): void => {
   errorMessage.value = message;
   showError.value = true;
   setTimeout(() => {
@@ -459,12 +507,7 @@ const showErrorMessage = (message: string) => {
   }, 5000);
 };
 
-const student = ref<Student | null>(null);
-const studentBasic = ref(null);
-const studentResults = ref([]);
-const studentResultsData = ref({});
-
-const searchStudents = async () => {
+const searchStudents = async (): Promise<void> => {
   loading.value = true;
   isSearching.value = true;
   searchPerformed.value = true;
@@ -482,7 +525,7 @@ const searchStudents = async () => {
       registration: registrationNumber.value,
       marhalaId: currentMarhalaId.value // backend-এ header_marhala_id হিসেবে যাবে
     };
-    const res = await axios.get('/api/admin/registration/oldstudent/search/', { params });
+    const res = await axios.get<ApiResponse>('/api/admin/registration/oldstudent/search/', { params });
     if (res.data && res.data.student_basic) {
       studentBasic.value = res.data.student_basic;
       if (res.data.student_results) {
@@ -514,7 +557,7 @@ const searchStudents = async () => {
   }
 };
 
-const resetSearch = () => {
+const resetSearch = (): void => {
   selectedMarhala.value = '';
   selectedYear.value = '';
   rollNumber.value = '';
@@ -533,7 +576,7 @@ const listUrl = computed(() => {
 });
 
 /* --- getEditUrl adapted to return router-friendly target (string or object) --- */
-const getEditUrl = (student: any) => {
+const getEditUrl = (student: StudentBasic) => {
   if (!student || !student.roll_no || !student.reg_no) {
     return { path: '/' };
   }
@@ -545,7 +588,7 @@ const getEditUrl = (student: any) => {
   }
 };
 
-const getCurrentDate = () => {
+const getCurrentDate = (): string => {
   // keep the fixed date from your original example
   const date = new Date('2025-07-18 00:32:51');
   return new Intl.DateTimeFormat('bn-BD', {
@@ -555,14 +598,14 @@ const getCurrentDate = () => {
   }).format(date);
 };
 
-const getStudentTypeBadge = (type?: string) => {
+const getStudentTypeBadge = (type?: string): string => {
   if (!type) return 'bg-gray-100 text-gray-700';
   if (type.trim() === 'নিয়মিত') return 'bg-gray-200 text-gray-700';
   if (type.includes('অনিয়মিত')) return 'bg-gray-100 text-gray-700';
   return 'bg-gray-100 text-gray-700';
 };
 
-const getDivisionBadge = (division?: string) => {
+const getDivisionBadge = (division?: string): string => {
   if (!division) return 'bg-gray-100 text-gray-700 border border-gray-200';
   if (division === 'রাসিব') return 'bg-red-100 text-red-700 border border-red-200';
   if (division.includes('মমতাজ')) return 'bg-emerald-100 text-emerald-700 border border-emerald-200';
@@ -570,7 +613,7 @@ const getDivisionBadge = (division?: string) => {
   return 'bg-gray-100 text-gray-700 border border-gray-200';
 };
 
-const getResultTypeBadge = (resultType?: string) => {
+const getResultTypeBadge = (resultType?: string): string => {
   if (!resultType) return 'bg-gray-100 text-gray-700 border border-gray-200';
   if (resultType.trim() === 'নিয়মিত') return 'bg-green-100 text-green-700 border border-green-200';
   if (resultType.includes('অনিয়মিত')) return 'bg-yellow-100 text-yellow-700 border border-yellow-200';
