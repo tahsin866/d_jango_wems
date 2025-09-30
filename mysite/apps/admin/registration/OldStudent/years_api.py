@@ -7,5 +7,8 @@ class YearsListView(APIView):
     permission_classes = [AllowAny]
     
     def get(self, request):
-        years = student_basic.objects.values_list('year', flat=True).distinct().order_by('-year')
-        return Response(list(years))
+        year_pairs = student_basic.objects.values('year', 'hijri_year').distinct().order_by('-year')
+        formatted_years = [
+            f"{y['hijri_year']} হিজরি / {y['year']} ঈসাব্দ" for y in year_pairs if y['hijri_year'] and y['year']
+        ]
+        return Response(formatted_years)

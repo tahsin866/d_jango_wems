@@ -21,6 +21,11 @@ class student_basic(models.Model):
     ip_address = models.GenericIPAddressField(blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True)
     updated_at = models.DateTimeField(blank=True, null=True)
+    marhala_id = models.IntegerField(blank=True, null=True)
+    cid = models.IntegerField(blank=True, null=True)
+    srtype = models.IntegerField(blank=True, null=True)
+    hijri_year = models.IntegerField(blank=True, null=True)
+    bangla_year = models.IntegerField(blank=True, null=True)
 
     class Meta:
         db_table = 'student_basic'

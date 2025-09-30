@@ -1,5 +1,5 @@
 <template>
-  <div class="font-[SolaimanLipi] min-h-screen bg-gray-100">
+  <div class="font-[SolaimanLipi]  bg-gray-100">
     <!-- Classic AdminLTE Header -->
     <div class="bg-gray-900 border-b border-gray-800 shadow py-5 px-8 flex items-center justify-between">
       <div>
@@ -32,48 +32,8 @@
       </div>
     </div>
 
-    <div class="mx-auto px-8 py-10 space-y-8">
       <!-- Classic Stats Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        <div
-          v-for="(stat, idx) in stats"
-          :key="idx"
-          class="bg-white border border-gray-300 rounded shadow p-0 transition hover:shadow-md"
-          style="min-width:220px;"
-        >
-          <!-- Card Header -->
-          <div class="flex items-center justify-between px-5 py-3 bg-gray-50 border-b border-gray-200 rounded-t">
-            <div class="flex items-center">
-              <i :class="`fas fa-${stat.icon} mr-2 text-gray-500`"></i>
-              <span class="font-medium text-gray-700">{{ stat.title }}</span>
-            </div>
-          </div>
-          <!-- Card Body -->
-          <div class="px-5 py-6 text-center">
-            <span class="text-3xl font-bold text-gray-900">{{ stat.value }}</span>
-            <div class="mt-4">
-              <div class="h-2 rounded bg-gray-100 border border-gray-300 shadow-inner flex items-center w-full">
-                <div
-                  class="h-2 rounded-l transition-all duration-500 flex items-center bg-gray-300"
-                  :style="{ width: Math.round((stat.trend[stat.trend.length - 1] / Math.max(...stat.trend)) * 100) + '%' }"
-                ></div>
-              </div>
-              <div class="flex justify-between mt-1 text-xs text-gray-500">
-                <span>Min: {{ Math.min(...stat.trend) }}</span>
-                <span>Max: {{ Math.max(...stat.trend) }}</span>
-              </div>
-            </div>
-          </div>
-          <!-- Card Footer -->
-          <div class="bg-gray-50 border-t border-gray-200 rounded-b px-5 py-2 flex items-center justify-between">
-            <span class="text-xs text-gray-600 flex items-center">
-              <i :class="`fas fa-${stat.icon} mr-1 text-gray-400`"></i>
-              {{ stat.title }}
-            </span>
-            <span class="text-xs text-gray-500">Info</span>
-          </div>
-        </div>
-      </div>
+
 
       <!-- Table Box -->
       <div class="bg-white rounded shadow border border-gray-300 overflow-hidden">
@@ -117,7 +77,7 @@
 
       <Toast position="top-right" />
     </div>
-  </div>
+
 </template>
 
 <script setup lang="ts">
@@ -135,44 +95,44 @@ import Toast from 'primevue/toast';
 import { useAgreements, type Agreement } from '@/views/Pages/markaz/composable/useAgreements';
 
 // Stats dummy for classic cards (replace with actual if needed)
-const stats = ref([
-  {
-    title: 'মোট আবেদন',
-    value: '১৫৯',
-    change: '+৫%',
-    icon: 'file-alt',
-    color: 'gray',
-    trend: [120, 122, 130, 140, 145, 150, 159],
-    trendUp: true
-  },
-  {
-    title: 'পেন্ডিং',
-    value: '৫২',
-    change: '-৩%',
-    icon: 'hourglass-half',
-    color: 'gray',
-    trend: [60, 58, 55, 54, 53, 52, 52],
-    trendUp: false
-  },
-  {
-    title: 'দাখিল',
-    value: '১০৭',
-    change: '+৮%',
-    icon: 'check-circle',
-    color: 'gray',
-    trend: [80, 88, 90, 95, 100, 105, 107],
-    trendUp: true
-  },
-  {
-    title: 'বাতিল',
-    value: '০',
-    change: '০%',
-    icon: 'times-circle',
-    color: 'gray',
-    trend: [0,0,0,0,0,0,0],
-    trendUp: false
-  }
-]);
+// const stats = ref([
+//   {
+//     title: 'মোট আবেদন',
+//     value: '১৫৯',
+//     change: '+৫%',
+//     icon: 'file-alt',
+//     color: 'gray',
+//     trend: [120, 122, 130, 140, 145, 150, 159],
+//     trendUp: true
+//   },
+//   {
+//     title: 'পেন্ডিং',
+//     value: '৫২',
+//     change: '-৩%',
+//     icon: 'hourglass-half',
+//     color: 'gray',
+//     trend: [60, 58, 55, 54, 53, 52, 52],
+//     trendUp: false
+//   },
+//   {
+//     title: 'দাখিল',
+//     value: '১০৭',
+//     change: '+৮%',
+//     icon: 'check-circle',
+//     color: 'gray',
+//     trend: [80, 88, 90, 95, 100, 105, 107],
+//     trendUp: true
+//   },
+//   {
+//     title: 'বাতিল',
+//     value: '০',
+//     change: '০%',
+//     icon: 'times-circle',
+//     color: 'gray',
+//     trend: [0,0,0,0,0,0,0],
+//     trendUp: false
+//   }
+// ]);
 
 // Initialize composable
 const {

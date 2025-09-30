@@ -44,7 +44,7 @@
           </div>
         </div>
         <!-- Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 bg-gray-50">
+        <!-- <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 bg-gray-50">
           <div class="flex flex-col items-center justify-center bg-white rounded border border-gray-300 p-4">
             <div class="text-base text-gray-600 mb-1">মোট মারহালা</div>
             <div class="text-xl font-semibold text-gray-900">{{ totalRecords }}</div>
@@ -61,7 +61,7 @@
               NA
             </div>
           </div>
-        </div>
+        </div> -->
       </div>
 
       <!-- Table Controls -->

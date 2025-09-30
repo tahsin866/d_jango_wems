@@ -1,27 +1,39 @@
 <template>
   <div
-    style="font-family: 'SolaimanLipi', sans-serif;"
-    class="min-h-screen flex items-center justify-center bg-[#f4f6f9] classic-signin-bg"
+    style="                                                                    font-family: 'SolaimanLipi', sans-serif;
+                                                "
+    class="min-h-screen flex items-center justify-center"
   >
     <div class="w-full max-w-md">
-      <div class="bg-white border border-[#d2d6de] shadow-lg rounded-lg px-8 py-10 classic-signin-card">
+      <div class="bg-white shadow-sm px-10 py-12">
         <!-- Logo -->
-        <div class="flex justify-center mb-8">
-          <LogoComponent />
+        <div class="flex justify-center mb-10">
+          <!-- <div class="w-16 h-16 bg-gray-800 rounded-sm flex items-center justify-center">
+            <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 48 48">
+              <rect width="48" height="48" rx="4" fill="currentColor"/>
+              <path d="M24 8L30 20H38L24 38L10 20H18L24 8Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+          </div> -->
         </div>
+
         <!-- Header -->
-        <div class="mb-7 text-center">
-          <h2 class="text-2xl font-extrabold text-[#222d32] classic-title">লগইন</h2>
-          <p class="text-[#3c8dbc] text-lg mt-1">ইমেইল বা মোবাইল নম্বর দিয়ে প্রবেশ করুন</p>
-        </div>
+        <!-- <div class="mb-8 text-center">
+          <div class="relative inline-block">
+            <h2 class="text-3xl font-bold text-gray-900 classic-title">লগইন</h2>
+            <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-800 mt-1"></div>
+          </div>
+          <p class="text-gray-700 text-lg mt-3">ইমেইল বা মোবাইল নম্বর দিয়ে প্রবেশ করুন</p>
+        </div> -->
+
         <!-- Status -->
-        <div v-if="props.status" class="mb-5 px-4 py-3 rounded border border-[#d2d6de] text-[#367fa9] bg-[#e9ecef] text-lg shadow">
+        <!-- <div v-if="props.status" class="mb-6 px-4 py-3 rounded-sm border-2 border-gray-800 text-gray-800 bg-gray-100 text-lg shadow">
           {{ props.status }}
-        </div>
+        </div> -->
+
         <!-- Form -->
-        <form @submit.prevent="submit" class="space-y-5">
+        <form @submit.prevent="submit" class="space-y-6">
           <div>
-            <label for="login" class="block text-lg font-semibold text-[#222d32] mb-1">ইমেইল বা মোবাইল নম্বর</label>
+            <label for="login" class="block text-lg font-bold text-gray-800 mb-2">ইমেইল বা মোবাইল নম্বর</label>
             <input
               id="login"
               type="text"
@@ -29,13 +41,14 @@
               autocomplete="username"
               required
               autofocus
-              class="block w-full px-4 py-2 rounded border border-[#d2d6de] bg-[#f9fafc] text-[#222d32] placeholder-[#b8c7ce] focus:outline-none focus:ring-2 focus:ring-[#3c8dbc] focus:border-[#3c8dbc] transition"
+              class="block w-full px-4 py-3 rounded-sm border-1 border-gray-800 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-gray-800 transition"
               placeholder="example@email.com বা ০১XXXXXXXXX"
             />
-            <div v-if="form.errors.login" class="text-lg text-[#dd4b39] mt-1">{{ form.errors.login }}</div>
+            <div v-if="form.errors.login" class="text-lg text-red-700 mt-2">{{ form.errors.login }}</div>
           </div>
+
           <div>
-            <label for="password" class="block text-lg font-semibold text-[#222d32] mb-1">পাসওয়ার্ড</label>
+            <label for="password" class="block text-lg font-bold text-gray-800 mb-2">পাসওয়ার্ড</label>
             <div class="relative">
               <input
                 id="password"
@@ -43,22 +56,22 @@
                 v-model="form.password"
                 autocomplete="current-password"
                 required
-                class="block w-full px-4 py-2 pr-11 rounded border border-[#d2d6de] bg-[#f9fafc] text-[#222d32] placeholder-[#b8c7ce] focus:outline-none focus:ring-2 focus:ring-[#3c8dbc] focus:border-[#3c8dbc] transition"
+                class="block w-full px-4 py-3 pr-12 rounded-sm border-1 border-gray-800 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-gray-800 transition"
                 placeholder="আপনার পাসওয়ার্ড লিখুন"
               />
               <button type="button"
                 @click="togglePassword"
-                class="absolute inset-y-0 right-0 flex items-center px-3 text-[#b8c7ce] hover:text-[#3c8dbc] focus:outline-none"
+                class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-600 hover:text-gray-800 focus:outline-none"
                 tabindex="-1"
                 aria-label="Show/hide password"
               >
-                <svg v-if="!showPassword" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg v-if="!showPassword" class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M2.458 12C3.732 7.943 7.522 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z"/>
                 </svg>
-                <svg v-else class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg v-else class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.967 9.967 0 012.293-3.95M6.21 6.21A9.956 9.956 0 0112 5c4.478 0 8.268 2.943 9.542 7a9.977 9.977 0 01-4.293 5.95M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -66,46 +79,51 @@
                 </svg>
               </button>
             </div>
-            <div v-if="form.errors.password" class="text-lg text-[#dd4b39] mt-1">{{ form.errors.password }}</div>
+            <div v-if="form.errors.password" class="text-lg text-red-700 mt-2">{{ form.errors.password }}</div>
           </div>
-          <div class="flex items-center justify-between">
+
+          <div class="flex items-center justify-between pt-2">
             <label class="flex items-center space-x-2">
               <input
                 type="checkbox"
                 v-model="form.remember"
-                class="h-4 w-4 border-[#b8c7ce] text-[#3c8dbc] focus:ring-[#3c8dbc] transition rounded"
+                class="h-5 w-5 border-1 border-gray-800 text-gray-800 focus:ring-gray-800 transition rounded-sm"
               />
-              <span class="text-lg text-[#222d32]">মনে রাখুন</span>
+              <span class="text-lg text-gray-800">মনে রাখুন</span>
             </label>
             <a
               v-if="props.canResetPassword"
               href="#"
-              class="text-lg text-[#3c8dbc] hover:underline"
+              class="text-lg text-gray-800 hover:text-gray-600 underline"
             >
               পাসওয়ার্ড ভুলে গেছেন?
             </a>
           </div>
+
           <button
             type="submit"
-            class="w-full flex justify-center items-center py-2 px-4 rounded bg-[#3c8dbc] hover:bg-[#367fa9] text-white font-semibold text-base shadow focus:outline-none focus:ring-2 focus:ring-[#3c8dbc] focus:ring-offset-2 transition"
+            class="w-full flex justify-center items-center py-3 px-4 rounded-sm bg-gray-800 hover:bg-gray-700 text-white font-bold text-lg shadow focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2 transition"
             :disabled="form.processing"
             :class="{ 'opacity-70 cursor-not-allowed': form.processing }"
           >
-            <svg v-if="form.processing" class="animate-spin h-5 w-5 text-white mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <svg v-if="form.processing" class="animate-spin h-6 w-6 text-white mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
             <span>প্রবেশ করুন</span>
           </button>
         </form>
-        <div class="mt-7 text-center text-lg text-[#b8c7ce]">
-          <span>মাদরাসা একাউন্ট নেই?</span>
-          <a
-            href="#"
-            class="ml-1 font-semibold text-[#3c8dbc] hover:underline"
-          >
-            মাদরাসা নিবন্ধন করুন
-          </a>
+
+        <div class="mt-10 pt-6 border-t-1 border-gray-800 text-center">
+          <p class="text-lg text-gray-700">
+            <span>মাদরাসা একাউন্ট নেই?</span>
+            <a
+              href="#"
+              class="ml-1 font-bold text-gray-800 hover:text-gray-600 underline"
+            >
+              মাদরাসা নিবন্ধন করুন
+            </a>
+          </p>
         </div>
       </div>
     </div>
@@ -223,9 +241,9 @@ const submit = async () => {
 
 const LogoComponent = {
   template: `
-    <svg class="w-12 h-12 text-[#3c8dbc]" fill="none" viewBox="0 0 48 48">
-      <rect width="48" height="48" rx="8" fill="currentColor" fill-opacity="0.10"/>
-      <path d="M24 6L31 20H40L24 42L8 20H17L24 6Z" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="white"/>
+    <svg class="w-16 h-16 text-gray-800" fill="none" viewBox="0 0 48 48">
+      <rect width="48" height="48" rx="4" fill="currentColor" fill-opacity="0.10"/>
+      <path d="M24 8L30 20H38L24 38L10 20H18L24 8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
     </svg>
   `
 }
@@ -233,14 +251,104 @@ const LogoComponent = {
 
 <style scoped>
 .classic-signin-bg {
-  background: linear-gradient(135deg, #e9ecef 0%, #f4f6f9 100%);
+  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+  position: relative;
 }
-.classic-signin-card {
-  box-shadow: 0 4px 28px -8px #3c8dbc60;
-  border-radius: 8px;
-  border: 1.5px solid #d2d6de;
+
+.classic-signin-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
 }
+
+/* .classic-signin-card {
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.2);
+  border-radius: 0;
+  position: relative;
+} */
+
+/* .classic-signin-card::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  pointer-events: none;
+  z-index: 0;
+} */
+
+.classic-signin-card > * {
+  position: relative;
+  z-index: 1;
+}
+
 .classic-title {
-  letter-spacing: 1px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* Classic input styling */
+input[type="text"],
+input[type="password"],
+input[type="checkbox"] {
+  transition: all 0.2s ease;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Classic button styling */
+button[type="submit"] {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+button[type="submit"]::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+button[type="submit"]:hover::before {
+  left: 100%;
+}
+
+/* Classic link styling */
+a {
+  position: relative;
+  text-decoration: none;
+}
+
+a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background-color: currentColor;
+  transition: width 0.3s ease;
+}
+
+a:hover::after {
+  width: 100%;
 }
 </style>

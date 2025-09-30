@@ -1,6 +1,6 @@
 <template>
     <div style="font-family: 'SolaimanLipi', sans-serif;" class="bg-gray-50 py-8">
-      <div class="mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="mx-auto px-4 sm:px-6 lg:px-8 ">
         <!-- Header -->
         <div
           class="bg-white rounded-lg shadow mb-6"
@@ -21,7 +21,7 @@
                   <span v-else class="text-red-500">মারহালা নাম পাওয়া যায়নি</span>
                 </h1>
                 <p class="text-gray-600 text-lg md:text-base">পুরাতন শিক্ষার্থী নিবন্ধন সিস্টেম</p>
-                <p class="text-gray-500 text-xs mt-1">{{ getCurrentDate() }} • {{ currentUser }}</p>
+                <p class="text-gray-500 text-lg mt-1">{{ getCurrentDate() }} • {{ currentUser }}</p>
               </div>
             </div>
 
@@ -174,99 +174,171 @@
           </div>
         </div>
 
-        <!-- Results Section -->
-        <div v-if="students.length > 0" class="transition-opacity" :class="isSearching ? 'opacity-0' : 'opacity-100'">
-          <div class="space-y-6">
-            <div v-for="student in students" :key="student.id" class="bg-white rounded-lg shadow border border-gray-200">
-              <div class="px-6 py-4 flex justify-between items-center border-b border-gray-200">
-                <div class="flex items-center">
-                  <div class="bg-gray-100 p-2 rounded-full">
-                    <svg class="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  </div>
-                  <h4 class="ml-3 text-lg font-medium text-gray-900 truncate">{{ student.Name }}</h4>
+        <!-- Student Detail Section (shown when studentBasic is available) -->
+        <div v-if="studentBasic" class="transition-opacity" :class="isSearching ? 'opacity-0' : 'opacity-100'">
+          <div class="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
+            <!-- Student Header -->
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-4 flex justify-between items-center">
+              <div class="flex items-center">
+                <div class="bg-white bg-opacity-20 p-2 rounded-full">
+                  <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
                 </div>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border" :class="getStudentTypeBadge(student.student_type)">
-                  {{ student.student_type }}
-                </span>
+                <h4 class="ml-3 text-xl font-bold text-white truncate">{{ studentBasic.student_name_bn }}</h4>
               </div>
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white bg-opacity-20 text-white">
+                রোল: {{ studentBasic.roll_no }}
+              </span>
+            </div>
 
-              <div class="p-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <!-- Student Basic Info -->
-                  <div>
-                    <h5 class="text-lg font-semibold text-gray-700 uppercase tracking-wider mb-2">শিক্ষার্থীর মৌলিক তথ্য</h5>
-                    <dl class="space-y-2">
-                      <div class="flex">
-                        <dt class="w-24 flex-shrink-0 text-lg font-medium text-gray-600">পিতা:</dt>
-                        <dd class="text-lg text-gray-900">{{ student.Father }}</dd>
-                      </div>
-                      <div class="flex">
-                        <dt class="w-24 flex-shrink-0 text-lg font-medium text-gray-600">মাতা:</dt>
-                        <dd class="text-lg text-gray-900">{{ student.Mother || 'N/A' }}</dd>
-                      </div>
-                      <div class="flex">
-                        <dt class="w-24 flex-shrink-0 text-lg font-medium text-gray-600">জন্ম-তারিখ:</dt>
-                        <dd class="text-lg text-gray-900">{{ student.DateofBirth || 'N/A' }}</dd>
-                      </div>
-                    </dl>
-                  </div>
-
-                  <!-- Academic Info -->
-                  <div>
-                    <h5 class="text-lg font-semibold text-gray-700 uppercase tracking-wider mb-2">একাডেমিক তথ্য</h5>
-                    <dl class="space-y-2">
-                      <div class="flex">
-                        <dt class="w-24 flex-shrink-0 text-lg font-medium text-gray-600">ক্লাস:</dt>
-                        <dd class="text-lg text-gray-900">{{ student.Class }}</dd>
-                      </div>
-                      <div class="flex">
-                        <dt class="w-24 flex-shrink-0 text-lg font-medium text-gray-600">রোল:</dt>
-                        <dd class="text-lg text-gray-900">{{ student.Roll }}</dd>
-                      </div>
-                      <div class="flex">
-                        <dt class="w-24 flex-shrink-0 text-lg font-medium text-gray-600">রেজিঃ নং:</dt>
-                        <dd class="text-lg text-gray-900">{{ student.reg_id }}</dd>
-                      </div>
-                      <div class="flex">
-                        <dt class="w-24 flex-shrink-0 text-lg font-medium text-gray-600">ফলাফল:</dt>
-                        <dd class="text-lg">
-                          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border" :class="getDivisionBadge(student.Division)">
-                            {{ student.Division || 'N/A' }}
-                          </span>
-                        </dd>
-                      </div>
-                    </dl>
-                  </div>
-
-                  <!-- Institution Info -->
-                  <div>
-                    <h5 class="text-lg font-semibold text-gray-700 uppercase tracking-wider mb-2">প্রতিষ্ঠানের তথ্য</h5>
-                    <dl class="space-y-2">
-                      <div class="flex items-start">
-                        <dt class="w-24 flex-shrink-0 text-lg font-medium text-gray-600">মাদরাসা:</dt>
-                        <dd class="text-lg text-gray-900">{{ student.Madrasha || 'N/A' }}</dd>
-                      </div>
-                      <div class="flex items-start">
-                        <dt class="w-24 flex-shrink-0 text-lg font-medium text-gray-600">মারকায:</dt>
-                        <dd class="text-lg text-gray-900">{{ student.Markaj || 'N/A' }}</dd>
-                      </div>
-                    </dl>
-
-                    <div class="pt-4">
-                      <router-link
-                        :to="getEditUrl(student)"
-                        class="w-full inline-flex items-center justify-center px-4 py-2.5 bg-gray-700 hover:bg-gray-800 text-white rounded text-lg font-medium"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-white" viewBox="0 0 20 20" fill="currentColor">
-                          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                        </svg>
-                        পরীক্ষার ফরম পূরণ করুন
-                      </router-link>
+            <!-- Student Info Cards -->
+            <div class="p-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <!-- Basic Info Card -->
+                <div class="bg-blue-50 rounded-lg p-5 border border-blue-100 shadow-sm">
+                  <h5 class="text-lg font-semibold text-blue-800 uppercase tracking-wider mb-4 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                    </svg>
+                    শিক্ষার্থীর মৌলিক তথ্য
+                  </h5>
+                  <div class="space-y-3">
+                    <div class="flex justify-between pb-2 border-b border-blue-100">
+                      <span class="font-medium text-blue-700">পিতা:</span>
+                      <span class="text-gray-800">{{ studentBasic.father_name_bn }}</span>
+                    </div>
+                    <div class="flex justify-between pb-2 border-b border-blue-100">
+                      <span class="font-medium text-blue-700">মাতা:</span>
+                      <span class="text-gray-800">{{ studentBasic.mother_name_bn || 'N/A' }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="font-medium text-blue-700">জন্ম-তারিখ:</span>
+                      <span class="text-gray-800">{{ studentBasic.date_of_birth || 'N/A' }}</span>
                     </div>
                   </div>
                 </div>
+
+                <!-- Academic Info Card -->
+                <div class="bg-green-50 rounded-lg p-5 border border-green-100 shadow-sm">
+                  <h5 class="text-lg font-semibold text-green-800 uppercase tracking-wider mb-4 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-green-600" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
+                    </svg>
+                    একাডেমিক তথ্য
+                  </h5>
+                  <div class="space-y-3">
+                    <div class="flex justify-between pb-2 border-b border-green-100">
+                      <span class="font-medium text-green-700">রোল:</span>
+                      <span class="text-gray-800">{{ studentBasic.roll_no }}</span>
+                    </div>
+                    <div class="flex justify-between pb-2 border-b border-green-100">
+                      <span class="font-medium text-green-700">রেজিঃ নং:</span>
+                      <span class="text-gray-800">{{ studentBasic.reg_no }}</span>
+                    </div>
+                    <div class="flex justify-between pb-2 border-b border-green-100">
+                      <span class="font-medium text-green-700">বছর:</span>
+                      <span class="text-gray-800">{{ studentBasic.year }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="font-medium text-green-700">মারহালা:</span>
+                      <span class="text-gray-800">{{ studentBasic.marhala_id }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Results Section -->
+              <div class="bg-gray-50 rounded-lg p-5 border border-gray-200 shadow-sm">
+                <h5 class="text-lg font-semibold text-gray-800 uppercase tracking-wider mb-4 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-600" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                  </svg>
+                  রেজাল্ট তথ্য
+                </h5>
+
+                <div class="overflow-x-auto">
+                  <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-100">
+                      <tr>
+                        <th scope="col" class="px-4 py-3 text-left text-lg font-semibold text-gray-700 uppercase tracking-wider">বিষয়</th>
+                        <th scope="col" class="px-4 py-3 text-left text-lg font-semibold text-gray-700 uppercase tracking-wider">প্রাপ্ত নম্বর</th>
+                        <th scope="col" class="px-4 py-3 text-left text-lg font-semibold text-gray-700 uppercase tracking-wider">ডিভিশন</th>
+                        <th scope="col" class="px-4 py-3 text-left text-lg font-semibold text-gray-700 uppercase tracking-wider">ফলাফলের ধরণ</th>
+                      </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                      <tr v-for="(result, idx) in studentResults" :key="idx" class="hover:bg-gray-50 transition-colors">
+                        <td class="px-4 py-3 text-lg font-medium text-gray-900">{{ result.label }}</td>
+                        <td class="px-4 py-3 text-lg">
+                          <span :class="result.value > 0 ? 'text-green-600 font-bold' : 'text-red-500 font-bold'" class="text-lg">
+                            {{ result.value }}
+                          </span>
+                        </td>
+                        <td class="px-4 py-3">
+                          <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border" :class="getDivisionBadge(result.division)">
+                            {{ result.division }}
+                          </span>
+                        </td>
+                        <td class="px-4 py-3">
+                          <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border" :class="getResultTypeBadge(result.result_type)">
+                            {{ result.result_type }}
+                          </span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Institution Info -->
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div class="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                    <h6 class="text-sm font-medium text-gray-700 mb-2 flex items-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                      </svg>
+                      মাদরাসা
+                    </h6>
+                    <p class="text-sm text-gray-900">{{ studentResultsData.madrasha || 'N/A' }}</p>
+                  </div>
+                  <div class="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                    <h6 class="text-sm font-medium text-gray-700 mb-2 flex items-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                      </svg>
+                      মারকায
+                    </h6>
+                    <p class="text-sm text-gray-900">{{ studentResultsData.markaj || 'N/A' }}</p>
+                  </div>
+                  <div class="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                    <h6 class="text-sm font-medium text-gray-700 mb-2 flex items-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
+                    </svg>
+                      ক্লাস
+                    </h6>
+                    <p class="text-sm text-gray-900">{{ studentResultsData.class_name || 'N/A' }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="mt-6 flex justify-end gap-3">
+                <button class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded text-md font-medium text-gray-700">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                  </svg>
+                  প্রিন্ট করুন
+                </button>
+                <router-link
+                  :to="getEditUrl(studentBasic)"
+                  class="inline-flex items-center px-4 py-2.5 bg-gray-700 hover:bg-gray-800 text-white rounded text-md font-medium"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-white" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                  </svg>
+                  পরীক্ষার ফরম পূরণ করুন
+                </router-link>
               </div>
             </div>
           </div>
@@ -282,7 +354,7 @@
           <p class="mt-2 text-lg text-gray-500">অনুগ্রহ করে অপেক্ষা করুন</p>
         </div>
 
-        <div v-else-if="searchPerformed && hasSearchCriteria && students.length === 0" class="bg-white rounded-lg shadow p-8 text-center mt-6">
+        <div v-else-if="searchPerformed && hasSearchCriteria && !studentBasic" class="bg-white rounded-lg shadow p-8 text-center mt-6">
           <div class="mx-auto h-24 w-24 flex items-center justify-center rounded-full bg-gray-100 mb-4">
             <svg class="h-16 w-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -402,14 +474,22 @@ const showErrorMessage = (message: string) => {
   }, 5000);
 };
 
+const student = ref<Student | null>(null);
+const studentBasic = ref(null);
+const studentResults = ref([]);
+const studentResultsData = ref({});
+
 const searchStudents = async () => {
   loading.value = true;
   isSearching.value = true;
   searchPerformed.value = true;
   showError.value = false;
+  student.value = null;
+  studentBasic.value = null;
+  studentResults.value = [];
+  studentResultsData.value = {};
 
   try {
-    // Real API call for students
     const params = {
       marhala: selectedMarhala.value,
       year: selectedYear.value,
@@ -417,14 +497,33 @@ const searchStudents = async () => {
       registration: registrationNumber.value,
       marhalaId: currentMarhalaId.value
     };
-  const res = await axios.get('/api/admin/registration/oldstudent/search/', { params });
-    students.value = res.data || [];
+    const res = await axios.get('/api/admin/registration/oldstudent/search/', { params });
+    if (res.data && res.data.student_basic) {
+      studentBasic.value = res.data.student_basic;
+      if (res.data.student_results) {
+        // Store the subjects array
+        if (res.data.student_results.subjects) {
+          studentResults.value = res.data.student_results.subjects;
+        }
 
-    if (students.value.length === 0) {
+        // Store the common data separately
+        studentResultsData.value = {
+          madrasha: res.data.student_results.madrasha || 'N/A',
+          markaj: res.data.student_results.markaj || 'N/A',
+          class_name: res.data.student_results.class_name || 'N/A'
+        };
+      }
+      showError.value = false;
+    } else {
+      studentBasic.value = null;
+      studentResults.value = [];
+      studentResultsData.value = {};
       showErrorMessage('রেজাল্ট পাওয়া যায়নি');
     }
   } catch {
-    students.value = [];
+    studentBasic.value = null;
+    studentResults.value = [];
+    studentResultsData.value = {};
     showErrorMessage('একটি ত্রুটি ঘটেছে');
   } finally {
     setTimeout(() => {
@@ -439,7 +538,10 @@ const resetSearch = () => {
   selectedYear.value = '';
   rollNumber.value = '';
   registrationNumber.value = '';
-  students.value = [];
+  student.value = null;
+  studentBasic.value = null;
+  studentResults.value = [];
+  studentResultsData.value = {};
   showError.value = false;
   searchPerformed.value = false;
 };
@@ -451,12 +553,12 @@ const listUrl = computed(() => {
 });
 
 /* --- getEditUrl adapted to return router-friendly target (string or object) --- */
-const getEditUrl = (student: Student) => {
-  if (!student || !student.Roll || !student.reg_id || !student.CID) {
+const getEditUrl = (student: any) => {
+  if (!student || !student.roll_no || !student.reg_no) {
     return { path: '/' };
   }
   try {
-    const encodedData = btoa(`${student.Roll}:${student.reg_id}:${student.CID}`);
+    const encodedData = btoa(`${student.roll_no}:${student.reg_no}:${student.marhala_id}`);
     return { path: '/students/edit', query: { data: encodedData } };
   } catch {
     return { path: '/' };
@@ -485,6 +587,13 @@ const getDivisionBadge = (division?: string) => {
   if (division === 'রাসিব') return 'bg-red-100 text-red-700 border border-red-200';
   if (division.includes('মমতাজ')) return 'bg-emerald-100 text-emerald-700 border border-emerald-200';
   if (division.includes('জায়্যিদ')) return 'bg-blue-100 text-blue-700 border border-blue-200';
+  return 'bg-gray-100 text-gray-700 border border-gray-200';
+};
+
+const getResultTypeBadge = (resultType?: string) => {
+  if (!resultType) return 'bg-gray-100 text-gray-700 border border-gray-200';
+  if (resultType.trim() === 'নিয়মিত') return 'bg-green-100 text-green-700 border border-green-200';
+  if (resultType.includes('অনিয়মিত')) return 'bg-yellow-100 text-yellow-700 border border-yellow-200';
   return 'bg-gray-100 text-gray-700 border border-gray-200';
 };
 
