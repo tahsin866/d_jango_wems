@@ -1,8 +1,5 @@
 <template>
-  <div
-  style="font-family: 'SolaimanLipi', sans-serif;"
-
-  class="min-h-screen bg-gray-50">
+  <div style="font-family: 'SolaimanLipi', sans-serif;" class="min-h-screen bg-gray-50">
     <!-- Header -->
     <header class="bg-white shadow-sm border-b border-gray-200">
       <div class=" mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -385,11 +382,11 @@
         </div>
       </div>
 
-      <!-- Data Table -->
+      <!-- Data Table with Fixed Height and Internal Scrolling -->
       <div class="bg-white rounded-sm shadow-sm border border-gray-200 overflow-hidden">
-        <div class="overflow-x-auto">
+        <div class="table-wrapper" style="height: 500px; overflow-y: auto;">
           <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+            <thead class="bg-gray-50 sticky top-0 z-10">
               <tr>
                 <th v-for="column in visibleColumns" :key="column.key"
                     @click="column.sortable ? sortBy(column.key) : null"
@@ -562,7 +559,6 @@ interface Column {
   visible: boolean;
   sortable: boolean;
 }
-
 
 // State
 const totalCount = ref(0);
@@ -765,7 +761,6 @@ const availableColumns = ref<Column[]>(initializeColumns());
 // Sorting and pagination
 const sortField = ref('id');
 const sortDirection = ref<'asc' | 'desc'>('asc');
-// Remove duplicate declarations
 
 // Computed properties
 const visibleColumns = computed(() => {
@@ -918,8 +913,6 @@ const femaleCount = computed(() => {
 });
 
 // Methods
-// ...existing code...
-
 const clearFilters = () => {
   filters.search = '';
   filters.division = '';
@@ -1050,7 +1043,6 @@ const getCsrfToken = () => {
   }
   return cookieValue;
 };
-
 </script>
 
 <style scoped>
@@ -1059,5 +1051,47 @@ const getCsrfToken = () => {
   .no-print {
     display: none !important;
   }
+}
+
+/* Table container with fixed height and internal scrolling */
+.table-wrapper {
+  position: relative;
+  overflow-y: auto;
+  height: 500px;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+}
+
+/* Sticky header for the table */
+.table-wrapper thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #f9fafb;
+}
+
+/* Custom scrollbar styling */
+.table-wrapper::-webkit-scrollbar {
+  width: 8px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Ensure table doesn't collapse when there's no data */
+.table-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
 }
 </style>
