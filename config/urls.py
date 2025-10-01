@@ -34,10 +34,10 @@ urlpatterns = [
     path('auth/', include('apps.users.urls')),  # Add users URLs
     
     # Subject APIs
-    path('api/', include('apps.subject.urls')),
+        path('api/', include('apps.admin.subject.urls')),
     
     # CentralExam APIs
-    path('api/central-exam/', include('apps.CentralExam.urls')),
+        path('api/central-exam/', include('apps.admin.CentralExam.urls')),
     path('users/', include('apps.users.urls')),  # <-- শুধু এভাবে include করুন!
     # Dashboard APIs
     path('api/admin/dashboard/', admin_dashboard_api),
@@ -49,8 +49,11 @@ urlpatterns = [
     path('api/markaz/', include('apps.Markaz.urls')),
 
     # Registration Overview API
-    path('api/admin/registration/overview/', include('apps.admin.registration.overview.urls')),
-    path('api/admin/registration/', include('apps.admin.registration.urls')),
+    path('api/admin/registration/overview/', include('apps.registration.overview.urls')),
+    path('api/admin/registration/', include('apps.registration.urls')),
+
+    # Madrasha List API
+    path('api/admin/madrasha/', include('apps.admin.madrasha.urls')),
 ]
 
 # Add media files serving in development

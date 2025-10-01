@@ -46,11 +46,12 @@ INSTALLED_APPS = [
     'rest_framework',
     'apps.users',
     'apps.school',
-    'apps.subject',  # New subject app
-    'apps.CentralExam',  # Central Exam app
+    'apps.admin.subject',  # New subject app
+    'apps.admin.CentralExam',  # Central Exam app
     'apps.Markaz',  # Markaz app added
-    'apps.admin.registration.overview',  # Registration Overview app
-    'apps.admin.registration.OldStudent',  # OldStudent app for unmanaged models
+    'apps.registration.overview',  # Registration Overview app
+    'apps.registration.OldStudent',  # OldStudent app for unmanaged models
+    'apps.admin.madrasha.apps.MadrashaConfig',  # Madrasha app for Division/District/Thana models
 ]
 
 MIDDLEWARE = [
@@ -145,7 +146,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Cache configuration - Using memory cache as fallback if Redis is not available
+# Cache configuration - Use memory cache for now, can be easily switched to Redis later
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
@@ -158,16 +159,16 @@ CACHES = {
         'VERSION': 1,
     },
     'sessions': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache', 
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         'LOCATION': 'wems-sessions',
         'TIMEOUT': 1800,  # 30 minutes for sessions
         'KEY_PREFIX': 'wems_session',
     }
 }
 
-AUTH_USER_MODEL = 'users.User'  # যদি আপনার model এর নাম User হয় এবং app 'users'
-
-# Alternative Redis configuration (uncomment when Redis is available)
+# Redis configuration - Uncomment when Redis is properly installed and running
+# To enable Redis cache, comment out the CACHES configuration above and uncomment this one:
+#
 # CACHES = {
 #     'default': {
 #         'BACKEND': 'django_redis.cache.RedisCache',
@@ -179,10 +180,9 @@ AUTH_USER_MODEL = 'users.User'  # যদি আপনার model এর না�
 #                 'retry_on_timeout': True,
 #             },
 #             'SERIALIZER': 'django_redis.serializers.json.JSONSerializer',
-#             'COMPRESSOR': 'django_redis.compressors.zlib.ZlibCompressor',
 #         },
 #         'TIMEOUT': 300,  # 5 minutes default timeout
-#         'KEY_PREFIX': 'wems',  # Prefix for all cache keys
+#         'KEY_PREFIX': 'wems',
 #         'VERSION': 1,
 #     },
 #     'sessions': {
@@ -195,6 +195,8 @@ AUTH_USER_MODEL = 'users.User'  # যদি আপনার model এর না�
 #         'KEY_PREFIX': 'wems_session',
 #     }
 # }
+
+AUTH_USER_MODEL = 'users.User'  # যদি আপনার model এর নাম User হয় এবং app 'users'
 
 # Session configuration for better performance with Redis
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
@@ -280,6 +282,10 @@ CACHE_KEY_PREFIX = 'wems'
 CACHE_MARHALA_LIST = f'{CACHE_KEY_PREFIX}:marhala:list'
 CACHE_SUBJECT_LIST = f'{CACHE_KEY_PREFIX}:subject:list'
 CACHE_SUBJECT_SETTINGS = f'{CACHE_KEY_PREFIX}:subject:settings'
+# Madrasha cache keys
+CACHE_MADRASHA_LIST = f'{CACHE_KEY_PREFIX}:madrasha:list'
+CACHE_MADRASHA_COUNT = f'{CACHE_KEY_PREFIX}:madrasha:count'
+CACHE_MADRASHA_PAGE = f'{CACHE_KEY_PREFIX}:madrasha:page'
 
 # Redis URL configuration
 REDIS_URL = "redis://localhost:6379/0"

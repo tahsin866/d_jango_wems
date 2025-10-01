@@ -12,7 +12,7 @@ class RegistrationOverviewSerializer(serializers.ModelSerializer):
     exam_setup_id = serializers.PrimaryKeyRelatedField(
         queryset=ExamSetup.objects.all(), source='exam_setup', write_only=True
     )
-    from apps.subject.models import Marhala
+    from apps.admin.subject.models import Marhala
     marhala_id = serializers.PrimaryKeyRelatedField(
         read_only=True, source='marhala'
     )

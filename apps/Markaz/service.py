@@ -11,7 +11,7 @@ from apps.Markaz.serializers import (
     SchoolSelectSerializer, MarkazApplicationSerializer, MainMadrasaInfoSerializer,
     AssociatedMadrasaSerializer, AttachmentSerializer
 )
-from apps.CentralExam.models import ExamSetup
+from apps.admin.CentralExam.models import ExamSetup
 from apps.users.models import User, UserSessions, UserInformation
 
 BN_MONTHS = [

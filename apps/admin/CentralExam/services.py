@@ -6,7 +6,7 @@ from django.core.cache import cache
 import json
 
 from .models import ExamSetup
-from apps.CentralExam.models import ExamFee
+from apps.admin.CentralExam.models import ExamFee
 from .serializers import ExamSetupSerializer, ExamFeeSerializer
 
 

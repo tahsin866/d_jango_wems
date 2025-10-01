@@ -7,7 +7,7 @@ import pytz
 
 from apps.Markaz.models import MarkazApplication, MainMadrasaInfo, AssociatedMadrasa
 from apps.school.models import School
-from apps.CentralExam.models import ExamSetup
+from apps.admin.CentralExam.models import ExamSetup
 
 BN_MONTHS = [
     'জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন',

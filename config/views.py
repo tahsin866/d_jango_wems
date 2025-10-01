@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from .decorators import admin_required, madrasa_required
-from apps.admin.registration.OldStudent.models import student_basic, student_results
+from apps.registration.OldStudent.models import student_basic, student_results
 from apps.users.models import User  # or the actual model names
 
 @admin_required

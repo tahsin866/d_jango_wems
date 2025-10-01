@@ -59,7 +59,7 @@ class User(models.Model):
 
     name = models.CharField(max_length=100)
     phone = models.CharField(max_length=20, blank=True)
-    email = models.CharField(max_length=100, blank=True)
+    email = models.CharField(max_length=100, unique=True)
     password = models.CharField(max_length=200)
     user_type = models.ForeignKey(UserType, on_delete=models.CASCADE)
     admin_category = models.ForeignKey(AdminCategory, on_delete=models.CASCADE, null=True, blank=True)

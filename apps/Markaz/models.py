@@ -1,6 +1,7 @@
+
 from django.db import models
 from apps.users.models import User
-from apps.CentralExam.models import ExamSetup
+from apps.admin.CentralExam.models import ExamSetup
 from apps.school.models import School
 
 class MarkazApplication(models.Model):
@@ -68,3 +69,6 @@ class MarkazApplicationAudit(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     class Meta:
         db_table = 'markaz_application_audit'
+
+
+

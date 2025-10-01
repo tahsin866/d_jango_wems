@@ -1,5 +1,5 @@
 from django.db import models
-from apps.CentralExam.models import ExamSetup
+from apps.admin.CentralExam.models import ExamSetup
 
 class RegistrationOverview(models.Model):
     exam_setup = models.ForeignKey(

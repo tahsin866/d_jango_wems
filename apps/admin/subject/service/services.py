@@ -4,12 +4,12 @@ from django.db import transaction
 from django.conf import settings
 from django.core.cache import cache
 from ..models import Marhala, MarhalaSubject, SubjectSettings
-from apps.CentralExam.models import ExamFee
+from apps.admin.CentralExam.models import ExamFee
 from ..serializers import (
     MarhalaWithCountsSerializer, MarhalaSerializer,
     MarhalaSubjectSerializer, SubjectSettingsSerializer
 )
-from apps.CentralExam.serializers import ExamFeeSerializer
+from apps.admin.CentralExam.serializers import ExamFeeSerializer
 from ..cache import SubjectCache
 
 def validate_required_fields(data, fields):

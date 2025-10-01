@@ -150,6 +150,16 @@ const routes = [
       },
 
 
+// মাদরাসা সংক্রান্ত
+
+
+ {
+        path: '/madrasah/list',
+        name: 'madrashaList',
+        component: () => import('@/views/Pages/Admin/madrasha/madrashaList.vue'),
+        meta: { title: 'মাদরাসার তালিকা', requiresAuth: true, role: 'admin' },
+      },
+
 
 
 // নেগরান/মুমতাহিন
@@ -241,6 +251,14 @@ const routes = [
     redirect: '/admin/negaran/application-list'
   },
 
+
+
+// মাদরাসা তালিকা
+
+  {
+    path: '/madrasha/list/',
+    redirect: '/admin/madrasha/list'
+  },
 
 
 

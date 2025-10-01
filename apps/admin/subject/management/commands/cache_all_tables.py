@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from apps.subject.models import Marhala, MarhalaSubject, SubjectSettings
-from apps.subject.cache import SubjectCache
+from apps.admin.subject.models import Marhala, MarhalaSubject, SubjectSettings
+from apps.admin.subject.cache import SubjectCache
 
 class Command(BaseCommand):
     help = 'Dump all subject app tables to Redis cache for zero-query serving.'
