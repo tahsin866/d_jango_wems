@@ -4,24 +4,18 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.core.cache import cache  # Django Redis cache
-from .models import student_basic, student_results
+from .models import Student
 
 class OldStudentSearchView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        # Extra logic: If header marhala_id==9 and cid==3, block result
         header_marhala_id = request.GET.get('marhalaId')
         marhala = request.GET.get('marhala')
-        block_irregular_for_fazilat = False
-        if header_marhala_id == '9' and marhala == '3':
-            block_irregular_for_fazilat = True
-
         year_str = request.GET.get('year')
         roll_no = request.GET.get('roll')
         reg_no = request.GET.get('registration')
 
-        # Extract English year from formatted string
         try:
             year = int(year_str.split('/')[-1].replace('ঈসাব্দ', '').strip()) if year_str else None
         except Exception:
@@ -30,79 +24,60 @@ class OldStudentSearchView(APIView):
         if not all([year, roll_no, reg_no, marhala]):
             return Response({'error': 'year, roll_no, reg_no, and marhala are required.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Redis cache key (unique per student)
         cache_key = f"student_data:{year}:{roll_no}:{reg_no}:{marhala}"
         cached_data = cache.get(cache_key)
         if cached_data:
             return Response(cached_data, status=status.HTTP_200_OK)
 
-        # Fetch student_basic from DB
+        # Fetch student from Student table
         student = get_object_or_404(
-            student_basic,
-            year=year,
-            roll_no=roll_no,
-            reg_no=reg_no,
-            cid=marhala  # এখন cid দিয়ে সার্চ হবে
+            Student,
+            years=year,
+            roll=roll_no,
+            reg_id=reg_no,
+            cid=marhala
         )
 
-        # Fetch related student_results from DB
-        results_qs = student_results.objects.filter(student_id=student.id).only(
-            'id', 'student_id', 'madrasha', 'mid', 'class_name',
-            'markaj', 'marid', 'melhaq', 'subject_label', 'subject_value',
-            'total', 'grace_label', 'grace_value', 'positions', 'division',
-            'absence', 'possub', 'created_at', 'updated_at'
-        )
-
-        results_raw = list(results_qs.values(
-            'id', 'student_id', 'madrasha', 'mid', 'class_name',
-            'markaj', 'marid', 'melhaq', 'subject_label', 'subject_value',
-            'total', 'grace_label', 'grace_value', 'positions', 'division',
-            'absence', 'possub', 'created_at', 'updated_at'
-        ))
-
-        # Determine irregular logic and group results
-        threshold = 33 if student.year >= 2024 else 35
+        # Gather subject results from Student fields
+        subjects = []
+        threshold = 33 if student.years >= 2024 else 35
         below_threshold_count = 0
         zero_count = 0
         absent_count = 0
-        subjects = []
-        # Use first result for common info
-        common_fields = ['madrasha', 'mid', 'class_name', 'markaj', 'marid', 'melhaq']
-        common_info = {k: results_raw[0][k] if results_raw else '' for k in common_fields}
-
-        for r in results_raw:
+        for i in range(1, 12):
+            label = getattr(student, f'sublabel_{i}', None)
+            value = getattr(student, f'subvalue_{i}', None)
+            # শুধু label এবং value থাকলে subject list-এ যোগ হবে
+            if not label or value is None or value == '':
+                continue
             try:
-                subject_val = float(r.get('subject_value', 0))
+                subject_val = float(value)
             except (TypeError, ValueError):
                 subject_val = 0
-            # absence=অনুপস্থিত যদি subject_value=0
+            absence = 'অনুপস্থিত' if subject_val == 0 else ''
+            division = getattr(student, 'division', '')
             if subject_val == 0:
                 zero_count += 1
-                r['absence'] = r.get('absence') or 'অনুপস্থিত'
             if subject_val < threshold:
                 below_threshold_count += 1
-            if r.get('absence') == 'অনুপস্থিত':
+            if absence == 'অনুপস্থিত':
                 absent_count += 1
-
-            # subject-wise result_type
             result_type_sub = 'নিয়মিত'
-            # ফেল কন্ডিশন
             fail_cond = subject_val < threshold
-            # division/absence irregular
-            is_rasib = r.get('division') == 'রাসিব'
-            is_absent = r.get('absence') == 'অনুপস্থিত'
-            is_jobt = r.get('division') == 'যব্ত' and r.get('absence') == 'যব্ত'
+            is_rasib = division == 'রাসিব'
+            is_absent = absence == 'অনুপস্থিত'
+            is_jobt = division == 'যব্ত' and absence == 'যব্ত'
             if fail_cond and (is_rasib or is_absent or is_jobt):
                 result_type_sub = 'অনিয়মিত (অন্যান্য)'
             subjects.append({
-                'label': r.get('subject_label'),
-                'value': r.get('subject_value'),
-                'absence': r.get('absence'),
-                'division': r.get('division'),
+                'label': label,
+                'value': value,
+                'absence': absence,
+                'division': division,
                 'result_type': result_type_sub,
             })
 
-        # Determine overall irregular type (for eligibility block)
+        # Determine overall irregular type
         result_type = 'নিয়মিত'
         has_rasib = any(s.get('division') == 'রাসিব' for s in subjects)
         has_absent = any(s.get('absence') == 'অনুপস্থিত' for s in subjects)
@@ -115,8 +90,6 @@ class OldStudentSearchView(APIView):
                 result_type = 'অনিয়মিত (অন্যান্য)'
             else:
                 result_type = 'নিয়মিত'
-
-            # Eligibility: marhala=3 এবং marhalaId=9 হলে, subjects-এ result_type 'অনিয়মিত' (যেমনই/অন্যান্য) অথবা division=='রাসিব' অথবা absence=='অনুপস্থিত' পাওয়া গেলে error response
             if header_marhala_id == '9' and marhala == '3':
                 for s in subjects:
                     s['result_type'] = result_type if result_type == 'নিয়মিত' else 'অনিয়মিত (অন্যান্য)'
@@ -130,25 +103,28 @@ class OldStudentSearchView(APIView):
                     s['result_type'] = result_type
 
         grouped_result = {
-            **common_info,
+            'madrasha': student.madrasha,
+            'mid': student.mid,
+            'class_name': student.class_name,
+            'markaj': student.markaj,
+            'marid': student.marid,
+            'melhaq': student.melhaq,
             'subjects': subjects
         }
 
         data = {
             'student_basic': {
-                'student_name_bn': student.student_name_bn,
-                'father_name_bn': student.father_name_bn,
-                'mother_name_bn': student.mother_name_bn,
-                'date_of_birth': student.date_of_birth,
-                'roll_no': student.roll_no,
-                'reg_no': student.reg_no,
+                'student_name_bn': student.name,
+                'father_name_bn': student.father,
+                'mother_name_bn': '',
+                'date_of_birth': student.dateofbirth,
+                'roll_no': student.roll,
+                'reg_no': student.reg_id,
                 'marhala_id': student.marhala_id,
-                'year': student.year,
+                'year': student.years,
             },
             'student_results': grouped_result
         }
 
-        # Save to Redis cache (expire after 24 hours)
         cache.set(cache_key, data, timeout=60*60*24)
-
         return Response(data, status=status.HTTP_200_OK)

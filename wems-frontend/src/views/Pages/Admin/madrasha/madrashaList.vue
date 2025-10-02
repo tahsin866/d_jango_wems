@@ -1,79 +1,65 @@
 <template>
-  <div style="font-family: 'SolaimanLipi', sans-serif;" class="min-h-screen bg-gray-50">
+  <div style="font-family: 'SolaimanLipi', sans-serif;" class="min-h-screen bg-gray-100">
     <!-- Header -->
-    <header class="bg-white shadow-sm border-b border-gray-200">
-      <div class=" mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <header class="bg-white shadow border-b border-gray-300 rounded-b-sm">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-3">
-            <div class="bg-indigo-600 p-2 rounded-sm">
+            <div class="bg-indigo-700 p-2 rounded-sm shadow">
               <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
               </svg>
             </div>
             <div>
-              <h1 class="text-2xl font-bold text-gray-900">Madrasha Management System</h1>
-              <p class="text-lg text-gray-500">Institutional Database Management</p>
+              <h1 class="text-3xl font-bold text-gray-900 leading-tight">মাদরাসার তালিকা</h1>
+              <p class="text-base text-gray-600">প্রতিষ্ঠানগত ডেটাবেস ব্যবস্থাপনা</p>
             </div>
           </div>
-          <button class="bg-gray-800 text-white px-4 py-2 rounded-sm hover:bg-indigo-700 transition-colors flex items-center space-x-2 shadow-sm">
+          <button class="bg-indigo-700 text-white px-4 py-2 rounded-sm hover:bg-indigo-800 transition-colors flex items-center space-x-2 shadow">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
             </svg>
-            <span>Add New Entry</span>
+            <span>নতুন ডাটা এন্ট্রি করুন</span>
           </button>
         </div>
       </div>
     </header>
 
     <!-- Main Content -->
-    <main class=" mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Loading/Error Status -->
-      <div v-if="loading" class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
-        <div class="flex">
-          <div class="flex-shrink-0">
-            <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-            </svg>
-          </div>
-          <div class="ml-3">
-            <p class="text-lg text-blue-700">
-              Loading madrasha data...
-            </p>
-          </div>
+      <div v-if="loading" class="bg-blue-100 border border-blue-300 rounded-sm p-4 mb-6 shadow-sm">
+        <div class="flex items-center">
+          <svg class="h-6 w-6 text-blue-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+          </svg>
+          <span class="text-lg font-medium text-blue-700">Loading madrasha data...</span>
         </div>
       </div>
 
-      <div v-if="error" class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
-        <div class="flex">
-          <div class="flex-shrink-0">
-            <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-            </svg>
-          </div>
-          <div class="ml-3">
-            <p class="text-lg text-red-700">
-              Error: {{ error }}
-            </p>
-          </div>
+      <div v-if="error" class="bg-red-100 border border-red-300 rounded-sm p-4 mb-6 shadow-sm">
+        <div class="flex items-center">
+          <svg class="h-6 w-6 text-red-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+          </svg>
+          <span class="text-lg font-medium text-red-700">Error: {{ error }}</span>
         </div>
       </div>
 
       <!-- Debug Info -->
-      <div v-if="!loading && !error" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+      <div v-if="!loading && !error" class="bg-yellow-100 border border-yellow-300 rounded-sm p-4 mb-6 shadow-sm">
         <div class="flex items-center justify-between">
-          <div class="flex items-center">
-            <div class="ml-3">
-              <p class="text-lg text-yellow-700">
-                Debug: Total Records: {{ totalCount }}, Current Page: {{ currentPage }}/{{ totalPages }},
-                Page Size: {{ itemsPerPage }}, Showing: {{ sampleData.length }} records,
-                Filtered: {{ filteredData.length }} records
-              </p>
-              <p v-if="cacheStatus" class="text-xs text-yellow-600 mt-1">
-                Cache: {{ cacheStatus.cached ? 'HIT' : 'MISS' }} | Backend: {{ cacheStatus.cache_backend || 'unknown' }}
-              </p>
-            </div>
+          <div>
+            <p class="text-base text-yellow-900">
+              Debug: Total Records: {{ totalCount }}, Current Page: {{ currentPage }}/{{ totalPages }},
+              Page Size: {{ itemsPerPage }}, Showing: {{ sampleData.length }} records,
+              Filtered: {{ filteredData.length }} records
+            </p>
+            <p v-if="cacheStatus" class="text-md text-yellow-700 mt-1">
+              Cache: {{ cacheStatus.cached ? 'HIT' : 'MISS' }} | Backend: {{ cacheStatus.cache_backend || 'unknown' }}
+            </p>
           </div>
-          <button @click="clearCache" class="bg-red-500 text-white px-3 py-1 rounded text-xs hover:bg-red-600">
+          <button @click="clearCache" class="bg-red-500 text-white px-3 py-1 rounded-sm text-md hover:bg-red-600 shadow">
             Clear Cache
           </button>
         </div>
@@ -81,445 +67,350 @@
 
       <!-- Stats Cards -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="bg-white rounded-sm shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-lg text-gray-500">Total Entries</p>
-              <p class="text-2xl font-bold text-gray-900">{{ filteredData.length }}</p>
-            </div>
-            <div class="bg-indigo-100 p-3 rounded-sm">
-              <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-              </svg>
-            </div>
-          </div>
+        <div class="bg-white rounded-sm shadow border border-gray-300 p-4 hover:shadow-md transition-shadow">
+          <p class="text-base text-gray-600 mb-1">মোট মাদরাসার তালিকা </p>
+          <p class="text-2xl font-bold text-gray-900">{{ filteredData.length }}</p>
         </div>
-        <div class="bg-white rounded-sm shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-lg text-gray-500">Male Students</p>
-              <p class="text-2xl font-bold text-blue-600">{{ maleCount }}</p>
-            </div>
-            <div class="bg-blue-100 p-3 rounded-sm">
-              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-              </svg>
-            </div>
-          </div>
+        <div class="bg-white rounded-sm shadow border border-gray-300 p-4 hover:shadow-md transition-shadow">
+          <p class="text-base text-gray-600 mb-1">মোট ছাত্র মাদরাসা</p>
+          <p class="text-2xl font-bold text-blue-700">{{ maleCount }}</p>
         </div>
-        <div class="bg-white rounded-sm shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-lg text-gray-500">Female Students</p>
-              <p class="text-2xl font-bold text-pink-600">{{ femaleCount }}</p>
-            </div>
-            <div class="bg-pink-100 p-3 rounded-sm">
-              <svg class="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-              </svg>
-            </div>
-          </div>
+        <div class="bg-white rounded-sm shadow border border-gray-300 p-4 hover:shadow-md transition-shadow">
+          <p class="text-base text-gray-600 mb-1">মোট ছাত্রী মাদরাসা</p>
+          <p class="text-2xl font-bold text-pink-600">{{ femaleCount }}</p>
         </div>
-        <div class="bg-white rounded-sm shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-lg text-gray-500">Active</p>
-              <p class="text-2xl font-bold text-green-600">{{ activeCount }}</p>
-            </div>
-            <div class="bg-green-100 p-3 rounded-sm">
-              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-            </div>
-          </div>
+        <div class="bg-white rounded-sm shadow border border-gray-300 p-4 hover:shadow-md transition-shadow">
+          <p class="text-base text-gray-600 mb-1">একটিভ মাদরাসা</p>
+          <p class="text-2xl font-bold text-green-600">{{ activeCount }}</p>
         </div>
       </div>
 
       <!-- Filters Section -->
-      <div class="bg-white rounded-sm shadow-sm border border-gray-200 p-6 mb-6">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
-          <h2 class="text-lg font-semibold text-gray-800 mb-2 sm:mb-0">Filters</h2>
-          <div class="flex flex-wrap gap-2">
-            <button @click="clearFilters" class="text-lg text-gray-500 hover:text-gray-700 transition-colors">
-              Clear All
-            </button>
-            <button @click="refreshData" class="text-lg text-gray-500 hover:text-gray-700 transition-colors flex items-center">
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-              </svg>
-              Refresh
-            </button>
-            <div class="relative">
-              <button @click="toggleColumnMenu" class="text-lg text-gray-500 hover:text-gray-700 transition-colors flex items-center">
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-                Columns
-              </button>
-              <div v-if="showColumnMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
-                <div class="py-1">
-                  <label v-for="column in availableColumns" :key="column.key" class="flex items-center px-4 py-2 text-lg text-gray-700 hover:bg-gray-100 cursor-pointer">
-                    <input type="checkbox" v-model="column.visible" @change="updateColumnVisibility" class="mr-2">
-                    {{ column.label }}
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <!-- Search -->
-          <div class="lg:col-span-2">
-            <label class="block text-lg font-medium text-gray-700 mb-1">Search</label>
-            <div class="relative">
-              <input
-                v-model="filters.search"
-                type="text"
-                placeholder="Search by name, village, mobile..."
-                class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              >
-              <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-              </svg>
-            </div>
-          </div>
-
-          <!-- Division Filter -->
-          <div>
-            <label class="block text-lg font-medium text-gray-700 mb-1">Division</label>
-            <select
-              v-model="filters.division"
-              :disabled="filtersLoading.divisions"
-              class="w-full px-3 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100"
-            >
-              <option value="">All Divisions</option>
-              <option v-for="division in availableDivisions" :key="division.did" :value="division.division">
-                {{ division.division }}
-              </option>
-            </select>
-            <span v-if="filtersLoading.divisions" class="text-xs text-gray-500">Loading divisions...</span>
-          </div>
-
-          <!-- District Filter -->
-          <div>
-            <label class="block text-lg font-medium text-gray-700 mb-1">District</label>
-            <select
-              v-model="filters.district"
-              :disabled="filtersLoading.districts || (!filters.division && availableDivisions.length > 0)"
-              class="w-full px-3 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100"
-            >
-              <option value="">All Districts</option>
-              <option v-for="district in availableDistricts" :key="district.desid" :value="district.district">
-                {{ district.district }}
-              </option>
-            </select>
-            <span v-if="filtersLoading.districts" class="text-xs text-gray-500">Loading districts...</span>
-            <span v-else-if="!filters.division && availableDivisions.length > 0" class="text-xs text-gray-500">Select a division first</span>
-          </div>
-
-          <!-- Thana Filter -->
-          <div>
-            <label class="block text-lg font-medium text-gray-700 mb-1">Thana/Upazila</label>
-            <select
-              v-model="filters.thana"
-              :disabled="filtersLoading.thanas || (!filters.district && availableDistricts.length > 0)"
-              class="w-full px-3 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100"
-            >
-              <option value="">All Thanas</option>
-              <option v-for="thana in availableThanas" :key="thana.thana_id" :value="thana.thana">
-                {{ thana.thana }}
-              </option>
-            </select>
-            <span v-if="filtersLoading.thanas" class="text-xs text-gray-500">Loading thanas...</span>
-            <span v-else-if="!filters.district && availableDistricts.length > 0" class="text-xs text-gray-500">Select a district first</span>
-          </div>
-
-          <!-- Stage Filter -->
-          <div>
-            <label class="block text-lg font-medium text-gray-700 mb-1">Stage</label>
-            <select v-model="filters.stage" class="w-full px-3 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-              <option value="">All Stages</option>
-              <option value="তাকমিল">তাকমিল</option>
-              <option value="ফযিলত">ফযিলত</option>
-              <option value="সানাবিয়া উলইয়া">সানাবিয়া উলইয়া</option>
-              <option value="সানাবিয়া">সানাবিয়া</option>
-              <option value="মুতাওয়াসসিতাহ">মুতাওয়াসসিতাহ</option>
-              <option value="ইবতেদাইয়্যাহ">ইবতেদাইয়্যাহ</option>
-              <option value="হিফজুল কোরাআন">হিফজুল কোরাআন</option>
-              <option value="কিরাআত">কিরাআত</option>
-            </select>
-          </div>
-
-          <!-- Student Type Filter -->
-          <div>
-            <label class="block text-lg font-medium text-gray-700 mb-1">Student Type</label>
-            <select v-model="filters.student_type" class="w-full px-3 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-              <option value="">All Types</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-            </select>
-          </div>
-
-          <!-- Mtype Filter -->
-          <div>
-            <label class="block text-lg font-medium text-gray-700 mb-1">Madrasha Type</label>
-            <select v-model="filters.mtype" class="w-full px-3 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-              <option value="">All Types</option>
-              <option value="Qawmi">Qawmi</option>
-              <option value="Alia">Alia</option>
-              <option value="Hafizia">Hafizia</option>
-            </select>
-          </div>
-
-          <!-- Status Filter -->
-          <div>
-            <label class="block text-lg font-medium text-gray-700 mb-1">Status</label>
-            <select v-model="filters.enabledisable" class="w-full px-3 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-              <option value="">All Status</option>
-              <option value="1">Active</option>
-              <option value="0">Inactive</option>
-            </select>
-          </div>
-
-          <!-- School ID Filter -->
-          <div>
-            <label class="block text-lg font-medium text-gray-700 mb-1">School ID</label>
-            <input
-              v-model="filters.school_id"
-              type="text"
-              placeholder="Enter school ID"
-              class="w-full px-3 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            >
-          </div>
-        </div>
-
-        <!-- Export Options -->
-        <div class="mt-6 pt-4 border-t border-gray-200">
-          <div class="flex flex-wrap items-center justify-between">
-            <div class="mb-2 sm:mb-0">
-              <h3 class="text-lg font-medium text-gray-700">Export Options</h3>
-              <p class="text-xs text-gray-500">Download filtered data in various formats</p>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <button @click="downloadExcel" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-lg leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                <svg class="w-4 h-4 mr-1.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v1a1 1 0 001 1h4a1 1 0 001-1v-1m3-2V8a2 2 0 00-2-2H8a2 2 0 00-2 2v8m5-4h4"></path>
-                </svg>
-                Excel
-              </button>
-              <button @click="downloadCSV" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-lg leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                <svg class="w-4 h-4 mr-1.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v1a1 1 0 001 1h4a1 1 0 001-1v-1m3-2V8a2 2 0 00-2-2H8a2 2 0 00-2 2v8m5-4h4"></path>
-                </svg>
-                CSV
-              </button>
-              <button @click="downloadPDF" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-lg leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                <svg class="w-4 h-4 mr-1.5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                </svg>
-                PDF
-              </button>
-              <button @click="printData" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-lg leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                <svg class="w-4 h-4 mr-1.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
-                </svg>
-                Print
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Advanced Filters Toggle -->
-        <div class="mt-4">
-          <button @click="toggleAdvancedFilters" class="text-lg text-gray-500 hover:text-gray-700 transition-colors flex items-center">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-            {{ showAdvancedFilters ? 'Hide' : 'Show' }} Advanced Filters
-          </button>
-
-          <div v-if="showAdvancedFilters" class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <!-- Year Filter -->
-            <div>
-              <label class="block text-lg font-medium text-gray-700 mb-1">Year</label>
-              <select v-model="filters.year" class="w-full px-3 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                <option value="">All Years</option>
-                <option v-for="year in availableYears" :key="year" :value="year">{{ year }}</option>
-              </select>
-            </div>
-
-            <!-- Date Range Filter -->
-            <div>
-              <label class="block text-lg font-medium text-gray-700 mb-1">From Date</label>
-              <input
-                v-model="filters.fromDate"
-                type="date"
-                class="w-full px-3 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              >
-            </div>
-
-            <div>
-              <label class="block text-lg font-medium text-gray-700 mb-1">To Date</label>
-              <input
-                v-model="filters.toDate"
-                type="date"
-                class="w-full px-3 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              >
-            </div>
-
-            <!-- Records Per Page -->
-            <div>
-              <label class="block text-lg font-medium text-gray-700 mb-1">Records Per Page</label>
-              <select v-model="itemsPerPage" class="w-full px-3 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                <option value="10">10</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-              </select>
-            </div>
+      <div class="bg-white rounded-sm shadow border border-gray-300 p-6 mb-6">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+    <h2 class="text-base font-semibold text-gray-800 mb-2 sm:mb-0">সার্চ ইউযার্ড</h2>
+    <div class="flex flex-wrap gap-2">
+      <button @click="clearFilters" class="text-base text-gray-600 hover:text-gray-900 transition-colors">
+        ক্লিয়ার করুন
+      </button>
+      <button @click="refreshData" class="text-base text-gray-600 hover:text-gray-900 transition-colors flex items-center">
+        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+        </svg>
+        রিফ্রেশ করুন
+      </button>
+      <div class="relative">
+        <button @click="toggleColumnMenu" class="text-base text-gray-600 hover:text-gray-900 transition-colors flex items-center">
+          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+          কলাম বাড়ানো কমানো
+        </button>
+        <div v-if="showColumnMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-sm shadow-lg z-10 border border-gray-300">
+          <div class="py-1">
+            <label v-for="column in availableColumns" :key="column.key" class="flex items-center px-4 py-2 text-base text-gray-700 hover:bg-gray-100 cursor-pointer">
+              <input type="checkbox" v-model="column.visible" @change="updateColumnVisibility" class="mr-2">
+              {{ column.label }}
+            </label>
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- All Filter Inputs (without Madrasha Type and School ID) -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- Search -->
+    <div class="lg:col-span-2">
+      <label class="block text-base font-semibold text-gray-700 mb-1">অনুসন্ধান করুন</label>
+      <div class="relative">
+        <input v-model="filters.search" type="text" placeholder="নাম, ইলহাক, দিয়ে সার্চ করুন..." class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50" />
+        <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+      </div>
+    </div>
+    <!-- Division Filter -->
+    <div>
+      <label class="block text-base font-medium text-gray-700 mb-1">বিভাগ</label>
+      <select v-model="filters.division" :disabled="filtersLoading.divisions" class="w-full px-3 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 bg-gray-50">
+        <option value="">সকল বিভাগ</option>
+        <option v-for="division in availableDivisions" :key="division.did" :value="division.division">{{ division.division }}</option>
+      </select>
+      <span v-if="filtersLoading.divisions" class="text-md text-gray-500">Loading divisions...</span>
+    </div>
+    <!-- District Filter -->
+    <div>
+      <label class="block text-base font-medium text-gray-700 mb-1">জেলা</label>
+      <select v-model="filters.district" :disabled="filtersLoading.districts || (!filters.division && availableDivisions.length > 0)" class="w-full px-3 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 bg-gray-50">
+        <option value="">সকল জেলা</option>
+        <option v-for="district in availableDistricts" :key="district.desid" :value="district.district">{{ district.district }}</option>
+      </select>
+      <span v-if="filtersLoading.districts" class="text-md text-gray-500">Loading districts...</span>
+      <span v-else-if="!filters.division && availableDivisions.length > 0" class="text-md text-gray-500">Select a division first</span>
+    </div>
+    <!-- Thana Filter -->
+    <div>
+      <label class="block text-base font-medium text-gray-700 mb-1">থানা/উপজিলা</label>
+      <select v-model="filters.thana" :disabled="filtersLoading.thanas || (!filters.district && availableDistricts.length > 0)" class="w-full px-3 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 bg-gray-50">
+        <option value="">সকল থানা</option>
+        <option v-for="thana in availableThanas" :key="thana.thana_id" :value="thana.thana">{{ thana.thana }}</option>
+      </select>
+      <span v-if="filtersLoading.thanas" class="text-md text-gray-500">Loading thanas...</span>
+      <span v-else-if="!filters.district && availableDistricts.length > 0" class="text-md text-gray-500">Select a district first</span>
+    </div>
+    <!-- Stage Filter -->
+    <div>
+      <label class="block text-base font-medium text-gray-700 mb-1">মারহালা স্তর</label>
+      <select v-model="filters.stage" class="w-full px-3 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50">
+        <option value="">সকল মারহালা স্তর</option>
+        <option value="তাকমিল">তাকমিল</option>
+        <option value="ফযিলত">ফযিলত</option>
+        <option value="সানাবিয়া উলইয়া">সানাবিয়া উলইয়া</option>
+        <option value="সানাবিয়া">সানাবিয়া</option>
+        <option value="মুতাওয়াসসিতাহ">মুতাওয়াসসিতাহ</option>
+        <option value="ইবতেদাইয়্যাহ">ইবতেদাইয়্যাহ</option>
+        <option value="হিফজুল কোরাআন">হিফজুল কোরাআন</option>
+        <option value="কিরাআত">কিরাআত</option>
+      </select>
+    </div>
+    <!-- Student Type Filter -->
+    <div>
+      <label class="block text-base font-medium text-gray-700 mb-1">মাদরাসা টাইপ</label>
+      <select v-model="filters.student_type" class="w-full px-3 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50">
+        <option value="">সকল মাদরাসা টাইপ</option>
+        <option value="Male">ছাত্র</option>
+        <option value="Female">ছাত্রী</option>
+      </select>
+    </div>
+    <!-- Status Filter -->
+    <div>
+      <label class="block text-base font-medium text-gray-700 mb-1">Status</label>
+      <select v-model="filters.enabledisable" class="w-full px-3 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50">
+        <option value="">All Status</option>
+        <option value="1">Active</option>
+        <option value="0">Inactive</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Export Options -->
+  <div class="mt-6 pt-4 border-t border-gray-200">
+    <div class="flex flex-wrap items-center justify-between">
+      <div class="mb-2 sm:mb-0">
+        <h3 class="text-base font-medium text-gray-700">এক্সপোর্ট অপশন</h3>
+        <p class="text-md text-gray-500">ফিল্টারড ডাটাকে বিভিন্ন ফরম্যাটে ডাউনলোড করুন</p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button @click="downloadExcel" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-base font-medium rounded-sm text-green-700 bg-white hover:bg-gray-50 transition">
+          <svg class="w-4 h-4 mr-1.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v1a1 1 0 001 1h4a1 1 0 001-1v-1m3-2V8a2 2 0 00-2-2H8a2 2 0 00-2 2v8m5-4h4"></path>
+          </svg>
+          Excel
+        </button>
+        <button @click="downloadCSV" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-base font-medium rounded-sm text-blue-700 bg-white hover:bg-gray-50 transition">
+          <svg class="w-4 h-4 mr-1.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v1a1 1 0 001 1h4a1 1 0 001-1v-1m3-2V8a2 2 0 00-2-2H8a2 2 0 00-2 2v8m5-4h4"></path>
+          </svg>
+          CSV
+        </button>
+        <button @click="downloadPDF" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-base font-medium rounded-sm text-red-700 bg-white hover:bg-gray-50 transition">
+          <svg class="w-4 h-4 mr-1.5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+          </svg>
+          PDF
+        </button>
+        <button @click="printData" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-base font-medium rounded-sm text-gray-700 bg-white hover:bg-gray-50 transition">
+          <svg class="w-4 h-4 mr-1.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+          </svg>
+          Print
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Advanced Filters Toggle -->
+  <div class="mt-4">
+    <button @click="toggleAdvancedFilters" class="text-base text-gray-600 hover:text-gray-900 transition-colors flex items-center">
+      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+      </svg>
+      {{ showAdvancedFilters ? 'হাইড' : 'শো' }} এডভান্সড ফিল্টার
+    </button>
+
+    <div v-if="showAdvancedFilters" class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Year Filter -->
+      <div>
+        <label class="block text-base font-medium text-gray-700 mb-1">বছর</label>
+        <select v-model="filters.year" class="w-full px-3 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50">
+          <option value="">সকল বছর</option>
+          <option v-for="year in availableYears" :key="year" :value="year">{{ year }}</option>
+        </select>
+      </div>
+      <!-- Date Range Filter -->
+      <div>
+        <label class="block text-base font-medium text-gray-700 mb-1">তারিখ থেকে</label>
+        <input v-model="filters.fromDate" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50" />
+      </div>
+      <div>
+        <label class="block text-base font-medium text-gray-700 mb-1">তারিখ পর্যন্ত</label>
+        <input v-model="filters.toDate" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50" />
+      </div>
+      <!-- Records Per Page -->
+      <div>
+        <label class="block text-base font-medium text-gray-700 mb-1">প্রতি পেজে সারি দেখান</label>
+        <select v-model="itemsPerPage" class="w-full px-3 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50">
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
 
       <!-- Data Table with Fixed Height and Internal Scrolling -->
-      <div class="bg-white rounded-sm shadow-sm border border-gray-200 overflow-hidden">
-        <div class="table-wrapper" style="height: 500px; overflow-y: auto;">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50 sticky top-0 z-10">
-              <tr>
-                <th v-for="column in visibleColumns" :key="column.key"
-                    @click="column.sortable ? sortBy(column.key) : null"
-                    :class="[
-                      'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider',
-                      column.sortable ? 'cursor-pointer hover:bg-gray-100' : ''
-                    ]">
-                  <div class="flex items-center space-x-1">
-                    <span>{{ column.label }}</span>
-                    <svg v-if="column.sortable && sortField === column.key" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"></path>
-                    </svg>
-                  </div>
-                </th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="item in paginatedData" :key="item.id" class="hover:bg-gray-50 transition-colors">
-                <td v-for="column in visibleColumns" :key="column.key" class="px-6 py-4 whitespace-nowrap text-lg text-gray-900">
-                  <template v-if="column.key === 'name'">
-                    <div>
-                      <div class="text-lg font-medium text-gray-900">{{ item.mname }}</div>
-                      <div class="text-lg text-gray-500">{{ item.ara_mname }}</div>
-                    </div>
-                  </template>
-                  <template v-else-if="column.key === 'stage'">
-                    {{ item.stage_display || item.stage }}
-                  </template>
-                  <template v-else-if="column.key === 'location'">
-                    {{ item.location || (item.division_name + ', ' + item.district_name + ', ' + item.thana_name) }}
-                  </template>
-                  <template v-else-if="column.key === 'student_type'">
-                    <span :class="item.student_type_display === 'ছাত্রী' ? 'bg-pink-100 text-pink-800' : 'bg-blue-100 text-blue-800'"
-                          class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full">
-                      {{ item.student_type_display || item.student_type }}
-                    </span>
-                  </template>
-                  <template v-else-if="column.key === 'status'">
-                    <span :class="item.enabledisable === '1' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
-                          class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full">
-                      {{ item.enabledisable === '1' ? 'Active' : 'Inactive' }}
-                    </span>
-                  </template>
-                  <template v-else-if="column.key === 'actions'">
-                    <div class="flex space-x-2">
-                      <button @click="viewItem(item)" class="text-indigo-600 hover:text-indigo-900">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                        </svg>
-                      </button>
-                      <button @click="editItem(item)" class="text-indigo-600 hover:text-indigo-900">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                        </svg>
-                      </button>
-                      <button @click="deleteItem(item)" class="text-red-600 hover:text-red-900">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                        </svg>
-                      </button>
-                    </div>
-                  </template>
-                  <template v-else>
-                    {{ item[column.key] }}
-                  </template>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+       <div class="bg-white rounded-sm shadow border border-gray-300">
+    <div class="table-wrapper" style="height: 500px; overflow-y: auto;">
+      <table class="min-w-full divide-y divide-gray-300">
+        <thead class="bg-gray-200 sticky top-0 z-10 rounded-t-sm">
+          <tr>
+            <th v-for="column in visibleColumns" :key="column.key"
+                @click="column.sortable ? sortBy(column.key) : null"
+                :class="[
+                  'px-6 py-3 text-left text-md font-semibold text-gray-700 uppercase tracking-wider',
+                  column.sortable ? 'cursor-pointer hover:bg-gray-300' : ''
+                ]">
+              <div class="flex items-center space-x-1">
+                <span>{{ column.label }}</span>
+                <svg v-if="column.sortable && sortField === column.key" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"></path>
+                </svg>
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white text-xl divide-y divide-gray-200">
+          <tr v-for="(item, $index) in paginatedData" :key="item.id" class="hover:bg-gray-50 transition-colors"
+              :class="($index % 2 === 0 ? 'bg-white' : 'bg-gray-50')">
+            <td v-for="column in visibleColumns" :key="column.key" class="px-6 py-4 whitespace-nowrap text-base text-gray-900">
+              <template v-if="column.key === 'name'">
+                <div>
+                  <div class="font-semibold text-gray-900">{{ item.mname }}</div>
+                  <div class="text-base text-gray-500">{{ item.ara_mname }}</div>
+                </div>
+              </template>
+              <template v-else-if="column.key === 'elhaqno'">
+                {{ item.elhaqno }}
+              </template>
+              <template v-else-if="column.key === 'stage'">
+                {{ item.stage_display || item.stage }}
+              </template>
+              <template v-else-if="column.key === 'location'">
+                {{ item.location || (item.division_name + ', ' + item.district_name + ', ' + item.thana_name) }}
+              </template>
+              <template v-else-if="column.key === 'student_type'">
+                <span :class="item.student_type_display === 'ছাত্রী' ? 'bg-pink-100 text-pink-800' : 'bg-blue-100 text-blue-800'"
+                      class="px-2 py-1 inline-flex text-md leading-5 font-semibold rounded-sm">
+                  {{ item.student_type_display || item.student_type }}
+                </span>
+              </template>
+              <template v-else-if="column.key === 'status'">
+                <span :class="item.enabledisable === '1' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                      class="px-2 py-1 inline-flex text-md leading-5 font-semibold rounded-sm">
+                  {{ item.enabledisable === '1' ? 'সক্রিয়' : 'নিষ্ক্রিয়' }}
+                </span>
+              </template>
+              <template v-else-if="column.key === 'actions'">
+                <!-- PrimeVue SplitButton integration -->
+                <SplitButton
+                  :label="'বিস্তারিত'"
+                  :model="[
+                    { label: 'সেটিংস', icon: 'pi pi-cog', command: () => editItem(item) }, // Settings icon
+                    { label: 'মুছে ফেলুন', icon: 'pi pi-trash', command: () => deleteItem(item) }, // Delete icon
+                    { label: 'বার্তা পাঠান', icon: 'pi pi-comments', command: () => sendMessage(item) }, // Message icon
+                    { label: 'পিডিএফ ডাউনলোড করুন', icon: 'pi pi-file-pdf', command: () => downloadPdf(item) }, // PDF icon
+                    { label: 'ইমেইল করুন', icon: 'pi pi-envelope', command: () => sendEmail(item) }, // Email icon
+                    { label: 'একটিভ করুন', icon: 'pi pi-check', command: () => activateItem(item) }, // Activate icon
+                    { label: 'ডিঅ্যাক্টিভ করুন', icon: 'pi pi-times-circle', command: () => deactivateItem(item) } // Deactivate icon
+                  ]"
+                  class="p-button-rounded-sm p-button-outlined"
+                  @click="viewItem(item)"
+                />
+              </template>
+              <template v-else>
+                {{ item[column.key] }}
+              </template>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <!-- Empty State -->
+    <div v-if="filteredData.length === 0" class="text-center py-12">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+      </svg>
+      <h3 class="mt-2 text-base font-semibold text-gray-900">No records found</h3>
+      <p class="mt-1 text-base text-gray-500">Try adjusting your search or filter criteria</p>
+    </div>
+    <!-- Pagination -->
+    <div v-if="filteredData.length > 0" class="bg-gray-100 px-6 py-3 flex items-center justify-between border-t border-gray-300 rounded-b-sm">
+      <div class="flex-1 flex justify-between sm:hidden">
+        <button @click="prevPage" :disabled="currentPage === 1" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-base font-medium rounded-sm text-gray-700 bg-white hover:bg-gray-50">
+          Previous
+        </button>
+        <button @click="nextPage" :disabled="currentPage === totalPages" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-base font-medium rounded-sm text-gray-700 bg-white hover:bg-gray-50">
+          Next
+        </button>
+      </div>
+      <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+        <div>
+          <p class="text-base text-gray-700">
+            Showing <span class="font-medium">{{ (currentPage - 1) * itemsPerPage + 1 }}</span>
+            to <span class="font-medium">{{ Math.min(currentPage * itemsPerPage, totalCount) }}</span>
+            of <span class="font-medium">{{ totalCount }}</span> results
+          </p>
         </div>
-
-        <!-- Empty State -->
-        <div v-if="filteredData.length === 0" class="text-center py-12">
-          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-          </svg>
-          <h3 class="mt-2 text-lg font-medium text-gray-900">No records found</h3>
-          <p class="mt-1 text-lg text-gray-500">Try adjusting your search or filter criteria</p>
-        </div>
-
-        <!-- Pagination -->
-        <div v-if="filteredData.length > 0" class="bg-gray-50 px-6 py-3 flex items-center justify-between border-t border-gray-200">
-          <div class="flex-1 flex justify-between sm:hidden">
-            <button @click="prevPage" :disabled="currentPage === 1" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-lg font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-              Previous
+        <div>
+          <nav class="relative z-0 inline-flex rounded-sm shadow-sm -space-x-px">
+            <button @click="prevPage" :disabled="currentPage === 1" class="relative inline-flex items-center px-2 py-2 rounded-l-sm border border-gray-300 bg-white text-base font-medium text-gray-500 hover:bg-gray-50">
+              <span class="sr-only">Previous</span>
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+              </svg>
             </button>
-            <button @click="nextPage" :disabled="currentPage === totalPages" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-lg font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-              Next
+            <button v-for="page in visiblePages" :key="page" @click="currentPage = page"
+                    :class="page === currentPage ? 'bg-indigo-100 border-indigo-500 text-indigo-700' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'"
+                    class="relative inline-flex items-center px-4 py-2 border text-base font-medium rounded-sm">
+              {{ page }}
             </button>
-          </div>
-          <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-            <div>
-              <p class="text-lg text-gray-700">
-                Showing
-                <span class="font-medium">{{ (currentPage - 1) * itemsPerPage + 1 }}</span>
-                to
-                <span class="font-medium">{{ Math.min(currentPage * itemsPerPage, totalCount) }}</span>
-                of
-                <span class="font-medium">{{ totalCount }}</span>
-                results
-              </p>
-            </div>
-            <div>
-              <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                <button @click="prevPage" :disabled="currentPage === 1" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-lg font-medium text-gray-500 hover:bg-gray-50">
-                  <span class="sr-only">Previous</span>
-                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                  </svg>
-                </button>
-                <button v-for="page in visiblePages" :key="page" @click="currentPage = page"
-                        :class="page === currentPage ? 'bg-indigo-50 border-indigo-500 text-indigo-600' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'"
-                        class="relative inline-flex items-center px-4 py-2 border text-lg font-medium">
-                  {{ page }}
-                </button>
-                <button @click="nextPage" :disabled="currentPage === totalPages" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-lg font-medium text-gray-500 hover:bg-gray-50">
-                  <span class="sr-only">Next</span>
-                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                  </svg>
-                </button>
-              </nav>
-            </div>
-          </div>
+            <button @click="nextPage" :disabled="currentPage === totalPages" class="relative inline-flex items-center px-2 py-2 rounded-r-sm border border-gray-300 bg-white text-base font-medium text-gray-500 hover:bg-gray-50">
+              <span class="sr-only">Next</span>
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </button>
+          </nav>
         </div>
       </div>
+    </div>
+  </div>
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, watch } from 'vue';
+import SplitButton from 'primevue/splitbutton'
+
+import 'primeicons/primeicons.css'
+
+
+
+
 
 interface Madrasha {
   id: number;
@@ -744,15 +635,16 @@ const initializeColumns = (): Column[] => {
 
   // Default columns if no saved settings
   return [
-    { key: 'id', label: 'ID', visible: true, sortable: true },
-    { key: 'madrasha_id', label: 'Madrasha ID', visible: true, sortable: true },
-    { key: 'name', label: 'Name', visible: true, sortable: true },
-    { key: 'stage', label: 'Stage', visible: true, sortable: true },
-    { key: 'location', label: 'Location', visible: true, sortable: true },
-    { key: 'student_type', label: 'Student Type', visible: true, sortable: true },
-    { key: 'mobile', label: 'Mobile', visible: true, sortable: true },
-    { key: 'status', label: 'Status', visible: true, sortable: true },
-    { key: 'actions', label: 'Actions', visible: true, sortable: false }
+    { key: 'id', label: 'আইডি', visible: true, sortable: true },
+    { key: 'madrasha_id', label: 'মাদরাসার আইডি', visible: true, sortable: true },
+    { key: 'elhaqno', label: 'ইলহাক নম্বর', visible: true, sortable: true },
+    { key: 'name', label: 'নাম', visible: true, sortable: true },
+    { key: 'stage', label: 'মারহালা স্তর', visible: true, sortable: true },
+    { key: 'location', label: 'ঠিকানা', visible: true, sortable: true },
+    { key: 'student_type', label: 'মাদরাসার ধরণ', visible: true, sortable: true },
+    { key: 'mobile', label: 'মোবাইল', visible: true, sortable: true },
+    { key: 'status', label: 'স্ট্যটাস', visible: true, sortable: true },
+    { key: 'actions', label: 'একশন', visible: true, sortable: false }
   ];
 };
 
@@ -982,6 +874,18 @@ const deleteItem = (item: Madrasha) => {
   // Implement delete functionality
 };
 
+const sendMessage = (item: Madrasha) => {
+  console.log('Send message:', item);
+  // Implement delete functionality
+};
+
+
+
+const sendEmail = (item: Madrasha) => {
+  console.log('Send email:', item);
+  // Implement delete functionality
+};
+
 const downloadExcel = () => {
   // Excel download functionality
   console.log('Download Excel');
@@ -1046,52 +950,40 @@ const getCsrfToken = () => {
 </script>
 
 <style scoped>
-/* Custom styles for print */
 @media print {
   .no-print {
     display: none !important;
   }
 }
-
-/* Table container with fixed height and internal scrolling */
-.table-wrapper {
+/* .table-wrapper {
   position: relative;
   overflow-y: auto;
   height: 500px;
   border: 1px solid #e5e7eb;
   border-radius: 0.375rem;
 }
-
-/* Sticky header for the table */
 .table-wrapper thead {
   position: sticky;
   top: 0;
   z-index: 10;
-  background-color: #f9fafb;
+  background-color: #e5e7eb;
 }
-
-/* Custom scrollbar styling */
 .table-wrapper::-webkit-scrollbar {
   width: 8px;
 }
-
 .table-wrapper::-webkit-scrollbar-track {
   background: #f1f1f1;
   border-radius: 4px;
 }
-
 .table-wrapper::-webkit-scrollbar-thumb {
   background: #c1c1c1;
   border-radius: 4px;
 }
-
 .table-wrapper::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
 }
-
-/* Ensure table doesn't collapse when there's no data */
 .table-wrapper table {
   width: 100%;
   border-collapse: collapse;
-}
+} */
 </style>
