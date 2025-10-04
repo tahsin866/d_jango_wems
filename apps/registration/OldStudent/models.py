@@ -6,15 +6,15 @@ class student_basic(models.Model):
     student_name_bn = models.CharField(max_length=255)
     student_name_ar = models.CharField(max_length=255, blank=True, null=True)
     student_name_en = models.CharField(max_length=255, blank=True, null=True)
-    father_name_bn = models.CharField(max_length=255)
+    father_name_bn = models.CharField(max_length=255, blank=True, null=True)
     father_name_ar = models.CharField(max_length=255, blank=True, null=True)
     father_name_en = models.CharField(max_length=255, blank=True, null=True)
     mother_name_bn = models.CharField(max_length=255, blank=True, null=True)
     mother_name_ar = models.CharField(max_length=255, blank=True, null=True)
     mother_name_en = models.CharField(max_length=255, blank=True, null=True)
     roll_no = models.IntegerField()
-    reg_no = models.CharField(max_length=255)
-    year = models.IntegerField()
+    reg_no = models.IntegerField(blank=True, null=True)
+    year = models.IntegerField(blank=True, null=True)
     date_of_birth = models.DateField(blank=True, null=True)
     mobile = models.CharField(max_length=50, blank=True, null=True)
     status = models.CharField(max_length=50, blank=True, null=True)
@@ -26,6 +26,12 @@ class student_basic(models.Model):
     srtype = models.IntegerField(blank=True, null=True)
     hijri_year = models.IntegerField(blank=True, null=True)
     bangla_year = models.IntegerField(blank=True, null=True)
+    students_type = models.CharField(max_length=255, blank=True, null=True)
+    exam_id = models.IntegerField(blank=True, null=True)
+    madrasha_id = models.IntegerField(blank=True, null=True)
+    markaz_id = models.IntegerField(blank=True, null=True)
+    is_old = models.IntegerField(blank=True, null=True)
+    irregular_sub = models.IntegerField(blank=True, null=True)
 
     class Meta:
         db_table = 'student_basic'
@@ -119,3 +125,49 @@ class Student(models.Model):
     class Meta:
         db_table = 'students'
         managed = False
+
+
+class student_adresss(models.Model):
+    id = models.BigIntegerField(primary_key=True)
+    student_id = models.BigIntegerField()
+    division = models.CharField(max_length=255, blank=True, null=True)
+    district = models.CharField(max_length=255, blank=True, null=True)
+    thana = models.CharField(max_length=255, blank=True, null=True)
+    post_office = models.CharField(max_length=255, blank=True, null=True)
+    passport_photo = models.CharField(max_length=255, blank=True, null=True)
+    birth_certificate_no = models.CharField(max_length=255, blank=True, null=True)
+    birth_certificate_photo = models.CharField(max_length=255, blank=True, null=True)
+    nid_no = models.CharField(max_length=255, blank=True, null=True)
+    nid_photo = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        db_table = 'student_adresss'
+        managed = False
+
+
+class student_attachment(models.Model):
+    id = models.IntegerField(primary_key=True)
+    student_id = models.IntegerField()
+    birth_no = models.CharField(max_length=255, blank=True, null=True)
+    birth_attach = models.CharField(max_length=255, blank=True, null=True)
+    nid_no = models.CharField(max_length=255, blank=True, null=True)
+    nid_attach = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        db_table = 'student_attachment'
+        managed = False
+
+    def create_student_address(basic, address):
+        student_adresss.objects.create(
+            id=basic.id,
+            student_id=basic.id,
+            division=address.get('division', ''),
+            district=address.get('district', ''),
+            thana=address.get('thana', ''),
+            post_office=address.get('post_office', ''),
+            passport_photo=address.get('passport_photo', ''),
+            birth_certificate_no=address.get('birth_certificate_no', ''),
+            birth_certificate_photo=address.get('birth_certificate_photo', ''),
+            nid_no=address.get('nid_no', ''),
+            nid_photo=address.get('nid_photo', ''),
+        )

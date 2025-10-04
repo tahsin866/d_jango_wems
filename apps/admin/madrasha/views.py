@@ -12,6 +12,7 @@ from apps.school.serializers import SchoolListSerializer
 from rest_framework.permissions import AllowAny, IsAdminUser
 from .models import Division, District, Thana
 from .serializers import DivisionSerializer, DistrictSerializer, ThanaSerializer
+from django.shortcuts import get_object_or_404
 
 class MadrashaListView(APIView):
     permission_classes = [AllowAny]
@@ -237,3 +238,33 @@ class ThanaListView(APIView):
                 'error': str(e),
                 'message': 'Failed to fetch thanas'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class MadrashaStatusUpdateView(APIView):
+    """Update a school's active/inactive status (1=active, 0=inactive)."""
+    permission_classes = [AllowAny]
+
+    def post(self, request, pk: int):
+        try:
+            school = get_object_or_404(School, pk=pk)
+            new_status = request.data.get('status', None)
+            if new_status is None:
+                return Response({'message': 'status is required (0 or 1)'}, status=status.HTTP_400_BAD_REQUEST)
+
+            try:
+                new_status_int = int(new_status)
+                if new_status_int not in (0, 1):
+                    raise ValueError()
+            except Exception:
+                return Response({'message': 'Invalid status value. Must be 0 or 1.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Update and save
+            school.status = new_status_int
+            school.save(update_fields=['status'])
+
+            # Clear cache so list reflects latest
+            MadrashaListView.clear_cache()
+
+            return Response({'message': 'Status updated', 'id': school.id, 'status': school.status}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'message': f'Failed to update status: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -274,6 +274,15 @@
                     </tbody>
                   </table>
                 </div>
+                <!-- Show irregular subjects if present -->
+                <div v-if="studentResultsData.irregular_subjects && studentResultsData.irregular_subjects.length" class="mt-4">
+                  <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded">
+                    <h6 class="text-lg font-semibold text-red-700 mb-2">অনিয়মিত/ফেল/অনুপস্থিত বিষয়সমূহ:</h6>
+                    <ul class="list-disc ml-6">
+                      <li v-for="(subj, i) in studentResultsData.irregular_subjects" :key="i" class="text-red-700 text-md font-bold">{{ subj }}</li>
+                    </ul>
+                  </div>
+                </div>
 
                 <!-- Institution Info -->
                 <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -316,7 +325,8 @@
                   প্রিন্ট করুন
                 </button>
                 <router-link
-                  :to="getEditUrl(studentBasic)"
+                  :to="{ path: '/student/old/registration/form' }"
+                  @click="prefillAndGo(studentBasic)"
                   class="inline-flex items-center px-4 py-2.5 bg-gray-700 hover:bg-gray-800 text-white rounded text-md font-medium"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-white" viewBox="0 0 20 20" fill="currentColor">
@@ -402,6 +412,7 @@ interface StudentResultsData {
   madrasha?: string;
   markaj?: string;
   class_name?: string;
+  irregular_subjects?: string[];
 }
 
 interface MarhalaOption {
@@ -416,11 +427,11 @@ interface ApiResponse {
     madrasha?: string;
     markaj?: string;
     class_name?: string;
+    irregular_subjects?: string[];
   };
   error?: string;
 }
 
-const examName = ref<string>('পরীক্ষা নাম');
 const marhalaName = ref<string>('মারহালা নাম');
 
 const route = useRoute();
@@ -448,7 +459,6 @@ onMounted(async () => {
 
   fadeIn.value = true;
 });
-const students = ref<Student[]>([]);
 const years = ref<string[]>([]);
 const loading = ref<boolean>(false);
 const currentMarhalaId = ref<string>('2');
@@ -528,17 +538,25 @@ const searchStudents = async (): Promise<void> => {
     const res = await axios.get<ApiResponse>('/api/admin/registration/oldstudent/search/', { params });
     if (res.data && res.data.student_basic) {
       studentBasic.value = res.data.student_basic;
-      if (res.data.student_results) {
+
+      // Save search result to sessionStorage for registration form
+      try {
+        sessionStorage.setItem('oldStudentSearchResult', JSON.stringify(res.data));
+        console.log('Search result saved to sessionStorage:', res.data);
+      } catch (e) {
+        console.warn('Could not save search result to sessionStorage:', e);
+      }      if (res.data.student_results) {
         // Store the subjects array
         if (res.data.student_results.subjects) {
           studentResults.value = res.data.student_results.subjects;
         }
 
-        // Store the common data separately
+        // Store the common data separately, including irregular_subjects
         studentResultsData.value = {
           madrasha: res.data.student_results.madrasha || 'N/A',
           markaj: res.data.student_results.markaj || 'N/A',
-          class_name: res.data.student_results.class_name || 'N/A'
+          class_name: res.data.student_results.class_name || 'N/A',
+          irregular_subjects: res.data.student_results.irregular_subjects || []
         };
       }
       showError.value = false;
@@ -575,17 +593,17 @@ const listUrl = computed(() => {
   return { path: '/students/list' };
 });
 
-/* --- getEditUrl adapted to return router-friendly target (string or object) --- */
-const getEditUrl = (student: StudentBasic) => {
-  if (!student || !student.roll_no || !student.reg_no) {
-    return { path: '/' };
-  }
+/* --- Prefill via sessionStorage to avoid showing in URL --- */
+const prefillAndGo = (student: StudentBasic | null) => {
   try {
-    const encodedData = btoa(`${student.roll_no}:${student.reg_no}:${student.marhala_id}`);
-    return { path: '/students/edit', query: { data: encodedData } };
-  } catch {
-    return { path: '/' };
-  }
+    if (!student) return;
+    const payload = {
+      name_bn: student.student_name_bn || '',
+      father_name_bn: student.father_name_bn || '',
+      Date_of_birth: student.date_of_birth || ''
+    };
+    sessionStorage.setItem('oldRegPrefill', JSON.stringify(payload));
+  } catch {}
 };
 
 const getCurrentDate = (): string => {
@@ -598,12 +616,7 @@ const getCurrentDate = (): string => {
   }).format(date);
 };
 
-const getStudentTypeBadge = (type?: string): string => {
-  if (!type) return 'bg-gray-100 text-gray-700';
-  if (type.trim() === 'নিয়মিত') return 'bg-gray-200 text-gray-700';
-  if (type.includes('অনিয়মিত')) return 'bg-gray-100 text-gray-700';
-  return 'bg-gray-100 text-gray-700';
-};
+// removed unused getStudentTypeBadge
 
 const getDivisionBadge = (division?: string): string => {
   if (!division) return 'bg-gray-100 text-gray-700 border border-gray-200';
@@ -617,6 +630,7 @@ const getResultTypeBadge = (resultType?: string): string => {
   if (!resultType) return 'bg-gray-100 text-gray-700 border border-gray-200';
   if (resultType.trim() === 'নিয়মিত') return 'bg-green-100 text-green-700 border border-green-200';
   if (resultType.includes('অনিয়মিত')) return 'bg-yellow-100 text-yellow-700 border border-yellow-200';
+  if (resultType.trim() === 'মানোউন্নয়ন') return 'bg-purple-100 text-purple-700 border border-purple-300';
   return 'bg-gray-100 text-gray-700 border border-gray-200';
 };
 

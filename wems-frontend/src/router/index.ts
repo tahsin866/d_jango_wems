@@ -162,6 +162,19 @@ const routes = [
 
 
 
+
+// মারকায সংক্রান্ত
+
+ {
+        path: '/markaz/list',
+        name: 'markazList',
+        component: () => import('@/views/Pages/Admin/markaz/markazList.vue'),
+        meta: { title: 'মারকায তালিকা', requiresAuth: true, role: 'admin' },
+      },
+
+
+
+
 // নেগরান/মুমতাহিন
 
 
@@ -259,6 +272,20 @@ const routes = [
     path: '/madrasha/list/',
     redirect: '/admin/madrasha/list'
   },
+
+// মারকায তালিকা
+
+  {
+    path: '/markaz/list',
+    redirect: '/admin/markaz/list'
+  },
+
+
+
+
+
+
+
 
 
 
@@ -361,7 +388,7 @@ const routes = [
         path: 'student/old/verify/:marhala_id',
         name: 'VerifyOldStudents',
         component: () => import('@/views/Pages/registraion/verifyOldStudents.vue'),
-        meta: { title: 'Verify Old Students', requiresAuth: true, role: 'user' },
+        meta: { title: 'পুরাতন ছাত্রদের তথ্য যাচাই', requiresAuth: true, role: 'user' },
       },
 
 

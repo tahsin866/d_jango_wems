@@ -36,7 +36,7 @@ class SchoolListSerializer(serializers.ModelSerializer):
         model = School
         fields = [
             'id', 'madrasha_id', 'mtype', 'elhaqno', 'stage', 'stageserial', 'mnname', 'ara_mname', 'mname',
-            'did', 'des_id', 'tid', 'village', 'post', 'mobile', 'enabledisable', 'year', 'mmlabel',
+            'did', 'des_id', 'tid', 'village', 'post', 'mobile', 'enabledisable', 'status', 'year', 'mmlabel',
             'editdate', 'created_at', 'updated_at',
             'division_name', 'district_name', 'thana_name',
             'stage_display', 'student_type_display', 'location'

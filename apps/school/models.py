@@ -17,6 +17,7 @@ class School(models.Model):
     post = models.CharField(max_length=100)
     mobile = models.CharField(max_length=20)
     enabledisable = models.CharField(max_length=10, null=True, blank=True)
+    status = models.IntegerField(default=1, null=True, blank=True)
     year = models.CharField(max_length=10, null=True, blank=True)
     mmlabel = models.CharField(max_length=100, null=True, blank=True)
     editdate = models.DateTimeField(null=True, blank=True)

@@ -4,7 +4,8 @@ from .views import (
     MadrashaCacheManagementView,
     DivisionListView,
     DistrictListView,
-    ThanaListView
+    ThanaListView,
+    MadrashaStatusUpdateView
 )
 
 urlpatterns = [
@@ -14,4 +15,6 @@ urlpatterns = [
     path('divisions/', DivisionListView.as_view(), name='division-list'),
     path('districts/', DistrictListView.as_view(), name='district-list'),
     path('thanas/', ThanaListView.as_view(), name='thana-list'),
+    # Update status
+    path('status/<int:pk>/', MadrashaStatusUpdateView.as_view(), name='madrasha-status-update'),
 ]
