@@ -421,6 +421,7 @@ interface MarhalaOption {
 }
 
 interface ApiResponse {
+  session_key?: string; // 🚀 Added for Redis cache system
   student_basic?: StudentBasic;
   student_results?: {
     subjects?: StudentResult[];
@@ -539,12 +540,26 @@ const searchStudents = async (): Promise<void> => {
     if (res.data && res.data.student_basic) {
       studentBasic.value = res.data.student_basic;
 
-      // Save search result to sessionStorage for registration form
-      try {
-        sessionStorage.setItem('oldStudentSearchResult', JSON.stringify(res.data));
-        console.log('Search result saved to sessionStorage:', res.data);
-      } catch (e) {
-        console.warn('Could not save search result to sessionStorage:', e);
+      // 🚀 REDIS CACHE SYSTEM: Save session key instead of full data
+      if (res.data.session_key) {
+        try {
+          const sessionData = {
+            session_key: res.data.session_key,
+            student_preview: res.data.student_basic // Store basic info for display
+          };
+          sessionStorage.setItem('oldStudentRedisSession', JSON.stringify(sessionData));
+          // Session saved successfully
+        } catch {
+          // Could not save Redis session
+        }
+      } else {
+        // Fallback: Save full search result to sessionStorage (backward compatibility)
+        try {
+          sessionStorage.setItem('oldStudentSearchResult', JSON.stringify(res.data));
+          // Fallback: Search result saved
+        } catch {
+          // Could not save search result
+        }
       }      if (res.data.student_results) {
         // Store the subjects array
         if (res.data.student_results.subjects) {

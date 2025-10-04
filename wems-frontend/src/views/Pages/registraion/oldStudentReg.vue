@@ -149,9 +149,10 @@
 </template>
 
 <script setup lang="ts">
-// TypeScript type for secure token system
-type SearchResult = {
+// TypeScript interface for secure token system
+interface SearchResult {
   secure_token?: string;
+  session_key?: string; // 🚀 Added for Redis cache system
   student_basic?: {
     cid?: string | number;
     srtype?: string;
@@ -330,15 +331,42 @@ const prevTab = () => {
 };
 
 onMounted(async () => {
-  // Load search result from sessionStorage if available
+  // 🚀 REDIS CACHE SYSTEM: Load session key first, then fallback
+  let sessionKey = null;
+
   try {
-    const storedSearchResult = sessionStorage.getItem('oldStudentSearchResult');
-    if (storedSearchResult) {
-      searchResult.value = JSON.parse(storedSearchResult);
-      console.log('Loaded search result from sessionStorage:', searchResult.value);
+    const storedSession = sessionStorage.getItem('oldStudentRedisSession');
+    if (storedSession) {
+      const sessionData = JSON.parse(storedSession);
+      if (sessionData.session_key) {
+        sessionKey = sessionData.session_key;
+        console.log('🚀 Redis session loaded successfully');
+
+        // Store session key for use in registration payload
+        searchResult.value = { session_key: sessionKey };
+
+        // Prefill from preview data (basic info for display)
+        if (sessionData.student_preview) {
+          studentInfoForm.value.name_bn = sessionData.student_preview.student_name_bn || '';
+          studentInfoForm.value.father_name_bn = sessionData.student_preview.father_name_bn || '';
+        }
+      }
     }
   } catch (e) {
-    console.warn('Could not load search result from sessionStorage:', e);
+    console.warn('Could not load Redis session from sessionStorage:', e);
+  }
+
+  // Fallback: Load old search result if no Redis session
+  if (!sessionKey) {
+    try {
+      const storedSearchResult = sessionStorage.getItem('oldStudentSearchResult');
+      if (storedSearchResult) {
+        searchResult.value = JSON.parse(storedSearchResult);
+        console.log('⚠️ Fallback: Loaded search result from sessionStorage:', searchResult.value);
+      }
+    } catch (e) {
+      console.warn('Could not load search result from sessionStorage:', e);
+    }
   }
 
   // Prefill from sessionStorage (preferred) to avoid showing data in URL
@@ -495,21 +523,23 @@ const submitStudentInfo = async () => {
 
   loading.value = true;
 
-  // Debug logging
-  console.log('=== SUBMITTING REGISTRATION DATA ===');
-  console.log('Personal:', personal);
-  console.log('Personal students_type:', personal.students_type);
-  console.log('SearchResult students_type:', searchResult.value?.student_basic?.students_type);
-  console.log('Address:', address);
-  console.log('Attachments:', attachments);
-  console.log('Search Result:', searchResult.value);
-  console.log('=====================================');
+  // Minimal logging (production safe)
+  console.log('=== SUBMITTING REGISTRATION ===');
+  console.log('Students type:', personal.students_type || 'empty');
+  console.log('Session key present:', !!searchResult.value?.session_key);
+  console.log('===================================');
 
   try {
     const res = await fetch('/api/admin/registration/oldstudent/register/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ personal, address, attachments, search_result: searchResult.value })
+      body: JSON.stringify({
+        session_key: searchResult.value?.session_key, // 🚀 Send Redis session key
+        personal,
+        address,
+        attachments,
+        search_result: searchResult.value?.session_key ? undefined : searchResult.value // Fallback for backward compatibility
+      })
     });
     let result = null;
     try {

@@ -156,18 +156,3 @@ class student_attachment(models.Model):
     class Meta:
         db_table = 'student_attachment'
         managed = False
-
-    def create_student_address(basic, address):
-        student_adresss.objects.create(
-            id=basic.id,
-            student_id=basic.id,
-            division=address.get('division', ''),
-            district=address.get('district', ''),
-            thana=address.get('thana', ''),
-            post_office=address.get('post_office', ''),
-            passport_photo=address.get('passport_photo', ''),
-            birth_certificate_no=address.get('birth_certificate_no', ''),
-            birth_certificate_photo=address.get('birth_certificate_photo', ''),
-            nid_no=address.get('nid_no', ''),
-            nid_photo=address.get('nid_photo', ''),
-        )

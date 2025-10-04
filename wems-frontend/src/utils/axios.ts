@@ -9,8 +9,6 @@ axios.defaults.headers.common['Content-Type'] = 'application/json'
 function getCsrfToken() {
   const name = 'csrftoken'
   let cookieValue = null
-  // Debug: log cookies for CSRF troubleshooting
-  console.log('[Axios Debug] document.cookie:', document.cookie)
   if (document.cookie && document.cookie !== '') {
     const cookies = document.cookie.split(';')
     for (let i = 0; i < cookies.length; i++) {
@@ -29,12 +27,8 @@ axios.interceptors.request.use(
   (config) => {
     // Add JWT token to requests
     const token = localStorage.getItem('token')
-    // Debug: log token value before request
-    console.log('[Axios Debug] token from localStorage:', token)
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`
-      // Debug: log Authorization header value
-      console.log('[Axios Debug] Authorization header:', config.headers['Authorization'])
     }
 
     config.withCredentials = true // যদি session cookie লাগে
@@ -47,7 +41,6 @@ axios.interceptors.request.use(
       }
     }
 
-    console.log('Axios request:', config.method?.toUpperCase(), config.url)
     return config
   },
   (error) => {
@@ -58,16 +51,12 @@ axios.interceptors.request.use(
 // Enhanced response interceptor with route validation handling
 axios.interceptors.response.use(
   (response) => {
-    console.log('Axios response:', response.status, response.config.url)
     return response
   },
   (error) => {
-    console.error('Axios error:', error.response?.status, error.config?.url, error.response?.data)
-
     // Handle layout access violations from backend
     if (error.response?.status === 403 && error.response?.data?.redirect_to) {
       const redirectTo = error.response.data.redirect_to
-      console.log(`🚫 Backend layout violation detected, redirecting to: ${redirectTo}`)
 
       // Redirect using router if available
       if (typeof window !== 'undefined') {
@@ -77,7 +66,6 @@ axios.interceptors.response.use(
 
     // Handle authentication errors
     if (error.response?.status === 401) {
-      console.log('🔒 Authentication required, clearing token and redirecting to signin')
       localStorage.removeItem('token')
       localStorage.removeItem('user_type')
       localStorage.removeItem('user_id')
