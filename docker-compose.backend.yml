@@ -1,0 +1,47 @@
+services:
+  # Database
+  wems-postgres:
+    image: postgres:13
+    container_name: wems-postgres
+    environment:
+      POSTGRES_DB: wifaq
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345678
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - wems-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Main Django Application
+  wems-django:
+    image: wems-django:with-all-deps
+    container_name: wems-django
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=1
+      - DATABASE_URL=postgresql://postgres:12345678@wems-postgres:5432/wifaq
+      - ALLOWED_HOSTS=localhost,127.0.0.1,wems-django
+    volumes:
+      - .:/app
+      - ./media:/app/media
+    depends_on:
+      wems-postgres:
+        condition: service_healthy
+    networks:
+      - wems-network
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+networks:
+  wems-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

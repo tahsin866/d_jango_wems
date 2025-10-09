@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  # Redis for Django sessions and caching
+  wems-redis:
+    image: redis:7-alpine
+    container_name: wems-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - wems-network
+    restart: unless-stopped
+
+  # Main Django Application
+  wems-django:
+    image: wems-django:with-all-deps
+    container_name: wems-django
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=1
+      - DATABASE_URL=postgresql://postgres:12345678@host.docker.internal:5432/wifaq
+      - REDIS_URL=redis://wems-redis:6379/0
+      - ALLOWED_HOSTS=localhost,127.0.0.1,wems-django
+    volumes:
+      - .:/app
+      - ./media:/app/media
+      - ./config/media:/app/config/media
+      - ./nid_photos:/app/nid_photos
+      - ./user_photos:/app/user_photos
+    depends_on:
+      - wems-redis
+    networks:
+      - wems-network
+    restart: unless-stopped
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+  # API Gateway
+  wems-api-gateway:
+    build:
+      context: ./services/api-gateway
+      dockerfile: Dockerfile.fastapi
+    container_name: wems-api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - AUTH_SERVICE_URL=http://wems-django:8000
+      - ACCOUNTS_SERVICE_URL=http://wems-django:8000
+      - TALEEM_SERVICE_URL=http://localhost:8003
+      - SANAD_SERVICE_URL=http://localhost:8004
+      - REGISTRATION_SERVICE_URL=http://localhost:8005
+      - TRAINING_SERVICE_URL=http://localhost:8006
+      - PUBLICATION_SERVICE_URL=http://localhost:8007
+    depends_on:
+      - wems-django
+    networks:
+      - wems-network
+    restart: unless-stopped
+
+networks:
+  wems-network:
+    driver: bridge
+
+# Note: Using host PostgreSQL 17 installation
+# Database connection: postgresql://postgres:12345678@host.docker.internal:5432/wifaq

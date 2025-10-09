@@ -1,0 +1,20 @@
+# Base requirements for WEMS Django Project
+asgiref==3.9.1
+Django==5.2.5
+django-cors-headers==4.7.0
+django-redis==6.0.0
+djangorestframework==3.16.1
+psycopg2-binary==2.9.10
+python-dotenv==1.1.1
+sqlparse==0.5.3
+tzdata==2025.2
+
+# Authentication & JWT
+PyJWT==2.8.0
+cryptography==42.0.2
+
+# Additional dependencies
+Pillow==11.3.0
+bcrypt==4.3.0
+passlib==1.7.4
+pytz==2024.2
