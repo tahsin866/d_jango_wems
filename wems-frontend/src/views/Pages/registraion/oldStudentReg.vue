@@ -222,6 +222,7 @@ interface SearchResult {
 
 import { watch, ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { getCurrentUserId } from '@/stores/userProfile';
 
 const searchResult = ref<SearchResult | null>(null);
 
@@ -605,12 +606,21 @@ const submitStudentInfo = async () => {
   console.log('Session key present:', !!searchResult.value?.session_key);
   console.log('===================================');
 
+  // 🔥 Get current user ID for marhala_id mapping
+  const currentUserId = getCurrentUserId();
+  if (currentUserId) {
+    console.log(`🔥 Sending user_id for marhala_id mapping: ${currentUserId}`);
+  } else {
+    console.log('⚠️ No current user ID found - marhala_id will use fallback logic');
+  }
+
   try {
     const res = await fetch('/api/admin/registration/oldstudent/register/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         session_key: searchResult.value?.session_key, // 🚀 Send Redis session key
+        user_id: currentUserId, // 🔥 Send user_id for marhala_id mapping
         personal,
         address,
         attachments,
@@ -629,10 +639,35 @@ const submitStudentInfo = async () => {
     }
     loading.value = false;
     if (res.ok && result.success) {
-      showToast(`ছাত্রের তথ্য সফলভাবে সংরক্ষণ করা হয়েছে! রেজিস্ট্রেশন নম্বর: ${result.reg_no}`, 'success');
+      // 🔥 Show detailed success message with field mapping info
+      const marhalaInfo = `marhala_id: ${result.marhala_id} (${result.marhala_id_source})`;
+      const madrashaInfo = `madrasha_id: ${result.madrasha_id} (${result.madrasha_id_source})`;
+      const mappingInfo = ` (${marhalaInfo}, ${madrashaInfo})`;
+
+      showToast(`ছাত্রের তথ্য সফলভাবে সংরক্ষণ করা হয়েছে! রেজিস্ট্রেশন নম্বর: ${result.reg_no}${mappingInfo}`, 'success');
+      console.log('✅ Registration successful:', {
+        student_id: result.student_id,
+        reg_no: result.reg_no,
+        marhala_id: result.marhala_id,
+        marhala_id_source: result.marhala_id_source,
+        madrasha_id: result.madrasha_id,
+        madrasha_id_source: result.madrasha_id_source,
+        action: result.action
+      });
       // Optionally reset form or redirect
     } else {
-      showToast('সংরক্ষণ ব্যর্থ: ' + (result.message || 'Unknown error'), 'error');
+      // 🔥 ENHANCED ERROR HANDLING
+      let errorMessage = result.message || result.error || 'Unknown error';
+
+      if (result.code === 'REG_NO_OUT_OF_RANGE') {
+        errorMessage = `রেজিস্ট্রেশন নম্বর সমস্যা: ${result.error}. অনুগ্রহ করে আবার চেষ্টা করুন।`;
+        console.error('Registration number out of range:', result);
+      } else if (result.code === 'DUPLICATE_REGISTRATION') {
+        errorMessage = `ডুপ্লিকেট রেজিস্ট্রেশন: এই রেজিস্ট্রেশন নম্বরটি ইতিমধ্যে বিদ্যমান (${result.reg_no})`;
+        console.error('Duplicate registration:', result);
+      }
+
+      showToast('সংরক্ষণ ব্যর্থ: ' + errorMessage, 'error');
     }
   } catch (err) {
     loading.value = false;

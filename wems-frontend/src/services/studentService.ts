@@ -56,7 +56,7 @@ export interface StatisticsData {
 }
 
 // API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 const STUDENTS_API_URL = `${API_BASE_URL}/api/admin/registration/students/`;
 
 // Configure axios instance
@@ -93,7 +93,7 @@ apiClient.interceptors.response.use(
 
 export class StudentService {
   /**
-   * Get all students with optional filters
+   * Get all students with optional filters and user-based madrasha_id filtering
    */
   static async getStudents(params?: {
     page?: number;
@@ -102,6 +102,7 @@ export class StudentService {
     status?: string;
     student_type?: string;
     is_paid?: boolean;
+    user_id?: number;
   }): Promise<Student[]> {
     try {
       const response = await apiClient.get<ApiResponse<Student[]>>(STUDENTS_API_URL, {

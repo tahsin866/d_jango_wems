@@ -4,6 +4,7 @@ import axios from 'axios';
 import StudentStatsCards from '@/views/Pages/registraion/components/StudentStatsCards.vue'
 import StudentSearchWizard from '@/views/Pages/registraion/components/StudentSearchWizard.vue'
 import StudentsDataTable from '@/views/Pages/registraion/components/StudentsDataTable.vue'
+import { getCurrentUserId } from '@/stores/userProfile';
 
 const students = ref([]);
 const loading = ref(true);
@@ -51,9 +52,18 @@ const studentStats = ref({
 const fetchData = async () => {
   try {
     loading.value = true;
+
+    // 🔥 Get current user ID for madrasha_id filtering
+    const currentUserId = getCurrentUserId();
+    console.log(`🔥 Fetching data for user_id: ${currentUserId}`);
+
     const [studentsRes, statsRes] = await Promise.all([
-      axios.get('/api/admin/registration/students/'),
-      axios.get('/api/admin/registration/students/statistics/')
+      axios.get('/api/admin/registration/students/', {
+        params: currentUserId ? { user_id: currentUserId } : {}
+      }),
+      axios.get('/api/admin/registration/students/statistics/', {
+        params: currentUserId ? { user_id: currentUserId } : {}
+      })
     ]);
 
     // Handle API response structure {success: true, data: [...]}
@@ -65,6 +75,8 @@ const fetchData = async () => {
       showMenu: false
     }));
     studentStats.value = statsData;
+
+    console.log(`✅ Loaded ${studentsData.length} students and statistics for user ${currentUserId}`);
   } catch (err) {
     console.error(err);
     error.value = 'ডাটা লোড করতে সমস্যা হয়েছে।';

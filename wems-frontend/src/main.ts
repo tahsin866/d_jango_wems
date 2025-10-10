@@ -1,3 +1,4 @@
+
 import './assets/main.css'
 // Import Swiper styles
 import 'swiper/css'
@@ -19,7 +20,7 @@ import Card from 'primevue/card';
 import Column from 'primevue/column';
 import DataTable from 'primevue/datatable';
 import InputText from 'primevue/inputtext';
-
+import Tooltip from 'primevue/tooltip';
 import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router';
@@ -52,7 +53,7 @@ app.component('PrimeButton', Button);
 app.component('SplitButton', SplitButton);
 app.component('PrimeDialog', Dialog);
 app.component('PrimeToast', Toast);
-
+app.directive('tooltip', Tooltip);
 app.component('PrimeBadge', Badge);
 app.component('PrimeCard', Card);
 app.component('PrimeColumn', Column);

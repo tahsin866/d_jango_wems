@@ -72,7 +72,8 @@ style="font-family: 'SolaimanLipi', sans-serif;"
             <SplitButton
               label="আরও"
               :model="toolbarItems"
-              class="bg-gray-100 hover:bg-gray-200 text-gray-700 border-0 rounded-md  py-2"
+              class="bg-gray-100 hover:bg-gray-200 text-gray-700 border-0 rounded-md py-2"
+              size="small"
             />
           </div>
         </template>
@@ -104,8 +105,10 @@ style="font-family: 'SolaimanLipi', sans-serif;"
         scrollHeight="calc(100vh - 400px)"
         :paginator="!useScrollMode"
         :rows="rowsPerPage"
+        :rowsPerPageOptions="[10, 25, 50, 100]"
         :paginatorTemplate="'FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown'"
         :currentPageReportTemplate="`মোট {totalRecords} টি রেকর্ডের মধ্যে {first} থেকে {last} দেখানো হচ্ছে`"
+        :pageLinkSize="10"
         filterDisplay="menu"
         :globalFilterFields="['name_bn', 'father_name_bn', 'current_madrasha']"
         :pt="{
@@ -218,6 +221,7 @@ style="font-family: 'SolaimanLipi', sans-serif;"
               label="বিস্তারিত"
               icon="pi pi-eye"
               size="small"
+              class="py-2"
               @click="viewStudent(slotProps.data.id)"
             />
           </template>
@@ -346,6 +350,8 @@ import Checkbox from 'primevue/checkbox';
 import { FilterMatchMode } from '@primevue/core/api';
 import 'primeicons/primeicons.css'
 import StudentService, { type Student, type StudentActivity } from '@/services/studentService';
+import router from '@/router';
+import { getCurrentUserId } from '@/stores/userProfile';
 
 // Type declarations
 type FilterType = Record<string, string | number | boolean>;
@@ -373,9 +379,16 @@ const loadStudents = async () => {
   error.value = null;
 
   try {
-    const students = await StudentService.getStudents();
+    // 🔥 Get current user ID for madrasha_id filtering
+    const currentUserId = getCurrentUserId();
+    console.log(`🔥 Loading students for user_id: ${currentUserId}`);
+
+    const students = await StudentService.getStudents({
+      user_id: currentUserId || undefined
+    });
+
     studentsData.value = students;
-    console.log('Students loaded successfully:', students.length);
+    console.log(`✅ Students loaded successfully: ${students.length} students for user ${currentUserId}`);
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to load students';
     console.error('Error loading students:', err);
@@ -900,17 +913,135 @@ tbody tr:hover {
 
 /* Split button styling */
 :deep(.p-splitbutton) {
-  height: 2rem;
+  height: auto;
+  min-height: 2.5rem;
 }
 
 :deep(.p-splitbutton .p-button) {
-  height: 2rem;
+  height: auto;
+  min-height: 2.5rem;
   font-size: 0.875rem;
-  padding: 0 0.75rem;
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:deep(.p-splitbutton .p-splitbutton-dropdown) {
+  min-height: 2.5rem;
+  padding: 0 0.5rem;
 }
 
 :deep(.p-splitbutton .p-menu) {
   min-width: 10rem;
+}
+
+/* Ensure regular buttons have consistent height */
+:deep(.p-button) {
+  min-height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+}
+
+/* Enhanced pagination styling */
+:deep(.p-paginator) {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  padding: 0.75rem 1rem;
+  margin-top: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+:deep(.p-paginator .p-paginator-pages) {
+  display: flex;
+  gap: 0.25rem;
+}
+
+:deep(.p-paginator .p-paginator-page) {
+  min-width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #374151;
+  transition: all 0.2s;
+  border-radius: 0.25rem;
+  font-weight: 500;
+}
+
+:deep(.p-paginator .p-paginator-page:hover) {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+:deep(.p-paginator .p-paginator-page.p-paginator-page-selected) {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: #ffffff;
+}
+
+:deep(.p-paginator .p-paginator-first),
+:deep(.p-paginator .p-paginator-prev),
+:deep(.p-paginator .p-paginator-next),
+:deep(.p-paginator .p-paginator-last) {
+  min-width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #374151;
+  transition: all 0.2s;
+  border-radius: 0.25rem;
+}
+
+:deep(.p-paginator .p-paginator-first:hover),
+:deep(.p-paginator .p-paginator-prev:hover),
+:deep(.p-paginator .p-paginator-next:hover),
+:deep(.p-paginator .p-paginator-last:hover) {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+:deep(.p-paginator .p-paginator-current) {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+}
+
+:deep(.p-paginator .p-dropdown) {
+  min-width: 4rem;
+  height: 2.25rem;
+}
+
+:deep(.p-paginator .p-dropdown .p-dropdown-label) {
+  padding: 0.25rem 0.5rem;
+}
+
+/* Responsive pagination */
+@media (max-width: 768px) {
+  :deep(.p-paginator) {
+    padding: 0.5rem;
+    gap: 0.25rem;
+  }
+
+  :deep(.p-paginator .p-paginator-page) {
+    min-width: 2rem;
+    height: 2rem;
+    font-size: 0.875rem;
+  }
+
+  :deep(.p-paginator .p-paginator-current) {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+  }
 }
 
 

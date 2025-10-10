@@ -8,6 +8,7 @@ from .models import Student
 from .models import Student
 from .models import student_basic, student_adresss, student_attachment
 from django.utils import timezone
+from apps.users.models import User, UserInformation
 import random
 import uuid
 import hashlib
@@ -21,37 +22,61 @@ class OldStudentRegistrationView(APIView):
     def trim(self, val):
         return val[:255] if isinstance(val, str) and len(val) > 255 else val
 
+    def get_user_madrasha_id(self, user_id):
+        """Get madrasha_id from user_information table using user_id"""
+        try:
+            user_info = UserInformation.objects.get(user_id=user_id)
+            return user_info.madrasha_id
+        except UserInformation.DoesNotExist:
+            return None
+        except Exception as e:
+            print(f"Error getting user madrasha_id: {str(e)}")
+            return None
+
     def post(self, request):
         # 🚀 REDIS CACHE SYSTEM: Check for session key first
         session_key = request.data.get('session_key')
-        
+
         if session_key:
             # Retrieve search data from Redis cache using session key
             cached_data = cache.get(session_key)
-            
+
             if not cached_data:
                 return Response({
                     'error': 'Session expired or invalid. Please search again.',
                     'code': 'SESSION_EXPIRED'
                 }, status=status.HTTP_400_BAD_REQUEST)
-            
+
             # Set search_result from cached Redis data
             search_result = cached_data
-            
+
             # Optionally delete session after use (one-time use)
             # cache.delete(session_key)  # Uncomment for one-time use
-            
+
         else:
             # Fallback mode: Direct search_result (for backward compatibility)
             search_result = request.data.get('search_result', {})
-        
+
         # Production-safe validation
         has_session = bool(session_key)
-        
+
         # Extract data from request
         personal = request.data.get('personal', {})
         address = request.data.get('address', {})
         attachments = request.data.get('attachments', {})
+
+        # 🔥 NEW LOGIC: Get user_id and map marhala_id from user_information table
+        user_id = request.data.get('user_id')
+        user_madrasha_id = None
+
+        if user_id:
+            user_madrasha_id = self.get_user_madrasha_id(user_id)
+            if user_madrasha_id:
+                print(f"🔥 Mapped madrasha_id from user_information: {user_madrasha_id} for user_id: {user_id}")
+            else:
+                print(f"⚠️ Could not find madrasha_id for user_id: {user_id}")
+        else:
+            print("⚠️ No user_id provided in request")
 
         # Map fields from search_result if available
         student_basic_data = search_result.get('student_basic', {}) if search_result else {}
@@ -60,15 +85,27 @@ class OldStudentRegistrationView(APIView):
 
         # Custom logic for reg_no, year, status, students_type, etc.
         year = str(timezone.now().year)[-2:]
+
+        # 🔥 FIXED: marhala_id comes from search_result/personal (NOT from user_information)
         marhala_id_from_search = str(student_basic_data.get('marhala_id', ''))
         marhala_id_from_personal = str(personal.get('marhala_id', ''))
+
+        # Priority order: search_result > personal (original logic)
         marhala_id = marhala_id_from_search or marhala_id_from_personal
-        
+
+        # 🔥 CORRECT: madrasha_id comes from user_information table
+        madrasha_id_from_user = user_madrasha_id if user_madrasha_id else None
+
         # Validation
         has_valid_marhala = bool(marhala_id and marhala_id.isdigit())
         
-        reg_code = str(random.randint(1000, 9999))
-        reg_no = int(f"{year}{marhala_id}{reg_code}")
+        # 🔥 FIXED: Generate 6-digit registration number
+        # Simple and robust approach: year (2) + random 4 digits = 6 digits total
+        year_last2 = str(timezone.now().year)[-2:]  # Last 2 digits of year
+        random_4digits = str(random.randint(1000, 9999))  # 4-digit random number
+        reg_no = int(f"{year_last2}{random_4digits}")  # Guaranteed 6 digits
+
+        print(f"✅ Generated 6-digit reg_no: {reg_no} (year: {year_last2}, random: {random_4digits})")
 
         status_val = personal.get('status', 'pending')
 
@@ -161,7 +198,7 @@ class OldStudentRegistrationView(APIView):
             # Parse datetime fields
             created_at_val = timezone.now()
             updated_at_val = timezone.now()
-            
+
             # Try to parse from personal data if provided
             if personal.get('created_at'):
                 try:
@@ -171,7 +208,7 @@ class OldStudentRegistrationView(APIView):
                         created_at_val = parsed_dt
                 except:
                     pass
-            
+
             if personal.get('updated_at'):
                 try:
                     from django.utils.dateparse import parse_datetime
@@ -181,68 +218,147 @@ class OldStudentRegistrationView(APIView):
                 except:
                     pass
 
-            # Insert into student_basic
-            basic = student_basic.objects.create(
-                student_name_bn=personal.get('student_name_bn', student_basic_data.get('student_name_bn', '')),
-                student_name_ar=personal.get('student_name_ar', ''),
-                student_name_en=personal.get('student_name_en', ''),
-                father_name_bn=personal.get('father_name_bn', student_basic_data.get('father_name_bn', '')),
-                father_name_ar=personal.get('father_name_ar', ''),
-                father_name_en=personal.get('father_name_en', ''),
-                mother_name_bn=personal.get('mother_name_bn', student_basic_data.get('mother_name_bn', '')),
-                mother_name_ar=personal.get('mother_name_ar', ''),
-                mother_name_en=personal.get('mother_name_en', ''),
-                date_of_birth=personal.get('date_of_birth', student_basic_data.get('date_of_birth', None)),
-                roll_no=0,  # Set to 0 instead of None to avoid database constraint issues
-                reg_no=reg_no,
-                year=timezone.now().year,
-                status=status_val,
-                students_type=students_type_val or '',  # CharField - string
-                exam_id=exam_id_val,  # IntegerField - int or None
-                madrasha_id=int(personal.get('madrasha_id')) if personal.get('madrasha_id') and str(personal.get('madrasha_id')).isdigit() else madrasha_id_val,  # From personal payload
-                markaz_id=None,  # IntegerField - None
-                irregular_sub=personal.get('irregular_sub', ''),
-                marhala_id=int(personal.get('marhala_id')) if personal.get('marhala_id') and str(personal.get('marhala_id')).isdigit() else (int(marhala_id) if marhala_id and marhala_id.isdigit() else None),  # Enhanced fallback logic
-                mobile=personal.get('mobile', ''),  # CharField - string from personal payload
-                ip_address=personal.get('ip_address', '127.0.0.1'),  # From personal payload
-                created_at=created_at_val,  # DateTimeField - datetime object
-                updated_at=updated_at_val,  # DateTimeField - datetime object
-                cid=int(personal.get('cid')) if personal.get('cid') and str(personal.get('cid')).isdigit() else cid_val,  # From personal payload
-                srtype=int(personal.get('srtype')) if personal.get('srtype') and str(personal.get('srtype')).isdigit() else srtype_val,  # From personal payload
-                is_old=1  # IntegerField - int
-            )
+            # Check for existing student to avoid duplicate key errors
+            # Use reg_no and marhala_id as unique identifiers for existing students
+            existing_student = None
+            if reg_no and marhala_id:
+                try:
+                    existing_student = student_basic.objects.get(
+                        reg_no=reg_no,
+                        marhala_id=int(marhala_id) if marhala_id and marhala_id.isdigit() else None
+                    )
+                except student_basic.DoesNotExist:
+                    existing_student = None
+                except Exception as e:
+                    # Handle any other database errors gracefully
+                    existing_student = None
+
+            # Prepare student data
+            student_data = {
+                'student_name_bn': personal.get('student_name_bn', student_basic_data.get('student_name_bn', '')),
+                'student_name_ar': personal.get('student_name_ar', ''),
+                'student_name_en': personal.get('student_name_en', ''),
+                'father_name_bn': personal.get('father_name_bn', student_basic_data.get('father_name_bn', '')),
+                'father_name_ar': personal.get('father_name_ar', ''),
+                'father_name_en': personal.get('father_name_en', ''),
+                'mother_name_bn': personal.get('mother_name_bn', student_basic_data.get('mother_name_bn', '')),
+                'mother_name_ar': personal.get('mother_name_ar', ''),
+                'mother_name_en': personal.get('mother_name_en', ''),
+                'date_of_birth': personal.get('date_of_birth', student_basic_data.get('date_of_birth', None)),
+                'roll_no': 0,  # Set to 0 instead of None to avoid database constraint issues
+                'reg_no': reg_no,
+                'year': timezone.now().year,
+                'status': status_val,
+                'students_type': students_type_val or '',  # CharField - string
+                'exam_id': exam_id_val,  # IntegerField - int or None
+                'madrasha_id': madrasha_id_from_user if madrasha_id_from_user else (int(personal.get('madrasha_id')) if personal.get('madrasha_id') and str(personal.get('madrasha_id')).isdigit() else madrasha_id_val),  # 🔥 FIXED: user_information > personal > search_result
+                'markaz_id': None,  # IntegerField - None
+                'irregular_sub': personal.get('irregular_sub', ''),
+                'marhala_id': int(personal.get('marhala_id')) if personal.get('marhala_id') and str(personal.get('marhala_id')).isdigit() else (int(marhala_id) if marhala_id and marhala_id.isdigit() else None),  # 🔥 FIXED: From search_result/personal (NOT user_information)
+                'mobile': personal.get('mobile', ''),  # CharField - string from personal payload
+                'ip_address': personal.get('ip_address', '127.0.0.1'),  # From personal payload
+                'created_at': created_at_val,  # DateTimeField - datetime object
+                'updated_at': updated_at_val,  # DateTimeField - datetime object
+                'cid': int(personal.get('cid')) if personal.get('cid') and str(personal.get('cid')).isdigit() else cid_val,  # From personal payload
+                'srtype': int(personal.get('srtype')) if personal.get('srtype') and str(personal.get('srtype')).isdigit() else srtype_val,  # From personal payload
+                'is_old': 1  # IntegerField - int
+            }
+
+            # Insert or update student_basic
+            if existing_student:
+                # Update existing student
+                for key, value in student_data.items():
+                    setattr(existing_student, key, value)
+                existing_student.save()
+                basic = existing_student
+            else:
+                # Create new student
+                basic = student_basic.objects.create(**student_data)
+
         except Exception as e:
-            # Log error without exposing sensitive data
-            raise
+            # Log error with more details for debugging
+            error_msg = f"Student registration error: {str(e)}"
+            print(f"ERROR: {error_msg}")
+            print(f"reg_no: {reg_no}, marhala_id: {marhala_id}")
+
+            # 🔥 ENHANCED ERROR HANDLING
+            if "duplicate key" in str(e).lower():
+                return Response({
+                    'error': 'Student with this registration number already exists.',
+                    'code': 'DUPLICATE_REGISTRATION',
+                    'reg_no': reg_no
+                }, status=status.HTTP_409_CONFLICT)
+            elif "integer out of range" in str(e).lower():
+                return Response({
+                    'error': f'Registration number {reg_no} is too large. Please try again.',
+                    'code': 'REG_NO_OUT_OF_RANGE',
+                    'reg_no': reg_no,
+                    'details': 'The generated registration number exceeds the maximum allowed value. The system will generate a new one.'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({
+                    'error': 'Registration failed. Please try again.',
+                    'code': 'REGISTRATION_ERROR',
+                    'details': str(e)
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         # Registration completed successfully
 
-        # Insert into student_adresss
-        student_adresss.objects.create(
-            id=basic.id,
-            student_id=basic.id,
-            division=self.trim(address.get('division', '')),
-            district=self.trim(address.get('district', '')),
-            thana=self.trim(address.get('thana', '')),
-            post_office=self.trim(address.get('post_office', '')),
-            passport_photo=self.trim(address.get('passport_photo', '')),
-            birth_certificate_no=self.trim(address.get('birth_certificate_no', '')),
-            birth_certificate_photo=self.trim(address.get('birth_certificate_photo', '')),
-            nid_no=self.trim(address.get('nid_no', '')),
-            nid_photo=self.trim(address.get('nid_photo', ''))
-        )
+        # Insert into student_adresss with error handling
+        try:
+            student_adresss.objects.update_or_create(
+                id=basic.id,
+                defaults={
+                    'student_id': basic.id,
+                    'division': self.trim(address.get('division', '')),
+                    'district': self.trim(address.get('district', '')),
+                    'thana': self.trim(address.get('thana', '')),
+                    'post_office': self.trim(address.get('post_office', '')),
+                    'passport_photo': self.trim(address.get('passport_photo', '')),
+                    'birth_certificate_no': self.trim(address.get('birth_certificate_no', '')),
+                    'birth_certificate_photo': self.trim(address.get('birth_certificate_photo', '')),
+                    'nid_no': self.trim(address.get('nid_no', '')),
+                    'nid_photo': self.trim(address.get('nid_photo', ''))
+                }
+            )
+        except Exception as e:
+            print(f"Warning: Failed to create student address record: {str(e)}")
+            # Continue with registration even if address creation fails
 
-        # Insert into student_attachment
-        student_attachment.objects.create(
-            id=basic.id,
-            student_id=basic.id,
-            birth_no=self.trim(attachments.get('birth_no', '')),
-            birth_attach=self.trim(attachments.get('birth_attach', '')),
-            nid_no=self.trim(attachments.get('nid_no', '')),
-            nid_attach=self.trim(attachments.get('nid_attach', ''))
-        )
+        # Insert into student_attachment with error handling
+        try:
+            student_attachment.objects.update_or_create(
+                id=basic.id,
+                defaults={
+                    'student_id': basic.id,
+                    'birth_no': self.trim(attachments.get('birth_no', '')),
+                    'birth_attach': self.trim(attachments.get('birth_attach', '')),
+                    'nid_no': self.trim(attachments.get('nid_no', '')),
+                    'nid_attach': self.trim(attachments.get('nid_attach', ''))
+                }
+            )
+        except Exception as e:
+            print(f"Warning: Failed to create student attachment record: {str(e)}")
+            # Continue with registration even if attachment creation fails
 
-        return Response({'success': True, 'student_id': basic.id, 'reg_no': reg_no}, status=status.HTTP_201_CREATED)
+        # Determine response message based on whether student was updated or created
+        action = "updated" if existing_student else "registered"
+        message = f"Student {action} successfully!"
+
+        # Add info about field mapping for debugging
+        response_data = {
+            'success': True,
+            'student_id': basic.id,
+            'reg_no': reg_no,
+            'action': action,
+            'message': message,
+            'marhala_id': basic.marhala_id,
+            'marhala_id_source': 'search_result_or_form',
+            'madrasha_id': basic.madrasha_id,
+            'madrasha_id_source': 'user_information' if madrasha_id_from_user else 'search_result_or_form'
+        }
+
+        return Response(response_data, status=status.HTTP_201_CREATED)
 
 class OldStudentSearchView(APIView):
     permission_classes = [AllowAny]

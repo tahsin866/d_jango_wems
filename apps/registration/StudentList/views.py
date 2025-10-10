@@ -48,8 +48,14 @@ class StudentListView(APIView):
             if request.GET.get('year'):
                 filters['year'] = int(request.GET.get('year'))
             
-            # Get user ID from request
-            user_id = getattr(request.user, 'id', None) if hasattr(request, 'user') else None
+            # 🔥 FIXED: Get user_id from request data or session
+            user_id = request.data.get('user_id') or request.GET.get('user_id')
+            if not user_id:
+                # Try to get from session token
+                auth_header = request.headers.get('Authorization', '')
+                if auth_header.startswith('Bearer '):
+                    # Could implement token validation here if needed
+                    pass
             
             # Get student list
             result = get_student_list(
@@ -90,8 +96,14 @@ class StudentDetailView(APIView):
     
     def get(self, request, pk):
         try:
-            # Get user ID from request
-            user_id = getattr(request.user, 'id', None) if hasattr(request, 'user') else None
+            # 🔥 FIXED: Get user_id from request data or session
+            user_id = request.data.get('user_id') or request.GET.get('user_id')
+            if not user_id:
+                # Try to get from session token
+                auth_header = request.headers.get('Authorization', '')
+                if auth_header.startswith('Bearer '):
+                    # Could implement token validation here if needed
+                    pass
             
             student_data = get_student_detail(pk, user_id=user_id)
             if student_data:
@@ -117,7 +129,7 @@ class StudentDetailView(APIView):
     
     def put(self, request, pk):
         try:
-            user_id = getattr(request.user, 'id', None) if hasattr(request, 'user') else None
+            user_id = request.data.get('user_id') or request.GET.get('user_id')
             student, error = update_student(pk, request.data, user_id)
             
             if student:
@@ -139,7 +151,7 @@ class StudentDetailView(APIView):
     
     def delete(self, request, pk):
         try:
-            user_id = getattr(request.user, 'id', None) if hasattr(request, 'user') else None
+            user_id = request.data.get('user_id') or request.GET.get('user_id')
             success, message = delete_student(pk, user_id)
             
             if success:
@@ -169,7 +181,7 @@ class StudentCreateView(APIView):
     
     def post(self, request):
         try:
-            user_id = getattr(request.user, 'id', None) if hasattr(request, 'user') else None
+            user_id = request.data.get('user_id') or request.GET.get('user_id')
             student, error = create_student(request.data, user_id)
             
             if student:
@@ -200,8 +212,14 @@ class StudentStatisticsView(APIView):
     
     def get(self, request):
         try:
-            # Get user ID from request
-            user_id = getattr(request.user, 'id', None) if hasattr(request, 'user') else None
+            # 🔥 FIXED: Get user_id from request data or session
+            user_id = request.data.get('user_id') or request.GET.get('user_id')
+            if not user_id:
+                # Try to get from session token
+                auth_header = request.headers.get('Authorization', '')
+                if auth_header.startswith('Bearer '):
+                    # Could implement token validation here if needed
+                    pass
             
             stats = get_student_statistics(user_id=user_id)
             return Response({
@@ -232,7 +250,7 @@ class StudentBulkUpdateView(APIView):
                     'error': 'No student data provided'
                 }, status=status.HTTP_400_BAD_REQUEST)
             
-            user_id = getattr(request.user, 'id', None) if hasattr(request, 'user') else None
+            user_id = request.data.get('user_id') or request.GET.get('user_id')
             result = bulk_update_students(student_updates, user_id)
             
             return Response({
@@ -279,7 +297,7 @@ class StudentSearchView(APIView):
             page = int(request.GET.get('page', 1))
             page_size = min(int(request.GET.get('page_size', 20)), 50)  # Max 50 results
             
-            user_id = getattr(request.user, 'id', None) if hasattr(request, 'user') else None
+            user_id = request.data.get('user_id') or request.GET.get('user_id')
             
             result = get_student_list(
                 user_id=user_id,
