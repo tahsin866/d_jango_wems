@@ -47,14 +47,26 @@ SERVICES = {
     }
 }
 
-# CORS Configuration
-CORS_ORIGINS = [
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:5173",
-    "http://127.0.0.1:8080",
-]
+# CORS Configuration - Environment-based
+import os
+
+ENVIRONMENT = os.getenv("ENVIRONMENT", "development").lower()
+
+if ENVIRONMENT == "production":
+    CORS_ORIGINS = [
+        # Add your production domains here
+        # "https://wems.example.com",
+        # "https://admin.wems.example.com",
+        # "https://api.wems.example.com",
+    ]
+else:
+    CORS_ORIGINS = [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:8080",
+    ]
 
 # Gateway Settings
 GATEWAY_CONFIG = {

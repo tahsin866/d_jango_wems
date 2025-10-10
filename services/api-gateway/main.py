@@ -6,7 +6,10 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 # Import configuration
-from config import CORS_ORIGINS, GATEWAY_CONFIG
+from config import CORS_ORIGINS, GATEWAY_CONFIG, SERVICES
+
+# Import security middleware
+from middleware import SecurityMiddleware, InputValidationMiddleware
 
 # Import route handlers
 from routes.auth import router as auth_router
@@ -21,6 +24,9 @@ from routes.sidebar import router as sidebar_router
 # Import utilities
 from utils.logging_config import setup_logging
 
+# Import security monitoring
+from security_monitor import HealthChecker, get_security_monitor
+
 # Setup logging
 logger = setup_logging()
 
@@ -33,13 +39,20 @@ app = FastAPI(
     redoc_url="/gateway/redoc"
 )
 
-# CORS middleware
+# Add security middleware (order matters - security first, then CORS)
+app.add_middleware(InputValidationMiddleware)
+app.add_middleware(
+    SecurityMiddleware,
+    django_service_url=SERVICES["django"]["url"]
+)
+
+# CORS middleware (simplified - security middleware handles most CORS)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-CSRFToken", "X-Service-Token"],
 )
 
 # Health check endpoints
@@ -63,37 +76,28 @@ async def health_check():
 
 @app.get("/gateway/health")
 async def gateway_health():
-    """Gateway detailed health check"""
+    """Enhanced gateway health check with security monitoring"""
     from config import SERVICES
-    import httpx
     from datetime import datetime
-    
-    service_status = {}
-    
-    for service_name, service_config in SERVICES.items():
-        try:
-            async with httpx.AsyncClient() as client:
-                response = await client.get(
-                    f"{service_config}/health/",
-                    timeout=5.0
-                )
-                service_status[service_name] = {
-                    "status": "healthy" if response.status_code == 200 else "unhealthy",
-                    "url": service_config,
-                    "response_time": response.elapsed.total_seconds() if hasattr(response, 'elapsed') else 0
-                }
-        except Exception as e:
-            service_status[service_name] = {
-                "status": "unhealthy",
-                "url": service_config,
-                "error": str(e)
-            }
-    
-    return {
-        "gateway": "healthy",
-        "timestamp": datetime.now(),
-        "services": service_status
-    }
+
+    # Initialize health checker
+    health_checker = HealthChecker(SERVICES)
+
+    # Get comprehensive health report
+    health_report = await health_checker.check_all_services()
+
+    # Add Django security endpoint checks
+    if "django" in SERVICES:
+        django_security = await health_checker.check_django_security_endpoints(SERVICES["django"])
+        health_report["django_security"] = django_security
+
+    return health_report
+
+@app.get("/gateway/security")
+async def gateway_security_status():
+    """Get security monitoring status"""
+    security_monitor = get_security_monitor()
+    return security_monitor.get_security_report()
 
 @app.get("/gateway/services")
 async def list_services():

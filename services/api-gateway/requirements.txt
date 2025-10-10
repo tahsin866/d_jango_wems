@@ -1,4 +1,22 @@
+# WEMS API Gateway Requirements
+# Core framework
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
 httpx==0.25.2
+
+# Security and middleware
+python-multipart==0.0.6
+cryptography==41.0.7
+
+# Development and testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+
+# Environment and configuration
 python-dotenv==1.0.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# Additional utilities
+click==8.1.7
+rich==13.7.0
