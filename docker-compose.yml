@@ -1,0 +1,339 @@
+services:
+  # Database
+  postgres:
+    image: postgres:13
+    container_name: wems-postgres
+    environment:
+      POSTGRES_DB: wifaq
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345678
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - wems-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis (for caching and sessions)
+  redis:
+    image: redis:7-alpine
+    container_name: wems-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - wems-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Central Authentication Service
+  auth-service:
+    build: ./services/auth-service
+    container_name: wems-auth-service
+    environment:
+      - DEBUG=True
+      - DB_HOST=postgres
+      - DB_NAME=wems
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=your-secret-key-here
+      - ALLOWED_HOSTS=localhost,127.0.0.1,auth-service
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - wems-network
+    volumes:
+      - ./logs/auth-service:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Accounts Service
+  accounts-service:
+    build: ./services/accounts-service
+    container_name: wems-accounts-service
+    environment:
+      - AUTH_SERVICE_URL=http://auth-service:8000
+      - DATABASE_URL=postgresql://postgres:12345678@postgres:5432/wems
+      - SERVICE_TOKEN=accounts-service-token
+    ports:
+      - "8002:8002"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    networks:
+      - wems-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Registration Service
+  registration-service:
+    build: ./services/registration-service
+    container_name: wems-registration-service
+    environment:
+      - AUTH_SERVICE_URL=http://auth-service:8000
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/wems
+      - SERVICE_TOKEN=registration-service-token
+    ports:
+      - "8005:8005"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    networks:
+      - wems-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Taleem Tarbiyat Service
+  taleem-service:
+    build: ./services/taleem-service
+    container_name: wems-taleem-service
+    environment:
+      - AUTH_SERVICE_URL=http://auth-service:8000
+      - DATABASE_URL=postgresql://postgres:12345678@postgres:5432/wems
+      - SERVICE_TOKEN=taleem-service-token
+    ports:
+      - "8003:8003"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    networks:
+      - wems-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Certificate (Sanad) Service
+  sanad-service:
+    build: ./services/sanad-service
+    container_name: wems-sanad-service
+    environment:
+      - AUTH_SERVICE_URL=http://auth-service:8000
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/wems
+      - SERVICE_TOKEN=sanad-service-token
+    ports:
+      - "8004:8004"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    networks:
+      - wems-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Administration Service
+  admin-service:
+    build: ./services/admin-service
+    container_name: wems-admin-service
+    environment:
+      - AUTH_SERVICE_URL=http://auth-service:8000
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/wems
+      - SERVICE_TOKEN=admin-service-token
+    ports:
+      - "8006:8006"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    networks:
+      - wems-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8006/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Training Service
+  training-service:
+    build: ./services/training-service
+    container_name: wems-training-service
+    environment:
+      - AUTH_SERVICE_URL=http://auth-service:8000
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/wems
+      - SERVICE_TOKEN=training-service-token
+    ports:
+      - "8007:8007"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    networks:
+      - wems-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8007/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Publication Service
+  publication-service:
+    build: ./services/publication-service
+    container_name: wems-publication-service
+    environment:
+      - AUTH_SERVICE_URL=http://auth-service:8000
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/wems
+      - SERVICE_TOKEN=publication-service-token
+    ports:
+      - "8008:8008"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    networks:
+      - wems-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8008/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Main Django Application (WEMS)
+  wems-django:
+    build: .
+    container_name: wems-django-app
+    environment:
+      - DEBUG=True
+      - DATABASE_URL=postgresql://postgres:12345678@postgres:5432/wems
+      - DJANGO_SETTINGS_MODULE=config.settings.development
+      - SECRET_KEY=your-django-secret-key-here
+      - ALLOWED_HOSTS=localhost,127.0.0.1,wems-django
+    ports:
+      - "8001:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - wems-network
+    volumes:
+      - ./media:/app/media
+      - ./config/media:/app/config/media
+      - ./nid_photos:/app/nid_photos
+      - ./user_photos:/app/user_photos
+    healthcheck:
+      test: ["CMD", "python", "manage.py", "check"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend Application
+  wems-frontend:
+    build: ./wems-frontend
+    container_name: wems-frontend
+    environment:
+      - VITE_API_BASE_URL=http://wems-django:8000
+      - VITE_AES_KEY=YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=
+    ports:
+      - "3000:80"
+    depends_on:
+      - wems-django
+    networks:
+      - wems-network
+    volumes:
+      - ./wems-frontend/nginx-logs:/var/log/nginx
+
+  # API Gateway
+  api-gateway:
+    build: ./services/api-gateway
+    container_name: wems-api-gateway
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - auth-service
+      - accounts-service
+      - registration-service
+      - taleem-service
+      - sanad-service
+      - admin-service
+      - training-service
+      - publication-service
+      - wems-django
+    networks:
+      - wems-network
+    volumes:
+      - ./nginx-logs:/var/log/nginx
+      - ./ssl:/etc/nginx/ssl:ro
+
+  # Monitoring (optional)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: wems-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+    networks:
+      - wems-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: wems-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - wems-network
+    depends_on:
+      - prometheus
+
+networks:
+  wems-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:

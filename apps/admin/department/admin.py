@@ -1,0 +1,1 @@
+# Empty admin file - not needed for this simple implementation
