@@ -400,14 +400,12 @@ const routes = [
         component: () => import('@/views/Pages/registraion/registrationOverview.vue'),
         meta: { title: 'Student Registration Overview', requiresAuth: true, role: 'user' },
       },
-
-      // {
-      //   path: 'registration/list',
-      //   name: 'RegistrationList',
-      //   component: () => import('@/views/Pages/registraion/registrationList.vue'),
-      //   meta: { title: 'Registration List', requiresAuth: true, role: 'user' },
-      // },
-
+      {
+        path: 'registration/list',
+        name: 'RegistrationList',
+        component: () => import('@/views/Pages/registraion/registrationList.vue'),
+        meta: { title: 'Registration List', requiresAuth: true, role: 'user' },
+      },
       {
         path: 'student/old/list',
         name: 'OldStudentList',
@@ -429,18 +427,28 @@ const routes = [
         component: () => import('@/views/Pages/registraion/oldStudentReg.vue'),
         meta: { title: 'Old Student Registration', requiresAuth: true, role: 'user' },
       },
-      // {
-      //   path: 'registration/list',
-      //   name: 'RegistrationList',
-      //   component: () => import('@/views/Pages/registraion/registrationTable.vue'),
-      //   meta: { title: 'registrationTable', requiresAuth: true, role: 'user' },
-      // },
       {
-        path: 'student/registration/list',
+        path: 'registration/list',
+        name: 'RegistrationList',
+        component: () => import('@/views/Pages/registraion/registrationTable.vue'),
+        meta: { title: 'registrationTable', requiresAuth: true, role: 'user' },
+      },
+      {
+        path: 'registration/table',
         name: 'RegistrationTable',
         component: () => import('@/views/Pages/registraion/registrationTable.vue'),
         meta: { title: 'Registration Table', requiresAuth: true, role: 'user' },
       },
+
+
+         {
+        path: 'registration/detail/:id',
+        name: 'RegistrationDetail',
+        component: () => import('@/views/Pages/registraion/OldStudentsDestailes.vue'),
+        meta: { title: 'Registration Detail', requiresAuth: true, role: 'user' },
+      },
+
+
       {
         path: 'restore',
         name: 'Restore',
@@ -526,8 +534,16 @@ const routes = [
     redirect: '/user/registration/overview'
   },
   {
+    path: '/student/registration/detail/:id',
+    redirect: (to: { params: { id: string } }) => `/user/student/registration/detail/${to.params.id}`
+  },
+
+
+
+
+  {
     path: '/registration/list',
-    redirect: '/user/student/registration/list'
+    redirect: '/user/registration/list'
   },
   {
     path: '/oldStudentList',
@@ -550,12 +566,10 @@ const routes = [
     path: '/registraionCard',
     redirect: '/user/registration/card'
   },
-
   {
-    path: '/student/registration/list',
-    redirect: '/user/registration/list'
+    path: '/registrationTable',
+    redirect: '/user/registration/table'
   },
-
   {
     path: '/restore',
     redirect: '/user/restore'

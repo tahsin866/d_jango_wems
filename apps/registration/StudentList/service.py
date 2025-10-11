@@ -383,23 +383,118 @@ def bulk_update_students(student_updates, user_id=None):
     success_count = 0
     error_count = 0
     errors = []
-    
+
     for student_data in student_updates:
         student_id = student_data.get('id')
         if not student_id:
             error_count += 1
             errors.append({"error": "Student ID is required"})
             continue
-        
+
         student, error = update_student(student_id, student_data, user_id)
         if student:
             success_count += 1
         else:
             error_count += 1
             errors.append({"id": student_id, "error": error})
-    
+
     return {
         'success_count': success_count,
         'error_count': error_count,
         'errors': errors
     }
+
+
+def get_student_detail_combined(student_id, user_id=None):
+    """
+    Get combined student information from both student_basic and student_adresss tables
+    """
+    r = get_redis_connection()
+    cache_key = f"student_detail_combined_{student_id}_{user_id}"
+
+    try:
+        # Try cache first
+        if r:
+            cached = r.get(cache_key)
+            if cached:
+                return json.loads(cached)
+    except Exception as e:
+        print(f"Redis get error: {e}")
+
+    try:
+        # Get student and verify user access
+        student = StudentBasic.objects.get(id=student_id)
+
+        # If user_id provided, verify user has access to this student
+        if user_id:
+            try:
+                user_info = UserInformation.objects.filter(user_id=user_id).first()
+                if not user_info or not user_info.madrasha_id:
+                    raise PermissionError("User has no madrasha access")
+
+                if student.madrasha_id != user_info.madrasha_id:
+                    raise PermissionError("User cannot access this student's data")
+            except Exception as e:
+                print(f"User access verification error: {e}")
+                raise PermissionError("Access denied")
+
+        # Serialize basic student data
+        serializer = StudentBasicSerializer(student)
+        result = serializer.data.copy()
+
+        # Get address data from student_adresss table
+        try:
+            from apps.registration.OldStudent.models import student_adresss
+            address_data = student_adresss.objects.filter(student_id=student_id).first()
+
+            if address_data:
+                result.update({
+                    'division': address_data.division,
+                    'district': address_data.district,
+                    'thana': address_data.thana,
+                    'post_office': address_data.post_office,
+                    'passport_photo': address_data.passport_photo,
+                    'birth_certificate_no': address_data.birth_certificate_no,
+                    'birth_certificate_photo': address_data.birth_certificate_photo,
+                    'nid_no': address_data.nid_no,
+                    'nid_photo': address_data.nid_photo
+                })
+            else:
+                # Add empty address fields if no address data exists
+                result.update({
+                    'division': None,
+                    'district': None,
+                    'thana': None,
+                    'post_office': None,
+                    'passport_photo': None,
+                    'birth_certificate_no': None,
+                    'birth_certificate_photo': None,
+                    'nid_no': None,
+                    'nid_photo': None
+                })
+        except Exception as e:
+            print(f"Error fetching address data: {e}")
+            # Add empty address fields if error occurs
+            result.update({
+                'division': None,
+                'district': None,
+                'thana': None,
+                'post_office': None,
+                'passport_photo': None,
+                'birth_certificate_no': None,
+                'birth_certificate_photo': None,
+                'nid_no': None,
+                'nid_photo': None
+            })
+
+        # Cache the result
+        try:
+            if r:
+                r.setex(cache_key, 600, json.dumps(result, default=str))  # Cache for 10 minutes
+        except Exception as e:
+            print(f"Redis set error: {e}")
+
+        return result
+
+    except StudentBasic.DoesNotExist:
+        return None

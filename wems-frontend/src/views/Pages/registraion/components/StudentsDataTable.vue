@@ -93,7 +93,7 @@ style="font-family: 'SolaimanLipi', sans-serif;"
         <DataTable
         v-model:expandedRows="expandedRows"
         v-model:editingRows="editingRows"
-        v-model:filters="filters"
+        v-model:filters="tableFilters"
         :value="displayStudents"
         dataKey="id"
         editMode="row"
@@ -114,7 +114,7 @@ style="font-family: 'SolaimanLipi', sans-serif;"
         :pt="{
           table: { style: 'min-width: 60rem' },
           column: {
-            bodycell: ({ state }) => ({
+            bodycell: ({ state }: { state: any }) => ({
               style:  state['d_editing']&&'padding-top: 0.75rem; padding-bottom: 0.75rem'
             })
           }
@@ -239,7 +239,7 @@ style="font-family: 'SolaimanLipi', sans-serif;"
               :pt="{
                 table: { style: 'min-width: 40rem' },
                 column: {
-                  bodycell: ({ state }) => ({
+                  bodycell: ({ state }: { state: any }) => ({
                     style:  state['d_editing']&&'padding-top: 0.75rem; padding-bottom: 0.75rem'
                   })
                 }
@@ -337,19 +337,19 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
 import Tag from 'primevue/tag';
-import Rating from 'primevue/rating';
+
 import SplitButton from 'primevue/splitbutton';
 import InputText from 'primevue/inputtext';
-import InputNumber from 'primevue/inputnumber';
+
 import Select from 'primevue/select';
 import Toolbar from 'primevue/toolbar';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
-import MultiSelect from 'primevue/multiselect';
-import Checkbox from 'primevue/checkbox';
+
+
 import { FilterMatchMode } from '@primevue/core/api';
 import 'primeicons/primeicons.css'
-import StudentService, { type Student, type StudentActivity } from '@/services/studentService';
+import StudentService, { type Student} from '@/services/studentService';
 import router from '@/router';
 import { getCurrentUserId } from '@/stores/userProfile';
 
@@ -369,8 +369,8 @@ const emit = defineEmits<{
 
 // Reactive data
 const studentsData = ref<Student[]>([]);
-const loading = ref(false);
 const error = ref<string | null>(null);
+const loading = ref(false);
 const scrollHeight = ref('400px');
 
 // Load students from API
@@ -478,8 +478,7 @@ const paymentStatusOptions = ref([
 ]);
 
 // Toolbar functionality
-const globalSearch = ref('');
-const filters = ref({
+const tableFilters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   name_bn: { value: null, matchMode: FilterMatchMode.CONTAINS },
   current_class: { value: null, matchMode: FilterMatchMode.EQUALS },
@@ -565,10 +564,11 @@ const editStudent = (id: number) => {
 };
 const viewStudent = (id: number) => {
   // Navigate to details page
-  router.push(`/students/${id}`);
+  router.push(`/user/registration/detail/${id}`);
 };
 
 // Action functions
+
 const submitApplication = () => {
   // Submit application logic
   if (submitId.value) {

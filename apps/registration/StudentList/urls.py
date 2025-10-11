@@ -7,8 +7,12 @@ from .views import (
     StudentBulkUpdateView,
     StudentSearchView
 )
+from .test_views import TestStudentAPIView
 
 urlpatterns = [
+    # Test API for header-based student fetch
+    path('test/', TestStudentAPIView.as_view(), name='test-student-api'),
+    
     # Student list with pagination and filtering
     path('', StudentListView.as_view(), name='student-list'),
     
@@ -25,5 +29,6 @@ urlpatterns = [
     path('bulk-update/', StudentBulkUpdateView.as_view(), name='student-bulk-update'),
     
     # Individual student operations (must be last to avoid conflicts)
+    # Now returns combined data by default
     path('<int:pk>/', StudentDetailView.as_view(), name='student-detail'),
 ]

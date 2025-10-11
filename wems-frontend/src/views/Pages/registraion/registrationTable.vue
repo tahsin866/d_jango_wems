@@ -101,10 +101,7 @@ const refresh = () => fetchData()
   :loading="loading"
   @update:filters="val => {
     Object.keys(val).forEach(key => {
-      const filterKey = key as keyof Filters;
-      if ((filters.value as Filters)[filterKey]) {
-        (filters.value as Filters)[filterKey].value = val[filterKey].value;
-      }
+      filters.value[key] = val[key];
     });
   }"
   @refresh="refresh"

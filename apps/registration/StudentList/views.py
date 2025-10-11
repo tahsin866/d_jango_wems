@@ -13,7 +13,8 @@ from .service import (
     update_student,
     delete_student,
     get_student_statistics,
-    bulk_update_students
+    bulk_update_students,
+    get_student_detail_combined
 )
 
 
@@ -24,13 +25,13 @@ class StudentListView(APIView):
     GET /api/registration/students/
     """
     permission_classes = [AllowAny]
-    
+
     def get(self, request):
         try:
             # Get query parameters
             page = int(request.GET.get('page', 1))
             page_size = int(request.GET.get('page_size', 10))
-            
+
             # Build filters from query parameters
             filters = {}
             if request.GET.get('search'):
@@ -47,7 +48,7 @@ class StudentListView(APIView):
                 filters['status'] = request.GET.get('status')
             if request.GET.get('year'):
                 filters['year'] = int(request.GET.get('year'))
-            
+
             # 🔥 FIXED: Get user_id from request data or session
             user_id = request.data.get('user_id') or request.GET.get('user_id')
             if not user_id:
@@ -56,7 +57,7 @@ class StudentListView(APIView):
                 if auth_header.startswith('Bearer '):
                     # Could implement token validation here if needed
                     pass
-            
+
             # Get student list
             result = get_student_list(
                 user_id=user_id,
@@ -64,14 +65,14 @@ class StudentListView(APIView):
                 page=page,
                 page_size=page_size
             )
-            
+
             return Response({
                 'success': True,
                 'data': result['students'],
                 'pagination': result['pagination'],
                 'filters': result['filters_applied']
             }, status=status.HTTP_200_OK)
-            
+
         except ValueError as e:
             return Response({
                 'success': False,
@@ -93,7 +94,7 @@ class StudentDetailView(APIView):
     DELETE /api/registration/students/{id}/
     """
     permission_classes = [AllowAny]
-    
+
     def get(self, request, pk):
         try:
             # 🔥 FIXED: Get user_id from request data or session
@@ -104,8 +105,9 @@ class StudentDetailView(APIView):
                 if auth_header.startswith('Bearer '):
                     # Could implement token validation here if needed
                     pass
-            
-            student_data = get_student_detail(pk, user_id=user_id)
+
+            # Use combined student data function instead of basic detail
+            student_data = get_student_detail_combined(pk, user_id=user_id)
             if student_data:
                 return Response({
                     'success': True,
@@ -126,12 +128,12 @@ class StudentDetailView(APIView):
                 'success': False,
                 'error': f'Internal server error: {str(e)}'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+
     def put(self, request, pk):
         try:
             user_id = request.data.get('user_id') or request.GET.get('user_id')
             student, error = update_student(pk, request.data, user_id)
-            
+
             if student:
                 return Response({
                     'success': True,
@@ -148,12 +150,12 @@ class StudentDetailView(APIView):
                 'success': False,
                 'error': f'Internal server error: {str(e)}'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+
     def delete(self, request, pk):
         try:
             user_id = request.data.get('user_id') or request.GET.get('user_id')
             success, message = delete_student(pk, user_id)
-            
+
             if success:
                 return Response({
                     'success': True,
@@ -178,12 +180,12 @@ class StudentCreateView(APIView):
     POST /api/registration/students/create/
     """
     permission_classes = [AllowAny]
-    
+
     def post(self, request):
         try:
             user_id = request.data.get('user_id') or request.GET.get('user_id')
             student, error = create_student(request.data, user_id)
-            
+
             if student:
                 return Response({
                     'success': True,
@@ -209,7 +211,7 @@ class StudentStatisticsView(APIView):
     GET /api/registration/students/statistics/
     """
     permission_classes = [AllowAny]
-    
+
     def get(self, request):
         try:
             # 🔥 FIXED: Get user_id from request data or session
@@ -220,7 +222,7 @@ class StudentStatisticsView(APIView):
                 if auth_header.startswith('Bearer '):
                     # Could implement token validation here if needed
                     pass
-            
+
             stats = get_student_statistics(user_id=user_id)
             return Response({
                 'success': True,
@@ -240,7 +242,7 @@ class StudentBulkUpdateView(APIView):
     POST /api/registration/students/bulk-update/
     """
     permission_classes = [AllowAny]
-    
+
     def post(self, request):
         try:
             student_updates = request.data.get('students', [])
@@ -249,16 +251,16 @@ class StudentBulkUpdateView(APIView):
                     'success': False,
                     'error': 'No student data provided'
                 }, status=status.HTTP_400_BAD_REQUEST)
-            
+
             user_id = request.data.get('user_id') or request.GET.get('user_id')
             result = bulk_update_students(student_updates, user_id)
-            
+
             return Response({
                 'success': True,
                 'message': f'Bulk update completed: {result["success_count"]} successful, {result["error_count"]} failed',
                 'data': result
             }, status=status.HTTP_200_OK)
-            
+
         except Exception as e:
             return Response({
                 'success': False,
@@ -273,7 +275,7 @@ class StudentSearchView(APIView):
     GET /api/registration/students/search/
     """
     permission_classes = [AllowAny]
-    
+
     def get(self, request):
         try:
             # Get search parameters
@@ -283,41 +285,84 @@ class StudentSearchView(APIView):
                     'success': False,
                     'error': 'Search term is required'
                 }, status=status.HTTP_400_BAD_REQUEST)
-            
+
             # Build filters
             filters = {'search': search_term}
-            
+
             # Optional filters
             if request.GET.get('marhala_id'):
                 filters['marhala_id'] = int(request.GET.get('marhala_id'))
             if request.GET.get('exam_id'):
                 filters['exam_id'] = int(request.GET.get('exam_id'))
-            
+
             # Get page parameters
             page = int(request.GET.get('page', 1))
             page_size = min(int(request.GET.get('page_size', 20)), 50)  # Max 50 results
-            
+
             user_id = request.data.get('user_id') or request.GET.get('user_id')
-            
+
             result = get_student_list(
                 user_id=user_id,
                 filters=filters,
                 page=page,
                 page_size=page_size
             )
-            
+
             return Response({
                 'success': True,
                 'data': result['students'],
                 'pagination': result['pagination'],
                 'search_term': search_term
             }, status=status.HTTP_200_OK)
-            
+
         except ValueError as e:
             return Response({
                 'success': False,
                 'error': f'Invalid parameter: {str(e)}'
             }, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({
+                'success': False,
+                'error': f'Internal server error: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class StudentDetailCombinedView(APIView):
+    """
+    API View for fetching combined student details from both student_basic and student_adresss tables
+    GET /api/registration/students/<int:pk>/combined/
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request, pk):
+        try:
+            # Get user_id from request data or session
+            user_id = request.data.get('user_id') or request.GET.get('user_id')
+            if not user_id:
+                # Try to get from session token
+                auth_header = request.headers.get('Authorization', '')
+                if auth_header.startswith('Bearer '):
+                    # Could implement token validation here if needed
+                    pass
+
+            # Get combined student data
+            student_data = get_student_detail_combined(pk, user_id=user_id)
+            if student_data:
+                return Response({
+                    'success': True,
+                    'data': student_data
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({
+                    'success': False,
+                    'error': 'Student not found'
+                }, status=status.HTTP_404_NOT_FOUND)
+        except PermissionError as e:
+            return Response({
+                'success': False,
+                'error': str(e)
+            }, status=status.HTTP_403_FORBIDDEN)
         except Exception as e:
             return Response({
                 'success': False,

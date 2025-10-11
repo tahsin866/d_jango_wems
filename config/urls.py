@@ -63,6 +63,9 @@ urlpatterns = [
     path('api/admin/registration/overview/', include('apps.registration.overview.urls')),
     path('api/admin/registration/', include('apps.registration.urls')),
 
+    # Registration StudentList API
+    path('api/registration/', include('apps.registration.StudentList.urls')),
+
     # Madrasha List API
     path('api/admin/madrasha/', include('apps.admin.madrasha.urls')),
 

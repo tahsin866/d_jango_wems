@@ -305,12 +305,6 @@ const isSubmenuOpen = (groupIndex: number) => {
   );
 };
 
-const endTransition = (el: Element) => {
-  (el as HTMLElement).style.height = "";
-};
-const startTransition = (el: Element) => {
-  (el as HTMLElement).style.height = "auto";
-};
 </script>
 
 <style scoped>
