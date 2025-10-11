@@ -235,40 +235,23 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import axios from 'axios'
 
-// Vue Router for navigation
 const router = useRouter()
 const route = useRoute()
 
-interface Subject {
-  id?: number
-  subject_code: string
-  name_bangla: string
-  name_english: string
-  name_arabic: string
-  status: string
-}
-
-interface MarhalaForm {
-  marhala_name_bn: string
-  marhala_name_en: string
-  marhala_name_ar: string
-}
-
-const marhalaId = ref<string | null>(null)
-const formData = ref<MarhalaForm>({
+const marhalaId = ref(null)
+const formData = ref({
   marhala_name_bn: '',
   marhala_name_en: '',
   marhala_name_ar: '',
 })
 
-const subjects = ref<Subject[]>([])
+const subjects = ref([])
 
-// Loading and error states
 const loading = ref(false)
 const loadingData = ref(false)
 const error = ref('')
@@ -283,10 +266,10 @@ const subjectHeaders = [
   'অ্যাকশন'
 ]
 
-const subjectStatusLabels: Record<string, string> = {
-  'SRtype_1': 'ছাত্র',
-  'SRtype_0': 'ছাত্রী',
-  'both': 'উভয়'
+const subjectStatusLabels = {
+  SRtype_1: 'ছাত্র',
+  SRtype_0: 'ছাত্রী',
+  both: 'উভয়'
 }
 
 async function loadMarhalaData() {
@@ -321,7 +304,7 @@ async function loadMarhalaData() {
     } else {
       error.value = response.data.message || 'ডেটা লোড করতে সমস্যা হয়েছে'
     }
-  } catch (err: unknown) {
+  } catch  {
     error.value = 'সার্ভার থেকে ডেটা আনতে সমস্যা হয়েছে'
   } finally {
     loadingData.value = false
@@ -337,10 +320,10 @@ function addNewRow() {
     status: 'both'
   })
 }
-function removeRow(index: number) {
+function removeRow(index) {
   subjects.value.splice(index, 1)
 }
-async function handleSubmit(event?: Event) {
+async function handleSubmit(event) {
   if (event) {
     event.preventDefault()
     event.stopPropagation()
@@ -378,7 +361,7 @@ async function handleSubmit(event?: Event) {
       marhala_name_en: formData.value.marhala_name_en,
       marhala_name_ar: formData.value.marhala_name_ar,
       subjects: validSubjects.map(subject => {
-        const subjectData: Record<string, unknown> = {
+        const subjectData = {
           subject_code: subject.subject_code,
           name_bangla: subject.name_bangla,
           name_english: subject.name_english,
@@ -411,7 +394,7 @@ async function handleSubmit(event?: Event) {
     } else {
       error.value = response.data.message || 'ডেটা আপডেটে সমস্যা হয়েছে'
     }
-  } catch (err: unknown) {
+  } catch  {
     error.value = 'সার্ভারে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।'
   } finally {
     loading.value = false
@@ -442,14 +425,14 @@ async function deleteMarhala() {
     } else {
       error.value = response.data.message || 'ডেটা ডিলিটে সমস্যা হয়েছে'
     }
-  } catch (err: unknown) {
+  } catch  {
     error.value = 'সার্ভারে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।'
   } finally {
     loading.value = false
   }
 }
 onMounted(() => {
-  marhalaId.value = route.params.id as string
+  marhalaId.value = route.params.id
   if (marhalaId.value) {
     loadMarhalaData()
   } else {

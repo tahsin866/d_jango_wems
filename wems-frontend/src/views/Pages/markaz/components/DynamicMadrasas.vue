@@ -310,173 +310,138 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, computed } from 'vue';
+<script setup>
+import { ref, computed } from 'vue'
 
-// Types as before
-export interface MadrashaType {
-  id?: number | string;
-  name?: string;
-  elhaqno?: string | number;
-}
-export interface RowType {
-  searchQuery?: string;
-  madrasa_id?: number | string | null;
-  fazilat?: number | null;
-  sanabiya_ulya?: number | null;
-  sanabiya?: number | null;
-  mutawassita?: number | null;
-  ibtedaiyyah?: number | null;
-  hifzul_quran?: number | null;
-  qirat?: number | null;
-  selectedMadrasha?: MadrashaType | null;
-  isOpen?: boolean;
-  exactSearch?: boolean;
-  files: {
-    noc?: File | null;
-    nocPreview?: string | null;
-    resolution?: File | null;
-    resolutionPreview?: string | null;
-  };
-}
+const props = defineProps({
+  rows: Array,
+  madrashas: Array,
+  filteredOptions: Function,
+  markazType: String
+})
 
-const props = defineProps<{
-  rows: RowType[];
-  madrashas: MadrashaType[];
-  filteredOptions?: (row: RowType) => MadrashaType[];
-  markazType: string;
-}>();
+const emit = defineEmits([
+  'add-row',
+  'remove-row',
+  'file-upload',
+  'remove-file',
+  'select-option'
+])
 
-const emit = defineEmits<{
-  (e: 'add-row'): void;
-  (e: 'remove-row', index: number): void;
-  (e: 'file-upload', file: File, type: 'noc' | 'resolution', index: number): void;
-  (e: 'remove-file', type: 'noc' | 'resolution', index: number): void;
-  (e: 'select-option', madrasha: MadrashaType, row: RowType): void;
-}>();
+const showDarsiyatFields = computed(() => props.markazType === 'দরসিয়াত')
+const showHifzField = computed(() => props.markazType === 'তাহফিজুল কোরআন')
+const showKiratField = computed(() => props.markazType === 'কিরাআত')
 
-const showDarsiyatFields = computed(() => props.markazType === 'দরসিয়াত');
-const showHifzField = computed(() => props.markazType === 'তাহফিজুল কোরআন');
-const showKiratField = computed(() => props.markazType === 'কিরাআত');
+const suggestionCache = ref({})
+const isLoading = ref({})
+const abortControllers = ref({})
 
-const suggestionCache = ref<{ [key: number]: MadrashaType[] }>({});
-const isLoading = ref<{ [key: number]: boolean }>({});
-const abortControllers = ref<{ [key: number]: AbortController }>({});
-
-// Debounce function to prevent rapid API calls
-function debounce(func: Function, delay: number) {
-  let timeoutId: NodeJS.Timeout;
-  return function (...args: any[]) {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => func.apply(this, args), delay);
-  };
+function debounce(func, delay) {
+  let timeoutId
+  return function (...args) {
+    clearTimeout(timeoutId)
+    timeoutId = setTimeout(() => func.apply(this, args), delay)
+  }
 }
 
-async function searchMadrasas(event: any, index: number, exactMatch: boolean = true) {
-  const query = (event?.query ?? '').toString().trim();
+async function searchMadrasas(event, index, exactMatch = true) {
+  const query = (event?.query ?? '').toString().trim()
 
-  // Cancel previous request for this index
   if (abortControllers.value[index]) {
-    abortControllers.value[index].abort();
+    abortControllers.value[index].abort()
   }
 
   if (!query) {
-    suggestionCache.value[index] = [];
-    isLoading.value[index] = false;
-    return;
+    suggestionCache.value[index] = []
+    isLoading.value[index] = false
+    return
   }
 
-  isLoading.value[index] = true;
-  const controller = new AbortController();
-  abortControllers.value[index] = controller;
+  isLoading.value[index] = true
+  const controller = new AbortController()
+  abortControllers.value[index] = controller
 
   try {
-    // Use exact match by default for better search results
-    const exactParam = exactMatch ? 'true' : 'false';
+    const exactParam = exactMatch ? 'true' : 'false'
     const response = await fetch(`http://127.0.0.1:8000/api/markaz/search-madrasa/?elhaq=${encodeURIComponent(query)}&exact=${exactParam}`, {
       signal: controller.signal
-    });
+    })
 
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
 
-    const data = await response.json();
-    const suggestions: MadrashaType[] = Array.isArray(data) ? data.map((item: any) => ({
-      id: item.school_id || '',  // এখন school_id API থেকে পাওয়া যাবে
-      name: item.mname || '',
-      elhaqno: item.elhaqno ? item.elhaqno.toString() : null
-    })).filter(item => item.name) : [];
+    const data = await response.json()
+    const suggestions = Array.isArray(data)
+      ? data.map(item => ({
+          id: item.school_id || '',
+          name: item.mname || '',
+          elhaqno: item.elhaqno ? item.elhaqno.toString() : null
+        })).filter(item => item.name)
+      : []
 
-    // Only update if this request wasn't cancelled
     if (!controller.signal.aborted) {
-      suggestionCache.value[index] = suggestions;
+      suggestionCache.value[index] = suggestions
     }
-  } catch (error: any) {
+  } catch (error) {
     if (error.name !== 'AbortError') {
-      console.error('Search error:', error);
       if (!controller.signal.aborted) {
-        suggestionCache.value[index] = [];
+        suggestionCache.value[index] = []
       }
     }
   } finally {
     if (!controller.signal.aborted) {
-      isLoading.value[index] = false;
+      isLoading.value[index] = false
     }
-    delete abortControllers.value[index];
+    delete abortControllers.value[index]
   }
 }
 
-// Create debounced version of search function
-const debouncedSearchMadrasas = debounce(searchMadrasas, 300);
-function getSuggestions(index: number): MadrashaType[] {
-  return suggestionCache.value[index] || [];
+const debouncedSearchMadrasas = debounce(searchMadrasas, 300)
+function getSuggestions(index) {
+  return suggestionCache.value[index] || []
 }
-function preloadSuggestions(index: number) {
-  // Only clear cache, don't trigger search on focus to avoid race conditions
-  suggestionCache.value[index] = [];
+function preloadSuggestions(index) {
+  suggestionCache.value[index] = []
 }
-function handleMadrasaSelect(evt: any, row: RowType, index: number) {
-  const selectedMadrasha = evt.value as MadrashaType;
-  row.searchQuery = selectedMadrasha.name || '';
-  row.madrasa_id = selectedMadrasha.id;
-  row.selectedMadrasha = { ...selectedMadrasha, name: selectedMadrasha.name || '' };
-  // Clear the cache to hide dropdown after selection
-  suggestionCache.value[index] = [];
-  // Also clear any ongoing search for this index
+function handleMadrasaSelect(evt, row, index) {
+  const selectedMadrasha = evt.value
+  row.searchQuery = selectedMadrasha.name || ''
+  row.madrasa_id = selectedMadrasha.id
+  row.selectedMadrasha = { ...selectedMadrasha, name: selectedMadrasha.name || '' }
+  suggestionCache.value[index] = []
   if (abortControllers.value[index]) {
-    abortControllers.value[index].abort();
-    delete abortControllers.value[index];
+    abortControllers.value[index].abort()
+    delete abortControllers.value[index]
   }
-  emit('select-option', { ...selectedMadrasha, name: selectedMadrasha.name || '' }, row);
+  emit('select-option', { ...selectedMadrasha, name: selectedMadrasha.name || '' }, row)
 }
-function handleFileSelect(event: any, type: 'noc' | 'resolution', index: number) {
-  let file: File | null = null;
-  if (event instanceof File) file = event;
-  else if (event?.files?.length > 0) file = event.files[0];
-  else if (event?.target?.files?.length > 0) file = event.target.files[0];
-  else if (event?.originalEvent?.target?.files?.length > 0) file = event.originalEvent.target.files[0];
-  if (file) emit('file-upload', file, type, index);
+function handleFileSelect(event, type, index) {
+  let file = null
+  if (event instanceof File) file = event
+  else if (event?.files?.length > 0) file = event.files[0]
+  else if (event?.target?.files?.length > 0) file = event.target.files[0]
+  else if (event?.originalEvent?.target?.files?.length > 0) file = event.originalEvent.target.files[0]
+  if (file) emit('file-upload', file, type, index)
 }
-type RequiredFieldName = 'fazilat' | 'sanabiya_ulya' | 'sanabiya' | 'mutawassita' | 'ibtedaiyyah' | 'hifzul_quran' | 'qirat';
-function isRequiredFieldEmpty(row: RowType, field: RequiredFieldName): boolean {
-  if (!row.madrasa_id) return false;
-  const markazType = props.markazType;
-  const value = (row as any)[field];
+function isRequiredFieldEmpty(row, field) {
+  if (!row.madrasa_id) return false
+  const markazType = props.markazType
+  const value = row[field]
   if (markazType === 'দরসিয়াত') {
-    const required: RequiredFieldName[] = ['fazilat', 'sanabiya_ulya', 'sanabiya', 'mutawassita', 'ibtedaiyyah'];
+    const required = ['fazilat', 'sanabiya_ulya', 'sanabiya', 'mutawassita', 'ibtedaiyyah']
     if (required.includes(field)) {
-      return !value || value === 0;
+      return !value || value === 0
     }
   }
   if (markazType === 'তাহফিজুল কোরআন' && field === 'hifzul_quran') {
-    return !value || value === 0;
+    return !value || value === 0
   }
   if (markazType === 'কিরাআত' && field === 'qirat') {
-    return !value || value === 0;
+    return !value || value === 0
   }
-  return false;
+  return false
 }
-function isImageFile(file: any) {
-  if (!file) return false;
-  return ['image/jpeg', 'image/png', 'image/jpg'].includes(file.type);
+function isImageFile(file) {
+  if (!file) return false
+  return ['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)
 }
 </script>

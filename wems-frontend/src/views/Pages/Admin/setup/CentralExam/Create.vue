@@ -219,52 +219,25 @@
   </div>
 </template>
 
-<script setup lang="ts">
-defineOptions({ name: 'CentralExamCreate' })
-
+<script setup>
 import { ref, computed, reactive } from 'vue'
-import axios, { AxiosError } from 'axios'
+import axios from 'axios'
 
-// Types
-interface ExamForm {
-  examName: string
-  arabicYear: string
-  banglaYear: string
-  englishYear: number | string
-}
+const isSubmitting = ref(false)
+const showMessage = ref(false)
+const message = ref('')
+const messageType = ref('success')
 
-interface ApiResponse {
-  success: boolean
-  message?: string
-  data?: unknown
-}
-
-interface ValidationErrors {
-  examName?: string
-  arabicYear?: string
-  banglaYear?: string
-  englishYear?: string
-}
-
-// State
-const isSubmitting = ref<boolean>(false)
-const showMessage = ref<boolean>(false)
-const message = ref<string>('')
-const messageType = ref<'success' | 'error'>('success')
-
-// Form data
-const form = reactive<ExamForm>({
+const form = reactive({
   examName: '',
   arabicYear: '',
   banglaYear: '',
   englishYear: ''
 })
 
-// Validation errors
-const errors = reactive<ValidationErrors>({})
+const errors = reactive({})
 
-// Computed
-const isFormValid = computed((): boolean => {
+const isFormValid = computed(() => {
   return !!(
     form.examName.trim() &&
     form.arabicYear.trim() &&
@@ -273,9 +246,8 @@ const isFormValid = computed((): boolean => {
   )
 })
 
-// Methods
-const validateForm = (): boolean => {
-  Object.keys(errors).forEach(key => { delete errors[key as keyof ValidationErrors] })
+const validateForm = () => {
+  Object.keys(errors).forEach(key => { delete errors[key] })
   let isValid = true
   if (!form.examName.trim()) {
     errors.examName = 'পরীক্ষার নাম আবশ্যক'
@@ -294,7 +266,7 @@ const validateForm = (): boolean => {
     isValid = false
   } else {
     const englishYearStr = form.englishYear.toString().trim()
-    const banglaToEnglishDigits = (str: string) => str.replace(/[০-৯]/g, d => String('০১২৩৪৫৬৭৮৯'.indexOf(d)))
+    const banglaToEnglishDigits = str => str.replace(/[০-৯]/g, d => String('০১২৩৪৫৬৭৮৯'.indexOf(d)))
     const yearNum = parseInt(banglaToEnglishDigits(englishYearStr))
     if (isNaN(yearNum) || yearNum < 2020 || yearNum > 2030) {
       errors.englishYear = 'ইংরেজি সন ২০২০-২০৩০ এর মধ্যে হতে হবে'
@@ -304,31 +276,31 @@ const validateForm = (): boolean => {
   return isValid
 }
 
-const showNotification = (msg: string, type: 'success' | 'error'): void => {
+const showNotification = (msg, type) => {
   message.value = msg
   messageType.value = type
   showMessage.value = true
   setTimeout(() => { showMessage.value = false }, 5000)
 }
 
-const resetForm = (): void => {
+const resetForm = () => {
   form.examName = ''
   form.arabicYear = ''
   form.banglaYear = ''
   form.englishYear = ''
-  Object.keys(errors).forEach(key => { delete errors[key as keyof ValidationErrors] })
+  Object.keys(errors).forEach(key => { delete errors[key] })
 }
 
-const handleSubmit = async (): Promise<void> => {
+const handleSubmit = async () => {
   if (!validateForm()) {
     showNotification('দয়া করে সমস্ত প্রয়োজনীয় ক্ষেত্র সঠিকভাবে পূরণ করুন', 'error')
     return
   }
   isSubmitting.value = true
   try {
-    const banglaToEnglishDigits = (str: string) => str.replace(/[০-৯]/g, d => String('০১২৩৪৫৬৭৮৯'.indexOf(d)))
+    const banglaToEnglishDigits = str => str.replace(/[০-৯]/g, d => String('০১২৩৪৫৬৭৮৯'.indexOf(d)))
     const englishYearNum = parseInt(banglaToEnglishDigits(form.englishYear.toString()))
-    const response = await axios.post<ApiResponse>('http://127.0.0.1:8000/api/central-exam/exam-setups/', {
+    const response = await axios.post('http://127.0.0.1:8000/api/central-exam/exam-setups/', {
       exam_name: form.examName,
       arabic_year: form.arabicYear,
       bangla_year: form.banglaYear,
@@ -342,18 +314,19 @@ const handleSubmit = async (): Promise<void> => {
     }
   } catch (error) {
     let errorMessage = 'দুঃখিত! কিছু সমস্যা হয়েছে। আবার চেষ্টা করুন।'
-    if (error instanceof AxiosError) {
-      if (error.response?.data?.message) {
+    if (error && error.response && error.response.data) {
+      if (error.response.data.message) {
         errorMessage = error.response.data.message
-      } else if (error.response?.data?.errors) {
+      } else if (error.response.data.errors) {
         const serverErrors = error.response.data.errors
         if (typeof serverErrors === 'object') {
           Object.keys(serverErrors).forEach(key => {
-            const fieldName = key === 'exam_name' ? 'examName' :
-                            key === 'arabic_year' ? 'arabicYear' :
-                            key === 'bangla_year' ? 'banglaYear' :
-                            key === 'english_year' ? 'englishYear' : key
-            errors[fieldName as keyof ValidationErrors] = Array.isArray(serverErrors[key])
+            const fieldName =
+              key === 'exam_name' ? 'examName' :
+              key === 'arabic_year' ? 'arabicYear' :
+              key === 'bangla_year' ? 'banglaYear' :
+              key === 'english_year' ? 'englishYear' : key
+            errors[fieldName] = Array.isArray(serverErrors[key])
               ? serverErrors[key][0]
               : serverErrors[key]
           })

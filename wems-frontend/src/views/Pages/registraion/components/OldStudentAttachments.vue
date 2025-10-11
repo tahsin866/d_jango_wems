@@ -86,39 +86,34 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { computed } from 'vue';
+<script setup>
+import { computed } from 'vue'
 
-const props = defineProps<{
-  studentPhoto?: File | null;
-  studentPhotoPreview?: string | null;
-  nidAttachment?: File | null;
-  nidAttachmentPreview?: string | null;
-}>();
+const props = defineProps({
+  studentPhoto: Object,
+  studentPhotoPreview: String,
+  nidAttachment: Object,
+  nidAttachmentPreview: String
+})
 
-const emit = defineEmits<{
-  (e: 'file-upload', event: Event, type: 'studentPhoto' | 'nidAttachment'): void;
-  (e: 'remove-file', type: 'studentPhoto' | 'nidAttachment'): void;
-}>();
+const emit = defineEmits(['file-upload', 'remove-file'])
 
 const studentPhotoName = computed(() => {
-  return props.studentPhoto?.name ?? '';
-});
+  return props.studentPhoto?.name ?? ''
+})
 
 const nidAttachmentName = computed(() => {
-  return props.nidAttachment?.name ?? '';
-});
+  return props.nidAttachment?.name ?? ''
+})
 
-function onFile(e: Event, type: 'studentPhoto' | 'nidAttachment') {
-  // forward raw change event to parent so parent can handle File/preview creation
-  emit('file-upload', e, type);
+function onFile(e, type) {
+  emit('file-upload', e, type)
 }
 
-function onRemove(type: 'studentPhoto' | 'nidAttachment') {
-  emit('remove-file', type);
+function onRemove(type) {
+  emit('remove-file', type)
 }
 </script>
-
 <style scoped>
 /* Professional styling enhancements */
 .transition-colors {

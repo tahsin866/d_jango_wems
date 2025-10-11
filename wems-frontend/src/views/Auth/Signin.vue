@@ -1,34 +1,12 @@
 <template>
   <div
-    style="                                                                    font-family: 'SolaimanLipi', sans-serif;
-                                                "
+    style="font-family: 'SolaimanLipi', sans-serif;"
     class="min-h-screen flex items-center justify-center"
   >
     <div class="w-full max-w-md">
       <div class="bg-white shadow-sm px-10 py-12">
         <!-- Logo -->
-        <div class="flex justify-center mb-10">
-          <!-- <div class="w-16 h-16 bg-gray-800 rounded-sm flex items-center justify-center">
-            <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 48 48">
-              <rect width="48" height="48" rx="4" fill="currentColor"/>
-              <path d="M24 8L30 20H38L24 38L10 20H18L24 8Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-            </svg>
-          </div> -->
-        </div>
-
-        <!-- Header -->
-        <!-- <div class="mb-8 text-center">
-          <div class="relative inline-block">
-            <h2 class="text-3xl font-bold text-gray-900 classic-title">লগইন</h2>
-            <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-800 mt-1"></div>
-          </div>
-          <p class="text-gray-700 text-lg mt-3">ইমেইল বা মোবাইল নম্বর দিয়ে প্রবেশ করুন</p>
-        </div> -->
-
-        <!-- Status -->
-        <!-- <div v-if="props.status" class="mb-6 px-4 py-3 rounded-sm border-2 border-gray-800 text-gray-800 bg-gray-100 text-lg shadow">
-          {{ props.status }}
-        </div> -->
+        <div class="flex justify-center mb-10"></div>
 
         <!-- Form -->
         <form @submit.prevent="submit" class="space-y-6">
@@ -130,32 +108,19 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, defineProps, defineOptions } from 'vue'
-import axios from '@/utils/axios';
-import { useRouter } from 'vue-router';
-import { isAdminType } from '@/utils/auth';
-import { useAuthAndSidebar } from '@/composables/useAuthAndSidebar';
-import type { AxiosError } from 'axios';
-defineOptions({ name: 'AuthSignin' })
+<script setup>
+import { ref } from 'vue'
+import axios from '@/utils/axios'
+import { useRouter } from 'vue-router'
+import { isAdminType } from '@/utils/auth'
+import { useAuthAndSidebar } from '@/composables/useAuthAndSidebar'
 
-const props = defineProps<{
-  canResetPassword: boolean
-  status?: string
-}>()
+const props = defineProps({
+  canResetPassword: Boolean,
+  status: String
+})
 
-type LoginFormType = {
-  login: string
-  password: string
-  remember: boolean
-  errors: {
-    login?: string
-    password?: string
-  }
-  processing: boolean
-}
-
-const form = ref<LoginFormType>({
+const form = ref({
   login: '',
   password: '',
   remember: false,
@@ -168,7 +133,7 @@ const togglePassword = () => {
   showPassword.value = !showPassword.value
 }
 
-const router = useRouter();
+const router = useRouter()
 
 const submit = async () => {
   form.value.processing = true
@@ -180,36 +145,26 @@ const submit = async () => {
       password: form.value.password,
     }, {
       withCredentials: true
-    });
+    })
 
     if (response.data.success) {
-  // Debug: Show full backend response and redirect value
-  console.log('Login Success, backend response:', response.data);
-  console.log('Redirect URL:', response.data.redirect);
+      localStorage.setItem('token', response.data.session_token)
+      localStorage.setItem('user_type', response.data.user_type)
+      localStorage.setItem('user_id', response.data.user_id.toString())
+      localStorage.setItem('permissions', JSON.stringify(response.data.permissions || []))
+      localStorage.setItem('current_user_id', response.data.user_id.toString())
+      if (response.data.department_id) {
+        localStorage.setItem('department_id', response.data.department_id.toString())
+      }
+      const { storeUserData } = useAuthAndSidebar()
+      storeUserData({
+        id: response.data.user_id,
+        name: response.data.user_name || '',
+        email: form.value.login,
+        department_id: response.data.department_id,
+        user_type: response.data.user_type
+      })
 
-  // Store session token for router guard authentication
-  localStorage.setItem('token', response.data.session_token);
-  localStorage.setItem('user_type', response.data.user_type);
-  localStorage.setItem('user_id', response.data.user_id.toString());
-  localStorage.setItem('permissions', JSON.stringify(response.data.permissions || []));
-  localStorage.setItem('current_user_id', response.data.user_id.toString());
-
-  // Store department_id if available
-  if (response.data.department_id) {
-    localStorage.setItem('department_id', response.data.department_id.toString());
-  }
-
-  // Store user data in useAuthAndSidebar composable format
-  const { storeUserData } = useAuthAndSidebar()
-  storeUserData({
-    id: response.data.user_id,
-    name: response.data.user_name || '',
-    email: form.value.login,
-    department_id: response.data.department_id,
-    user_type: response.data.user_type
-  })
-
-      // Login history API call (optional, backend handles this already)
       try {
         await axios.post('http://localhost:8000/users/login-history/create/', {
           user: response.data.user_id,
@@ -220,61 +175,53 @@ const submit = async () => {
           location: '',
         }, {
           withCredentials: true
-        });
+        })
       } catch {}
 
-      const userType = response.data.user_type;
-
+      const userType = response.data.user_type
       if (response.data.redirect) {
-        await router.push(response.data.redirect);
+        await router.push(response.data.redirect)
       } else if (isAdminType(userType)) {
-        await router.push('/AdminDashboard');
+        await router.push('/AdminDashboard')
       } else if (userType === 'Madrasah' || userType === 'madrasha') {
-        await router.push('/dashboard');
+        await router.push('/dashboard')
       } else {
-        await router.push('/signin');
+        await router.push('/signin')
       }
     } else {
-      form.value.errors.login = 'Authentication failed';
+      form.value.errors.login = 'Authentication failed'
     }
-
-  } catch (error: unknown) {
-    // Import AxiosError type from axios
-
-
-    const axiosError = error as AxiosError;
-
+  } catch (error) {
     if (
       typeof error === 'object' &&
       error !== null &&
       'response' in error &&
-      typeof axiosError.response?.status === 'number'
+      typeof error.response?.status === 'number'
     ) {
-      const status = axiosError.response!.status;
+      const status = error.response.status
       if (status === 401) {
-        form.value.errors.login = 'ভুল ইমেইল/মোবাইল নম্বর বা পাসওয়ার্ড';
+        form.value.errors.login = 'ভুল ইমেইল/মোবাইল নম্বর বা পাসওয়ার্ড'
       } else if (status === 403) {
-        form.value.errors.login = 'আপনার একাউন্ট নিষ্ক্রিয়। অ্যাডমিনের সাথে যোগাযোগ করুন';
+        form.value.errors.login = 'আপনার একাউন্ট নিষ্ক্রিয়। অ্যাডমিনের সাথে যোগাযোগ করুন'
       } else if (status >= 500) {
-        form.value.errors.login = 'সার্ভার ত্রুটি। পরে আবার চেষ্টা করুন';
+        form.value.errors.login = 'সার্ভার ত্রুটি। পরে আবার চেষ্টা করুন'
       } else {
-        form.value.errors.login = 'লগইনে ত্রুটি হয়েছে। আবার চেষ্টা করুন';
+        form.value.errors.login = 'লগইনে ত্রুটি হয়েছে। আবার চেষ্টা করুন'
       }
     } else if (
       typeof error === 'object' &&
       error !== null &&
       'request' in error
     ) {
-      form.value.errors.login = 'নেটওয়ার্ক ত্রুটি। ইন্টারনেট সংযোগ চেক করুন';
+      form.value.errors.login = 'নেটওয়ার্ক ত্রুটি। ইন্টারনেট সংযোগ চেক করুন'
     } else {
-      form.value.errors.login = 'লগইনে ত্রুটি হয়েছে। আবার চেষ্টা করুন';
+      form.value.errors.login = 'লগইনে ত্রুটি হয়েছে। আবার চেষ্টা করুন'
     }
   } finally {
-    form.value.processing = false;
-    form.value.password = '';
+    form.value.processing = false
+    form.value.password = ''
   }
 }
-
 </script>
 
 <style scoped>
@@ -297,24 +244,6 @@ const submit = async () => {
   pointer-events: none;
 }
 
-/* .classic-signin-card {
-  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.2);
-  border-radius: 0;
-  position: relative;
-} */
-
-/* .classic-signin-card::before {
-  content: '';
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  right: 10px;
-  bottom: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  pointer-events: none;
-  z-index: 0;
-} */
-
 .classic-signin-card > * {
   position: relative;
   z-index: 1;
@@ -325,7 +254,6 @@ const submit = async () => {
   text-transform: uppercase;
 }
 
-/* Classic input styling */
 input[type="text"],
 input[type="password"],
 input[type="checkbox"] {
@@ -337,7 +265,6 @@ input[type="password"]:focus {
   box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
 }
 
-/* Classic button styling */
 button[type="submit"] {
   position: relative;
   overflow: hidden;
@@ -359,7 +286,6 @@ button[type="submit"]:hover::before {
   left: 100%;
 }
 
-/* Classic link styling */
 a {
   position: relative;
   text-decoration: none;

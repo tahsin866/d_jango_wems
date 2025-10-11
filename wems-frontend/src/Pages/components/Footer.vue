@@ -74,8 +74,6 @@
   </footer>
 </template>
 
-<script lang="ts">
-export default {
-  name: "AppFooter"
-};
+<script setup>
+/* No options API needed in <script setup>! */
 </script>

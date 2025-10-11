@@ -59,75 +59,66 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { reactive, watch, computed } from 'vue';
-
-// Types
-type Division = { id: string | number; Division: string };
-type District = { DesID: string | number; District: string };
-type Thana = { Thana_ID: string | number; Thana: string };
-type Filters = { division?: string; district?: string; Thana?: string };
-type StudentInfo = Record<string, unknown>;
+<script setup>
+import { reactive, watch, computed } from 'vue'
 
 // Props
-const props = defineProps<{
-  divisions?: Division[];
-  districts?: District[];
-  thanas?: Thana[];
-  addressFilters?: Filters;
-  studentInfoForm?: StudentInfo;
-}>();
+const props = defineProps({
+  divisions: Array,
+  districts: Array,
+  thanas: Array,
+  addressFilters: Object,
+  studentInfoForm: Object
+})
 
 // Emits
-const emit = defineEmits<{
-  'update:addressFilters': [filters: Filters];
-}>();
+const emit = defineEmits(['update:addressFilters'])
 
 // Computed props
-const divisions = computed(() => props.divisions ?? []);
-const districts = computed(() => props.districts ?? []);
-const thanas = computed(() => props.thanas ?? []);
+const divisions = computed(() => props.divisions ?? [])
+const districts = computed(() => props.districts ?? [])
+const thanas = computed(() => props.thanas ?? [])
 const addressLoading = computed(() => ({
   divisions: false,
   districts: false,
   thanas: false
-}));
+}))
 
 // Local address state
-const localAddress = reactive<Filters>({
+const localAddress = reactive({
   division: props.addressFilters?.division ?? '',
   district: props.addressFilters?.district ?? '',
   Thana: props.addressFilters?.Thana ?? ''
-});
+})
 
 // Sync local state if props change
 watch(() => props.addressFilters, (v) => {
-  if (!v) return;
-  localAddress.division = v.division ?? '';
-  localAddress.district = v.district ?? '';
-  localAddress.Thana = v.Thana ?? '';
-}, { deep: true, immediate: true });
+  if (!v) return
+  localAddress.division = v.division ?? ''
+  localAddress.district = v.district ?? ''
+  localAddress.Thana = v.Thana ?? ''
+}, { deep: true, immediate: true })
 
 // Event handlers
-function onDivisionChange(event: Event) {
-  const value = (event.target as HTMLSelectElement).value;
-  localAddress.division = value;
-  localAddress.district = '';
-  localAddress.Thana = '';
-  emit('update:addressFilters', { ...localAddress });
+function onDivisionChange(event) {
+  const value = event.target.value
+  localAddress.division = value
+  localAddress.district = ''
+  localAddress.Thana = ''
+  emit('update:addressFilters', { ...localAddress })
 }
 
-function onDistrictChange(event: Event) {
-  const value = (event.target as HTMLSelectElement).value;
-  localAddress.district = value;
-  localAddress.Thana = '';
-  emit('update:addressFilters', { ...localAddress });
+function onDistrictChange(event) {
+  const value = event.target.value
+  localAddress.district = value
+  localAddress.Thana = ''
+  emit('update:addressFilters', { ...localAddress })
 }
 
-function onThanaChange(event: Event) {
-  const value = (event.target as HTMLSelectElement).value;
-  localAddress.Thana = value;
-  emit('update:addressFilters', { ...localAddress });
+function onThanaChange(event) {
+  const value = event.target.value
+  localAddress.Thana = value
+  emit('update:addressFilters', { ...localAddress })
 }
 </script>
 

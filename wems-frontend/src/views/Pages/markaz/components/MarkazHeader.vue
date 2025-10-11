@@ -56,24 +56,23 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, watch } from 'vue';
+<script setup>
+import { ref, watch } from 'vue'
 
-const props = defineProps<{ examName?: string; searchQuery?: string }>();
-const emit = defineEmits<{
-  (e: 'update:searchQuery', value: string): void;
-  (e: 'refresh'): void;
-  (e: 'create'): void;
-}>();
+const props = defineProps({
+  examName: String,
+  searchQuery: String
+})
+const emit = defineEmits(['update:searchQuery', 'refresh', 'create'])
 
-const localQuery = ref<string>(props.searchQuery ?? '');
+const localQuery = ref(props.searchQuery ?? '')
 
 watch(
   () => props.searchQuery,
-  (v) => {
-    localQuery.value = v ?? '';
+  v => {
+    localQuery.value = v ?? ''
   }
-);
+)
 </script>
 
 <style scoped>

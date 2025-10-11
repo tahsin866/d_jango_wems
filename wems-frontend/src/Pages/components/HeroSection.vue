@@ -156,7 +156,7 @@
   </section>
 </template>
 
-<script setup lang="ts">
+<script setup>
 // Clean, professional component with no unnecessary JavaScript
 </script>
 

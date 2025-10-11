@@ -197,54 +197,45 @@
     </div>
   </div>
 </template>
+<script setup>
+import { ref, onMounted, onUnmounted } from 'vue'
 
-<script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+const emit = defineEmits(['continue'])
 
-const emit = defineEmits<{
-  (e: 'continue'): void;
-}>();
-
-// User agreement state
-const agreed = ref(false);
-
-// Scrolling progress tracking
-const scrollPercentage = ref(0);
-const termsContainer = ref<HTMLElement | null>(null);
+const agreed = ref(false)
+const scrollPercentage = ref(0)
+const termsContainer = ref(null)
 
 const handleScroll = () => {
-  const el = termsContainer.value;
-  if (!el) return;
-  const scrollTop = el.scrollTop;
-  const scrollHeight = el.scrollHeight;
-  const clientHeight = el.clientHeight;
-  const percent = (scrollTop / (scrollHeight - clientHeight)) * 100;
-  scrollPercentage.value = Number.isFinite(percent) ? Math.max(0, Math.min(100, percent)) : 0;
-};
-
-// Emit continue
-function emitContinue() {
-  if (!agreed.value) return;
-  emit('continue');
+  const el = termsContainer.value
+  if (!el) return
+  const scrollTop = el.scrollTop
+  const scrollHeight = el.scrollHeight
+  const clientHeight = el.clientHeight
+  const percent = (scrollTop / (scrollHeight - clientHeight)) * 100
+  scrollPercentage.value = Number.isFinite(percent) ? Math.max(0, Math.min(100, percent)) : 0
 }
 
-// Helper function to get current date in formatted style
+function emitContinue() {
+  if (!agreed.value) return
+  emit('continue')
+}
+
 const getCurrentDateTime = () => {
-  // Using the timestamp provided in the conversation for consistency
-  return '2025-08-10 04:31:59';
-};
+  return '2025-08-10 04:31:59'
+}
 
 onMounted(() => {
   if (termsContainer.value) {
-    termsContainer.value.addEventListener('scroll', handleScroll, { passive: true });
+    termsContainer.value.addEventListener('scroll', handleScroll, { passive: true })
   }
-});
+})
 
 onUnmounted(() => {
   if (termsContainer.value) {
-    termsContainer.value.removeEventListener('scroll', handleScroll);
+    termsContainer.value.removeEventListener('scroll', handleScroll)
   }
-});
+})
 </script>
 
 <style scoped>

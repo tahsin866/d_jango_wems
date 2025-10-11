@@ -251,69 +251,31 @@
 
 </template>
 
-<script setup lang="ts">
-defineOptions({ name: 'CentralExamCreate' })
-
-// ---------------------------
-// Imports
-// ---------------------------
+<script setup>
 import { ref, computed, reactive, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import axios, { AxiosError } from 'axios'
+import axios from 'axios'
 
-// ---------------------------
-// Types
-// ---------------------------
-interface ExamForm {
-  examName: string
-  arabicYear: string
-  banglaYear: string
-  englishYear: number | string
-}
-
-interface ValidationErrors {
-  examName?: string
-  arabicYear?: string
-  banglaYear?: string
-  englishYear?: string
-}
-
-// ---------------------------
-// Router setup
-// ---------------------------
 const route = useRoute()
 const router = useRouter()
-const examId = ref(route.params.id as string)
+const examId = ref(route.params.id)
 
-// ---------------------------
-// State
-// ---------------------------
-const isSubmitting = ref<boolean>(false)
-const isLoading = ref<boolean>(false)
+const isSubmitting = ref(false)
+const isLoading = ref(false)
+const showMessage = ref(false)
+const message = ref('')
+const messageType = ref('success')
 
-const showMessage = ref<boolean>(false)
-const message = ref<string>('')
-const messageType = ref<'success' | 'error'>('success')
-
-// ---------------------------
-// Form data
-// ---------------------------
-const form = reactive<ExamForm>({
+const form = reactive({
   examName: '',
   arabicYear: '',
   banglaYear: '',
   englishYear: ''
 })
 
-// ---------------------------
-// Validation errors
-// ---------------------------
-const errors = reactive<ValidationErrors>({})
+const errors = reactive({})
 
-// ---------------------------
-// Computed
-// ---------------------------
-const isFormValid = computed((): boolean => {
+const isFormValid = computed(() => {
   return !!(
     form.examName.trim() &&
     form.arabicYear.trim() &&
@@ -322,15 +284,8 @@ const isFormValid = computed((): boolean => {
   )
 })
 
-// ---------------------------
-// Methods: Validation
-// ---------------------------
-const validateForm = (): boolean => {
-  // Clear previous errors
-  Object.keys(errors).forEach(key => {
-    delete errors[key as keyof ValidationErrors]
-  })
-
+const validateForm = () => {
+  Object.keys(errors).forEach(key => { delete errors[key] })
   let isValid = true
 
   if (!form.examName.trim()) {
@@ -358,28 +313,17 @@ const validateForm = (): boolean => {
       isValid = false
     }
   }
-
   return isValid
 }
 
-// ---------------------------
-// Methods: Notification
-// ---------------------------
-const showNotification = (msg: string, type: 'success' | 'error'): void => {
+const showNotification = (msg, type) => {
   message.value = msg
   messageType.value = type
   showMessage.value = true
-
-  // Hide message after 5 seconds
-  setTimeout(() => {
-    showMessage.value = false
-  }, 5000)
+  setTimeout(() => { showMessage.value = false }, 5000)
 }
 
-// ---------------------------
-// Methods: API Calls
-// ---------------------------
-const loadExamData = async (): Promise<void> => {
+const loadExamData = async () => {
   if (!examId.value) return
 
   isLoading.value = true
@@ -397,37 +341,28 @@ const loadExamData = async (): Promise<void> => {
     } else {
       showNotification('ডেটা লোড করতে সমস্যা হয়েছে', 'error')
     }
-  } catch (error) {
-    console.error('Error loading exam data:', error)
+  } catch  {
     showNotification('ডেটা লোড করতে সমস্যা হয়েছে', 'error')
   } finally {
     isLoading.value = false
   }
 }
 
-// ---------------------------
-// Methods: Form Actions
-// ---------------------------
-const resetForm = (): void => {
+const resetForm = () => {
   form.examName = ''
   form.arabicYear = ''
   form.banglaYear = ''
   form.englishYear = ''
-
-  // Clear errors
-  Object.keys(errors).forEach(key => {
-    delete errors[key as keyof ValidationErrors]
-  })
+  Object.keys(errors).forEach(key => { delete errors[key] })
 }
 
-const handleSubmit = async (): Promise<void> => {
+const handleSubmit = async () => {
   if (!validateForm()) {
     showNotification('দয়া করে সমস্ত প্রয়োজনীয় ক্ষেত্র সঠিকভাবে পূরণ করুন', 'error')
     return
   }
 
   isSubmitting.value = true
-
   try {
     const response = await axios.put(
       `http://127.0.0.1:8000/api/central-exam/exam-setups/${examId.value}/update/`,
@@ -441,8 +376,6 @@ const handleSubmit = async (): Promise<void> => {
 
     if (response.status === 200) {
       showNotification('পরীক্ষা সেটাপ সফলভাবে আপডেট করা হয়েছে!', 'success')
-
-      // Navigate back to list after successful update
       setTimeout(() => {
         router.push('/admin/central-exam/list')
       }, 2000)
@@ -450,15 +383,11 @@ const handleSubmit = async (): Promise<void> => {
       throw new Error('Unexpected response')
     }
   } catch (error) {
-    console.error('Error updating exam:', error)
-
     let errorMessage = 'দুঃখিত! কিছু সমস্যা হয়েছে। আবার চেষ্টা করুন।'
-
-    if (error instanceof AxiosError) {
-      if (error.response?.data?.message) {
+    if (error && error.response && error.response.data) {
+      if (error.response.data.message) {
         errorMessage = error.response.data.message
-      } else if (error.response?.data?.errors) {
-        // Handle Django validation errors
+      } else if (error.response.data.errors) {
         const serverErrors = error.response.data.errors
         if (typeof serverErrors === 'object') {
           Object.keys(serverErrors).forEach(key => {
@@ -467,8 +396,7 @@ const handleSubmit = async (): Promise<void> => {
               key === 'arabic_year' ? 'arabicYear' :
               key === 'bangla_year' ? 'banglaYear' :
               key === 'english_year' ? 'englishYear' : key
-
-            errors[fieldName as keyof ValidationErrors] = Array.isArray(serverErrors[key])
+            errors[fieldName] = Array.isArray(serverErrors[key])
               ? serverErrors[key][0]
               : serverErrors[key]
           })
@@ -476,16 +404,12 @@ const handleSubmit = async (): Promise<void> => {
         }
       }
     }
-
     showNotification(errorMessage, 'error')
   } finally {
     isSubmitting.value = false
   }
 }
 
-// ---------------------------
-// Lifecycle
-// ---------------------------
 onMounted(() => {
   loadExamData()
 })

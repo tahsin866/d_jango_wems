@@ -17,17 +17,22 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+  // Force ES2015 target for better compatibility
+  esbuild: {
+    target: 'es2015',
+    keepNames: true
+  },
   server: {
     host: '0.0.0.0',
     port: 5173,
     proxy: {
       '/api': {
-        target: process.env.VITE_API_BASE_URL || 'http://localhost:8000',
+        target: process.env.VITE_API_BASE_URL || 'http://host.docker.internal:8000',
         changeOrigin: true,
         secure: false,
       },
       '/auth': {
-        target: process.env.VITE_API_BASE_URL || 'http://localhost:8000',
+        target: process.env.VITE_API_BASE_URL || 'http://host.docker.internal:8000',
         changeOrigin: true,
         secure: false,
       }
@@ -38,6 +43,7 @@ export default defineConfig({
     assetsDir: 'assets',
     sourcemap: false,
     minify: 'esbuild',
+    target: 'es2015',
     rollupOptions: {
       output: {
         manualChunks: {

@@ -132,104 +132,74 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 
-// Vue Router
 const router = useRouter()
 
-interface MarhalaData {
-  id: number | string;
-  marhala_name_bn: string;
-  total_subjects: number;
-  male_subjects: number;
-  female_subjects: number;
-  both_subjects: number;
-}
-
-type Marhala = {
-  id: string
-  name: string
-  subjects: number
-  male: number
-  female: number
-  high: number
-}
-
-type VisualizeItem = {
-  name: string
-  total: number
-  male: number
-  female: number
-  high: number
-}
-
-const marhalaData = ref<MarhalaData[]>([]);
-const loading = ref(false);
-const error = ref('');
+const marhalaData = ref([])
+const loading = ref(false)
+const error = ref('')
 
 // Cache configuration
-const CACHE_KEY = 'marhala_data_cache';
-const CACHE_VERSION_KEY = 'marhala_cache_version';
-const CACHE_EXPIRY_MINUTES = 10;
+const CACHE_KEY = 'marhala_data_cache'
+const CACHE_VERSION_KEY = 'marhala_cache_version'
+const CACHE_EXPIRY_MINUTES = 10
 
-function getCachedData(): MarhalaData[] | null {
+function getCachedData() {
   try {
-    const cachedData = localStorage.getItem(CACHE_KEY);
-    const cacheVersion = localStorage.getItem(CACHE_VERSION_KEY);
+    const cachedData = localStorage.getItem(CACHE_KEY)
+    const cacheVersion = localStorage.getItem(CACHE_VERSION_KEY)
     if (cachedData && cacheVersion) {
-      const cached = JSON.parse(cachedData);
-      const version = JSON.parse(cacheVersion);
-      const currentTime = new Date().getTime();
+      const cached = JSON.parse(cachedData)
+      const version = JSON.parse(cacheVersion)
+      const currentTime = new Date().getTime()
       if (currentTime - version.timestamp < CACHE_EXPIRY_MINUTES * 60 * 1000) {
-        return cached;
+        return cached
       }
     }
-  } catch (error) {
-    //
-  }
-  return null;
+  } catch  {}
+  return null
 }
-function setCachedData(data: MarhalaData[]) {
+function setCachedData(data) {
   try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+    localStorage.setItem(CACHE_KEY, JSON.stringify(data))
     localStorage.setItem(CACHE_VERSION_KEY, JSON.stringify({
       timestamp: new Date().getTime(),
       version: '1.0'
-    }));
-  } catch (error) {}
+    }))
+  } catch  {}
 }
 function refreshCache() {
-  localStorage.removeItem(CACHE_KEY);
-  localStorage.removeItem(CACHE_VERSION_KEY);
-  fetchMarhalaData();
+  localStorage.removeItem(CACHE_KEY)
+  localStorage.removeItem(CACHE_VERSION_KEY)
+  fetchMarhalaData()
 }
 if (typeof window !== 'undefined') {
-  (window as unknown as Record<string, unknown>).refreshMarhalaCache = refreshCache;
-  (window as unknown as Record<string, unknown>).clearMarhalaCache = () => {
-    localStorage.removeItem(CACHE_KEY);
-    localStorage.removeItem(CACHE_VERSION_KEY);
-  };
+  window.refreshMarhalaCache = refreshCache
+  window.clearMarhalaCache = () => {
+    localStorage.removeItem(CACHE_KEY)
+    localStorage.removeItem(CACHE_VERSION_KEY)
+  }
 }
 
-const totalMarhalas = computed(() => marhalaData.value.length);
+const totalMarhalas = computed(() => marhalaData.value.length)
 const totalSubjects = computed(() =>
   marhalaData.value.reduce((sum, item) => sum + item.total_subjects, 0)
-);
-const marhalas = computed<Marhala[]>(() => {
+)
+const marhalas = computed(() => {
   return marhalaData.value.map(item => {
-    let id = item.id;
+    let id = item.id
     if (typeof id === 'string') {
       if (id.includes(':')) {
-        id = id.split(':').pop() || id;
+        id = id.split(':').pop() || id
       }
-      id = String(Number(id));
+      id = String(Number(id))
     } else {
-      id = String(id);
+      id = String(id)
     }
-
     return {
       id: id,
       name: item.marhala_name_bn,
@@ -237,71 +207,71 @@ const marhalas = computed<Marhala[]>(() => {
       male: item.male_subjects,
       female: item.female_subjects,
       high: item.both_subjects
-    };
-  });
-});
-const visualizeData = computed<VisualizeItem[]>(() => {
+    }
+  })
+})
+const visualizeData = computed(() => {
   return marhalaData.value.map(item => ({
     name: item.marhala_name_bn,
     total: item.total_subjects,
     male: item.male_subjects,
     female: item.female_subjects,
     high: item.both_subjects
-  }));
-});
+  }))
+})
 
-const defaultMarhalaData: MarhalaData[] = [
+const defaultMarhalaData = [
   { id: 9, marhala_name_bn: 'নূরানী', total_subjects: 11, male_subjects: 4, female_subjects: 4, both_subjects: 3 },
   { id: 10, marhala_name_bn: 'সানাভিয়্য উলিয়া', total_subjects: 10, male_subjects: 1, female_subjects: 2, both_subjects: 7 },
-  { id: 11, marhala_name_bn: 'সানাভিয়া', total_subjects: 8, male_subjects: 8, female_subjects: 0, both_subjects: 0 },
+  { id: 11, marhala_name_bn: 'সানাবিয়া', total_subjects: 8, male_subjects: 8, female_subjects: 0, both_subjects: 0 },
   { id: 12, marhala_name_bn: 'মুতাওয়াসসিত', total_subjects: 9, male_subjects: 1, female_subjects: 8, both_subjects: 0 },
   { id: 14, marhala_name_bn: 'ইনফিরাদ', total_subjects: 9, male_subjects: 2, female_subjects: 1, both_subjects: 6 },
   { id: 15, marhala_name_bn: 'আলিমিয়্য কুদ্দাম', total_subjects: 3, male_subjects: 0, female_subjects: 0, both_subjects: 3 },
   { id: 16, marhala_name_bn: 'ইমামত ইমামিয়্য এবং কিরাআত', total_subjects: 4, male_subjects: 0, female_subjects: 0, both_subjects: 4 },
-];
+]
 
 async function fetchMarhalaData() {
-  const cachedData = getCachedData();
+  const cachedData = getCachedData()
   if (cachedData && cachedData.length > 0) {
-    marhalaData.value = cachedData;
+    marhalaData.value = cachedData
   } else {
-    marhalaData.value = defaultMarhalaData;
+    marhalaData.value = defaultMarhalaData
   }
   try {
-    loading.value = true;
-    error.value = '';
+    loading.value = true
+    error.value = ''
     const response = await axios.get('http://localhost:8000/api/marhalas/with-counts/', {
       withCredentials: true,
       headers: { 'Content-Type': 'application/json' }
-    });
+    })
     if (response.data.success && response.data.data.length > 0) {
-      marhalaData.value = response.data.data;
-      setCachedData(response.data.data);
-      error.value = '';
+      marhalaData.value = response.data.data
+      setCachedData(response.data.data)
+      error.value = ''
     } else {
       if (!cachedData) {
-        error.value = response.data.message || 'ডেটা লোড করতে সমস্যা হয়েছে';
-        marhalaData.value = defaultMarhalaData;
+        error.value = response.data.message || 'ডেটা লোড করতে সমস্যা হয়েছে'
+        marhalaData.value = defaultMarhalaData
       }
     }
-  } catch (err: unknown) {
+  } catch  {
     if (!cachedData) {
-      error.value = 'সার্ভার থেকে ডেটা আনতে সমস্যা হয়েছে';
-      marhalaData.value = defaultMarhalaData;
+      error.value = 'সার্ভার থেকে ডেটা আনতে সমস্যা হয়েছে'
+      marhalaData.value = defaultMarhalaData
     }
   } finally {
-    loading.value = false;
+    loading.value = false
   }
 }
 
 onMounted(() => {
-  fetchMarhalaData();
-});
+  fetchMarhalaData()
+})
 function navigateToSubjectSetup() {
-  router.push('/subject/setup/create');
+  router.push('/subject/setup/create')
 }
-function editMarhala(marhala: Marhala) {
-  router.push(`/admin/setup/marhala/edit/${marhala.id}`);
+function editMarhala(marhala) {
+  router.push(`/admin/setup/marhala/edit/${marhala.id}`)
 }
 </script>
 

@@ -278,64 +278,48 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import axios from 'axios'
 import SplitButton from 'primevue/splitbutton'
 
-// Types
-interface ExamSetup {
-  id: number
-  exam_name: string
-  arabic_year: string
-  bangla_year: string
-  english_year: string
-  created_at: string
-  updated_at: string
-}
-
-// Router
 const router = useRouter()
 
 const onInclusionCreate = () => {
-  router.push('/central/exam/FeeSetups');
-};
-const onEdit = (id) => {
-  router.push(`/central/exam/FeeEdit/${id}`);
-};
-const onOtherCreate = (exam: ExamSetup) => {
+  router.push('/central/exam/FeeSetups')
+}
+const onEdit = id => {
+  router.push(`/central/exam/FeeEdit/${id}`)
+}
+const onOtherCreate = exam => {
   router.push(`/central/exam/${exam.id}/other/create`)
 }
-const onOtherEdit = (exam: ExamSetup) => {
+const onOtherEdit = exam => {
   router.push(`/central/exam/${exam.id}/other/edit`)
 }
 
-// State
-const searchQuery = ref<string>('')
-const selectedClass = ref<string>('')
-const selectedYear = ref<string>('')
-const selectedStatus = ref<string>('')
-const currentPage = ref<number>(1)
-const isLoading = ref<boolean>(false)
-const examList = ref<ExamSetup[]>([])
+const searchQuery = ref('')
+const selectedClass = ref('')
+const selectedYear = ref('')
+const selectedStatus = ref('')
+const currentPage = ref(1)
+const isLoading = ref(false)
+const examList = ref([])
 
-// Store all exam data for filter options
-const allExamData = ref<ExamSetup[]>([])
+const allExamData = ref([])
 
-// Fetch all exams for filter dropdown options
 const fetchAllExamsForFilters = async () => {
   try {
     const response = await axios.get('http://127.0.0.1:8000/api/central-exam/exam-setups/list/')
     allExamData.value = response.data.data || []
-  } catch (error) {
-    console.error('Error fetching all exams for filters:', error)
+  } catch  {
+    // fail silent
   }
 }
 
-// Computed: unique years for dropdown
 const availableYears = computed(() => {
-  const years = new Set<string>()
+  const years = new Set()
   allExamData.value.forEach(exam => {
     years.add(exam.english_year)
     years.add(exam.arabic_year)
@@ -344,16 +328,14 @@ const availableYears = computed(() => {
   return Array.from(years).sort()
 })
 
-// Computed: unique exam names for dropdown
 const availableExamNames = computed(() => {
-  const examNames = new Set<string>()
+  const examNames = new Set()
   allExamData.value.forEach(exam => {
     examNames.add(exam.exam_name)
   })
   return Array.from(examNames).sort()
 })
 
-// Fetch exams with filters
 const fetchExamSetups = async () => {
   try {
     isLoading.value = true
@@ -364,17 +346,15 @@ const fetchExamSetups = async () => {
     const url = `http://127.0.0.1:8000/api/central-exam/exam-setups/list/${params.toString() ? '?' + params.toString() : ''}`
     const response = await axios.get(url)
     examList.value = response.data.data || []
-  } catch (error) {
-    console.error('Error fetching exam setups:', error)
+  } catch  {
+    // fail silent
   } finally {
     isLoading.value = false
   }
 }
 
-// Computed: filtered exams (backend filtering)
 const filteredExams = computed(() => examList.value)
 
-// Pagination
 const paginatedExams = computed(() => {
   const startIndex = (currentPage.value - 1) * 10
   const endIndex = startIndex + 10
@@ -385,17 +365,16 @@ const totalPages = computed(() => Math.ceil(filteredExams.value.length / 10))
 const resetPagination = () => {
   currentPage.value = 1
 }
-const previousPage = (): void => {
+const previousPage = () => {
   if (currentPage.value > 1) currentPage.value--
 }
-const nextPage = (): void => {
+const nextPage = () => {
   if (currentPage.value < totalPages.value) currentPage.value++
 }
-const goToPage = (page: number): void => {
+const goToPage = page => {
   currentPage.value = page
 }
 
-// Clear all filters
 const clearFilters = () => {
   searchQuery.value = ''
   selectedClass.value = ''
@@ -405,13 +384,11 @@ const clearFilters = () => {
   fetchExamSetups()
 }
 
-// Format: exam_name/arabic_year/english_year
-const formatExamName = (exam: ExamSetup) => {
+const formatExamName = exam => {
   return `${exam.exam_name}/${exam.arabic_year}/${exam.english_year}`
 }
 
-// Debounced search for searchQuery
-let searchTimeout: ReturnType<typeof setTimeout> | null = null
+let searchTimeout = null
 const debouncedSearch = () => {
   if (searchTimeout) clearTimeout(searchTimeout)
   searchTimeout = setTimeout(() => {
@@ -419,7 +396,6 @@ const debouncedSearch = () => {
   }, 500)
 }
 
-// Watchers
 watch([searchQuery], () => {
   resetPagination()
   debouncedSearch()
@@ -429,19 +405,17 @@ watch([selectedYear, selectedStatus, selectedClass], () => {
   fetchExamSetups()
 })
 
-// Lifecycle
 onMounted(() => {
   fetchExamSetups()
   fetchAllExamsForFilters()
 })
 
-// Delete exam
-const deleteExam = async (id: number) => {
+const deleteExam = async id => {
   if (confirm('আপনি কি নিশ্চিতভাবে ডিলিট করতে চান?')) {
     try {
       await axios.delete(`/api/central-exam/exam-setups/${id}/delete/`)
       examList.value = examList.value.filter(exam => exam.id !== id)
-    } catch (_error) {
+    } catch  {
       alert('ডিলিট করা যায়নি!')
     }
   }

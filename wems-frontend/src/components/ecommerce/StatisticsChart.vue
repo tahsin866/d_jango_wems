@@ -201,32 +201,10 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed } from "vue";
 
-// Notice Type
-interface Notice {
-  id: number;
-  title: string;
-  date: string;
-  priority: "high" | "medium" | "low" | string;
-  content: string;
-  attachment: string | null;
-}
-
-// Exam Type
-interface Exam {
-  id: number;
-  name: string;
-  date: string;
-  registeredStudents: string;
-  centers: string;
-  status: string;
-  statusText: string;
-  color: string;
-}
-
-const notices = ref<Notice[]>([
+const notices = ref([
   {
     id: 1,
     title: "দাওরায়ে হাদীস পরীক্ষার সময়সূচী প্রকাশিত হয়েছে",
@@ -256,7 +234,7 @@ const notices = ref<Notice[]>([
   }
 ]);
 
-const upcomingExams = ref<Exam[]>([
+const upcomingExams = ref([
   {
     id: 1,
     name: "দাওরায়ে হাদীস",
@@ -299,10 +277,10 @@ const upcomingExams = ref<Exam[]>([
   }
 ]);
 
-const selectedNotice = ref<Notice | null>(null);
+const selectedNotice = ref(null);
 const showNoticeModal = ref(false);
 
-function showNoticeDetails(notice: Notice) {
+function showNoticeDetails(notice) {
   selectedNotice.value = notice;
   showNoticeModal.value = true;
 }
@@ -314,7 +292,7 @@ function closeNoticeDetails() {
   showNoticeModal.value = false;
 }
 
-function noticePriorityBadge(priority: string): string {
+function noticePriorityBadge(priority) {
   switch (priority) {
     case "high":
       return "bg-red-100 text-red-700 border-red-300";
@@ -327,7 +305,7 @@ function noticePriorityBadge(priority: string): string {
   }
 }
 
-function noticePriorityIcon(priority: string): { path: string; type: string } {
+function noticePriorityIcon(priority) {
   switch (priority) {
     case "high":
       return {
@@ -352,7 +330,7 @@ function noticePriorityIcon(priority: string): { path: string; type: string } {
   }
 }
 
-function priorityText(priority: string): string {
+function priorityText(priority) {
   switch (priority) {
     case "high":
       return "জরুরি";

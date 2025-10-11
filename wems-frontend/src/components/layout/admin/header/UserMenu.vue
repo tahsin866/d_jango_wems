@@ -63,7 +63,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { UserCircleIcon, ChevronDownIcon, LogoutIcon, SettingsIcon, InfoCircleIcon } from '@/icons'
 import { RouterLink, useRouter } from 'vue-router'
 import { ref, onMounted, onUnmounted, computed } from 'vue'
@@ -77,7 +77,7 @@ import {
 } from '@/stores/userProfile'
 
 const dropdownOpen = ref(false)
-const dropdownRef = ref<HTMLElement | null>(null)
+const dropdownRef = ref(null)
 
 const menuItems = computed(() => {
   const baseItems = [
@@ -119,8 +119,8 @@ const signOut = async () => {
   router.push('/')
 }
 
-const handleClickOutside = (event: MouseEvent) => {
-  if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
+const handleClickOutside = (event) => {
+  if (dropdownRef.value && !dropdownRef.value.contains(event.target)) {
     closeDropdown()
   }
 }

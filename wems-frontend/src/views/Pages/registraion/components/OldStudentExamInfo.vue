@@ -156,35 +156,18 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { reactive, watch, computed } from 'vue';
+<script setup>
+import { reactive, watch, computed } from 'vue'
 
-type PastExamForm = {
-  Madrasha?: string;
-  Markaj?: string;
-  Class?: string;
-  Roll?: string;
-  reg_id?: string;
-  DateofBirth?: string;
-  Division?: string;
-  [key: string]: any;
-};
+const props = defineProps({
+  pastExamForm: Object,
+  currentExamForm: Object
+})
 
-type CurrentExamForm = {
-  student_type?: string;
-  irregular_subjects?: string;
-  [key: string]: any;
-};
-
-const props = defineProps<{
-  pastExamForm?: PastExamForm;
-  currentExamForm?: CurrentExamForm;
-}>();
-
-const isDark = computed(() => document.documentElement.classList.contains('dark'));
+const isDark = computed(() => document.documentElement.classList.contains('dark'))
 
 // Default dummy data (used if parent doesn't provide props)
-const DEFAULT_PAST: PastExamForm = {
+const DEFAULT_PAST = {
   Madrasha: 'আব্দুল্লাহ মাদরাসা',
   Markaj: 'মারকায-১',
   Class: '৮ম',
@@ -192,15 +175,15 @@ const DEFAULT_PAST: PastExamForm = {
   reg_id: 'REG-2025-101',
   DateofBirth: '2008-02-14',
   Division: 'জায়্যিদ'
-};
+}
 
-const DEFAULT_CURRENT: CurrentExamForm = {
+const DEFAULT_CURRENT = {
   student_type: 'নিয়মিত',
   irregular_subjects: ''
-};
+}
 
 // Create local reactive copies to avoid mutating parent props directly
-const localPast = reactive<PastExamForm>({
+const localPast = reactive({
   Madrasha: props.pastExamForm?.Madrasha ?? DEFAULT_PAST.Madrasha,
   Markaj: props.pastExamForm?.Markaj ?? DEFAULT_PAST.Markaj,
   Class: props.pastExamForm?.Class ?? DEFAULT_PAST.Class,
@@ -208,18 +191,18 @@ const localPast = reactive<PastExamForm>({
   reg_id: props.pastExamForm?.reg_id ?? DEFAULT_PAST.reg_id,
   DateofBirth: props.pastExamForm?.DateofBirth ?? DEFAULT_PAST.DateofBirth,
   Division: props.pastExamForm?.Division ?? DEFAULT_PAST.Division
-});
+})
 
-const localCurrent = reactive<CurrentExamForm>({
+const localCurrent = reactive({
   student_type: props.currentExamForm?.student_type ?? DEFAULT_CURRENT.student_type,
   irregular_subjects: props.currentExamForm?.irregular_subjects ?? DEFAULT_CURRENT.irregular_subjects
-});
+})
 
 // Keep local copies in sync when parent updates props
 watch(
   () => props.pastExamForm,
   (v) => {
-    if (!v) return;
+    if (!v) return
     Object.assign(localPast, {
       Madrasha: v.Madrasha ?? DEFAULT_PAST.Madrasha,
       Markaj: v.Markaj ?? DEFAULT_PAST.Markaj,
@@ -228,22 +211,22 @@ watch(
       reg_id: v.reg_id ?? DEFAULT_PAST.reg_id,
       DateofBirth: v.DateofBirth ?? DEFAULT_PAST.DateofBirth,
       Division: v.Division ?? DEFAULT_PAST.Division
-    });
+    })
   },
   { deep: true, immediate: true }
-);
+)
 
 watch(
   () => props.currentExamForm,
   (v) => {
-    if (!v) return;
+    if (!v) return
     Object.assign(localCurrent, {
       student_type: v.student_type ?? DEFAULT_CURRENT.student_type,
       irregular_subjects: v.irregular_subjects ?? DEFAULT_CURRENT.irregular_subjects
-    });
+    })
   },
   { deep: true, immediate: true }
-);
+)
 </script>
 
 <style scoped>

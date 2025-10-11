@@ -16,7 +16,6 @@
     </div>
   </div>
 </template>
-<script setup lang="ts">
-import { defineProps } from 'vue';
-const props = defineProps({ modelValue: String });
+<script setup>
+defineProps({ modelValue: String });
 </script>

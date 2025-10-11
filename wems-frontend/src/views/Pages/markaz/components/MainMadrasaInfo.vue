@@ -1,66 +1,45 @@
-<script setup lang="ts">
-import { defineProps, defineEmits, computed } from 'vue'
+<script setup>
+import { computed } from 'vue'
 
 const props = defineProps({
-    form: {
-      type: Object,
-      required: true
-    },
-    nocFile: {
-      type: Object,
-      default: null
-    },
-    nocPreview: {
-      type: String,
-      default: null
-    },
-    resolutionFile: {
-      type: Object,
-      default: null
-    },
-    resolutionPreview: {
-      type: String,
-      default: null
-    },
-    errors: {
-      type: Object,
-      default: () => ({})
-    }
+  form: {
+    type: Object,
+    required: true
+  },
+  nocFile: {
+    type: Object,
+    default: null
+  },
+  nocPreview: {
+    type: String,
+    default: null
+  },
+  resolutionFile: {
+    type: Object,
+    default: null
+  },
+  resolutionPreview: {
+    type: String,
+    default: null
+  },
+  errors: {
+    type: Object,
+    default: () => ({})
+  }
 })
-// ...existing code...
-import InputNumber from 'primevue/inputnumber'
-import FileUpload from 'primevue/fileupload'
-import Button from 'primevue/button'
 
+defineEmits(['file-upload', 'remove-file', 'update:form'])
 
-// Emits
-const emit = defineEmits(['file-upload', 'remove-file', 'update:form'])
-
-// Remove localForm, use props.form directly for v-model
-
-// Computed properties to show fields
 const showDarsiyatFields = computed(() => props.form.markaz_type === 'দরসিয়াত')
 const showHifzField = computed(() => props.form.markaz_type === 'তাহফিজুল কোরআন')
 const showKiratField = computed(() => props.form.markaz_type === 'কিরাআত')
 
-// File select handlers
-function onNocFileSelect(e: any) {
-    if (e?.files?.[0]) {
-        emit('file-upload', { files: [e.files[0]] }, 'noc')
-    }
-}
 
-function onResolutionFileSelect(e: any) {
-    if (e?.files?.[0]) {
-        emit('file-upload', { files: [e.files[0]] }, 'resolution')
-    }
-}
 
-// File type helpers
-const isImageFile = (file: any) => {
-  if (!file) return false;
-  return ['image/jpeg', 'image/png', 'image/jpg'].includes(file.type);
-};
+function isImageFile(file) {
+  if (!file) return false
+  return ['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)
+}
 </script>
 
 <template>
@@ -73,7 +52,6 @@ const isImageFile = (file: any) => {
     </div>
     <div class="p-8">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <!-- Darsiyat Fields -->
         <template v-if="showDarsiyatFields">
           <div class="flex flex-col">
             <label class="block font-semibold text-sm text-gray-700 mb-2">
@@ -82,7 +60,7 @@ const isImageFile = (file: any) => {
             <div class="relative">
               <input
                 type="number"
-                v-model="props.form.fazilat"
+                v-model="localForm.value.fazilat"
                 min="0"
                 placeholder="ছাত্র সংখ্যা লিখুন"
                 class="w-full h-12 rounded-sm border border-gray-300 px-4 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 font-medium text-gray-800 bg-white shadow-sm transition-all duration-200"
@@ -97,7 +75,7 @@ const isImageFile = (file: any) => {
             <div class="relative">
               <input
                 type="number"
-                v-model="props.form.sanabiya_ulya"
+                v-model="localForm.value.sanabiya_ulya"
                 min="0"
                 placeholder="ছাত্র সংখ্যা লিখুন"
                 class="w-full h-12 rounded-sm border border-gray-300 px-4 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 font-medium text-gray-800 bg-white shadow-sm transition-all duration-200"
@@ -112,7 +90,7 @@ const isImageFile = (file: any) => {
             <div class="relative">
               <input
                 type="number"
-                v-model="props.form.sanabiya"
+                v-model="localForm.value.sanabiya"
                 min="0"
                 placeholder="ছাত্র সংখ্যা লিখুন"
                 class="w-full h-12 rounded-sm border border-gray-300 px-4 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 font-medium text-gray-800 bg-white shadow-sm transition-all duration-200"
@@ -127,7 +105,7 @@ const isImageFile = (file: any) => {
             <div class="relative">
               <input
                 type="number"
-                v-model="props.form.mutawassita"
+                v-model="localForm.value.mutawassita"
                 min="0"
                 placeholder="ছাত্র সংখ্যা লিখুন"
                 class="w-full h-12 rounded-sm border border-gray-300 px-4 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 font-medium text-gray-800 bg-white shadow-sm transition-all duration-200"
@@ -142,7 +120,7 @@ const isImageFile = (file: any) => {
             <div class="relative">
               <input
                 type="number"
-                v-model="props.form.ibtedaiyyah"
+                v-model="localForm.value.ibtedaiyyah"
                 min="0"
                 placeholder="ছাত্র সংখ্যা লিখুন"
                 class="w-full h-12 rounded-sm border border-gray-300 px-4 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 font-medium text-gray-800 bg-white shadow-sm transition-all duration-200"
@@ -151,7 +129,6 @@ const isImageFile = (file: any) => {
             <p v-if="props.errors.ibtedaiyyah" class="text-xs text-red-500 mt-1">{{ props.errors.ibtedaiyyah }}</p>
           </div>
         </template>
-        <!-- Hifzul Quran Field -->
         <div v-if="showHifzField" class="flex flex-col">
           <label class="block font-semibold text-sm text-gray-700 mb-2">
             হিফজুল কোরান <span class="text-red-500">*</span>
@@ -159,7 +136,7 @@ const isImageFile = (file: any) => {
           <div class="relative">
             <input
               type="number"
-              v-model="props.form.hifzul_quran"
+              v-model="localForm.value.hifzul_quran"
               min="0"
               placeholder="ছাত্র সংখ্যা লিখুন"
               class="w-full h-12 rounded-sm border border-gray-300 px-4 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 font-medium text-gray-800 bg-white shadow-sm transition-all duration-200"
@@ -167,7 +144,6 @@ const isImageFile = (file: any) => {
           </div>
           <p v-if="props.errors.hifzul_quran" class="text-xs text-red-500 mt-1">{{ props.errors.hifzul_quran }}</p>
         </div>
-        <!-- Kirat Field -->
         <div v-if="showKiratField" class="flex flex-col">
           <label class="block font-semibold text-sm text-gray-700 mb-2">
             ইলমুল কিরআত <span class="text-red-500">*</span>
@@ -175,7 +151,7 @@ const isImageFile = (file: any) => {
           <div class="relative">
             <input
               type="number"
-              v-model="props.form.qirat"
+              v-model="localForm.value.qirat"
               min="0"
               placeholder="ছাত্র সংখ্যা লিখুন"
               class="w-full h-12 rounded-sm border border-gray-300 px-4 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 font-medium text-gray-800 bg-white shadow-sm transition-all duration-200"
@@ -184,7 +160,6 @@ const isImageFile = (file: any) => {
           <p v-if="props.errors.qirat" class="text-xs text-red-500 mt-1">{{ props.errors.qirat }}</p>
         </div>
       </div>
-      <!-- File Upload Section -->
       <div class="mt-12">
         <div class="bg-green-800 to-indigo-900 p-3 rounded-t-sm">
           <h3 class="text-lg font-bold text-white flex items-center">
@@ -193,7 +168,6 @@ const isImageFile = (file: any) => {
           </h3>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-gray-50 rounded-b-lg border border-t-0 border-gray-200">
-          <!-- NOC File Upload -->
           <div class="border border-gray-300 rounded-sm p-6 bg-white shadow-md">
             <div class="flex items-center justify-between mb-4">
               <label class="block font-semibold text-sm text-gray-700">
@@ -242,7 +216,6 @@ const isImageFile = (file: any) => {
               </div>
             </div>
           </div>
-          <!-- Resolution File Upload -->
           <div class="border border-gray-300 rounded-sm p-6 bg-white shadow-md">
             <div class="flex items-center justify-between mb-4">
               <label class="block font-semibold text-sm text-gray-700">

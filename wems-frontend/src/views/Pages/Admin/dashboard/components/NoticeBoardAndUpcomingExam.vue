@@ -1,29 +1,8 @@
-<script setup lang="ts">
-import { ref, computed } from "vue";
+<script setup>
+import { ref, computed } from "vue"
 
-// Notice Type
-interface Notice {
-  id: number;
-  title: string;
-  date: string;
-  priority: "high" | "medium" | "low" | string;
-  content: string;
-  attachment: string | null;
-}
-
-// Exam Type
-interface Exam {
-  id: number;
-  name: string;
-  date: string;
-  registeredStudents: string;
-  centers: string;
-  status: string;
-  statusText: string;
-  color: string;
-}
-
-const notices = ref<Notice[]>([
+// Notice Data
+const notices = ref([
   {
     id: 1,
     title: "দাওরায়ে হাদীস পরীক্ষার সময়সূচী প্রকাশিত হয়েছে",
@@ -51,9 +30,9 @@ const notices = ref<Notice[]>([
       "আগামী ২০ জুলাই সকল মাদরাসার প্রধান শিক্ষকদের উপস্থিতিতে নতুন পাঠ্যক্রম নিয়ে আলোচনা সভা অনুষ্ঠিত হবে।",
     attachment: null
   }
-]);
+])
 
-const upcomingExams = ref<Exam[]>([
+const upcomingExams = ref([
   {
     id: 1,
     name: "দাওরায়ে হাদীস",
@@ -94,98 +73,95 @@ const upcomingExams = ref<Exam[]>([
     statusText: "আসন্ন",
     color: "bg-green-100 text-green-800"
   }
-]);
+])
 
-const selectedNotice = ref<Notice | null>(null);
-const showNoticeModal = ref(false);
+const selectedNotice = ref(null)
+const showNoticeModal = ref(false)
 
-function showNoticeDetails(notice: Notice) {
-  selectedNotice.value = notice;
-  showNoticeModal.value = true;
+function showNoticeDetails(notice) {
+  selectedNotice.value = notice
+  showNoticeModal.value = true
 }
 
 function closeNoticeDetails() {
   setTimeout(() => {
-    selectedNotice.value = null;
-  }, 200);
-  showNoticeModal.value = false;
+    selectedNotice.value = null
+  }, 200)
+  showNoticeModal.value = false
 }
 
-function noticePriorityBadge(priority: string): string {
+function noticePriorityBadge(priority) {
   switch (priority) {
     case "high":
-      return "bg-red-100 text-red-700 border-red-200";
+      return "bg-red-100 text-red-700 border-red-200"
     case "medium":
-      return "bg-amber-100 text-amber-700 border-amber-200";
+      return "bg-amber-100 text-amber-700 border-amber-200"
     case "low":
-      return "bg-blue-100 text-blue-700 border-blue-200";
+      return "bg-blue-100 text-blue-700 border-blue-200"
     default:
-      return "bg-gray-100 text-gray-600 border-gray-200";
+      return "bg-gray-100 text-gray-600 border-gray-200"
   }
 }
 
-function noticePriorityIcon(priority: string): { path: string; type: string } {
+function noticePriorityIcon(priority) {
   switch (priority) {
     case "high":
       return {
-        path:
-          "M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z",
+        path: "M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z",
         type: "text-red-500"
-      };
+      }
     case "medium":
       return {
-        path:
-          "M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z",
+        path: "M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z",
         type: "text-amber-500"
-      };
+      }
     case "low":
       return {
-        path:
-          "M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z",
+        path: "M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z",
         type: "text-blue-500"
-      };
+      }
     default:
       return {
-        path:
-          "M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z",
+        path: "M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z",
         type: "text-gray-500"
-      };
+      }
   }
 }
 
-function priorityText(priority: string): string {
+function priorityText(priority) {
   switch (priority) {
     case "high":
-      return "জরুরি";
+      return "জরুরি"
     case "medium":
-      return "গুরুত্বপূর্ণ";
+      return "গুরুত্বপূর্ণ"
     case "low":
-      return "সাধারণ";
+      return "সাধারণ"
     default:
-      return "সাধারণ";
+      return "সাধারণ"
   }
 }
 
 // Exam search/filter feature
-const examSearch = ref("");
+const examSearch = ref("")
 const filteredExams = computed(() => {
-  if (!examSearch.value) return upcomingExams.value;
-  const searchTerm = examSearch.value.toLowerCase();
+  if (!examSearch.value) return upcomingExams.value
+  const searchTerm = examSearch.value.toLowerCase()
   return upcomingExams.value.filter(
     e =>
       e.name.toLowerCase().includes(searchTerm) ||
       e.date.toLowerCase().includes(searchTerm) ||
       e.registeredStudents.toLowerCase().includes(searchTerm) ||
       e.centers.toLowerCase().includes(searchTerm)
-  );
-});
+  )
+})
 
 // Current date and user from the provided info
-const currentDateTime = "2025-08-07 06:50:26";
-const currentUser = "tahsin866";
+const currentDateTime = "2025-08-07 06:50:26"
+const currentUser = "tahsin866"
 </script>
 
 <template>
+  <!-- ... template unchanged (see user's template above) ... -->
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-5">
     <!-- Notice Board -->
     <div class="lg:col-span-1">
@@ -213,7 +189,6 @@ const currentUser = "tahsin866";
             <span class="text-xs text-gray-500">{{ currentDateTime }}</span>
           </div>
         </div>
-
         <!-- Notice List -->
         <div class="divide-y divide-gray-100 max-h-[320px] overflow-y-auto">
           <div
@@ -286,7 +261,6 @@ const currentUser = "tahsin866";
           </div>
           <div v-if="!notices.length" class="p-6 text-center text-gray-500 text-sm">কোনো নোটিশ নেই</div>
         </div>
-
         <!-- Footer -->
         <div class="px-5 py-3 bg-gray-50 border-t border-gray-200">
           <div class="flex justify-end">
@@ -307,7 +281,6 @@ const currentUser = "tahsin866";
         </div>
       </div>
     </div>
-
     <!-- Upcoming Exams -->
     <div class="lg:col-span-2">
       <div class="bg-white rounded-lg border border-gray-200 shadow-sm h-full">
@@ -358,7 +331,6 @@ const currentUser = "tahsin866";
             </div>
           </div>
         </div>
-
         <!-- Table -->
         <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
@@ -430,7 +402,6 @@ const currentUser = "tahsin866";
             </tbody>
           </table>
         </div>
-
         <!-- Footer -->
         <div class="px-5 py-3 bg-gray-50 border-t border-gray-200">
           <div class="flex justify-between items-center">
@@ -471,7 +442,6 @@ const currentUser = "tahsin866";
       </div>
     </div>
   </div>
-
   <!-- Notice Details Modal using only Tailwind CSS -->
   <div
     v-if="showNoticeModal"

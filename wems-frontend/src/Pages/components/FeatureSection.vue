@@ -171,7 +171,6 @@
         <div class="text-center mb-8">
           <p class="text-sm font-medium text-slate-500 uppercase tracking-wide">বিশ্বস্ত এবং নিরাপদ</p>
         </div>
-
         <div class="flex flex-wrap items-center justify-center gap-12 opacity-60">
           <div class="flex items-center gap-3">
             <div class="w-12 h-12 bg-slate-100 rounded-md flex items-center justify-center">
@@ -181,7 +180,6 @@
             </div>
             <span class="text-sm font-medium text-slate-600">SSL সুরক্ষিত</span>
           </div>
-
           <div class="flex items-center gap-3">
             <div class="w-12 h-12 bg-slate-100 rounded-md flex items-center justify-center">
               <svg class="w-6 h-6 text-slate-600" fill="currentColor" viewBox="0 0 24 24">
@@ -190,7 +188,6 @@
             </div>
             <span class="text-sm font-medium text-slate-600">সরকার অনুমোদিত</span>
           </div>
-
           <div class="flex items-center gap-3">
             <div class="w-12 h-12 bg-slate-100 rounded-md flex items-center justify-center">
               <svg class="w-6 h-6 text-slate-600" fill="currentColor" viewBox="0 0 24 24">
@@ -205,7 +202,7 @@
   </section>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { computed, defineComponent } from 'vue'
 
 // Define icons as components
@@ -258,9 +255,9 @@ const AnimatedNumber = defineComponent({
     this.animateValue(0, this.value, 1500);
   },
   methods: {
-    animateValue(start: number, end: number, duration: number) {
-      let startTimestamp: number | null = null;
-      const step = (timestamp: number) => {
+    animateValue(start, end, duration) {
+      let startTimestamp = null;
+      const step = (timestamp) => {
         if (!startTimestamp) startTimestamp = timestamp;
         const progress = Math.min((timestamp - startTimestamp) / duration, 1);
         this.displayValue = Math.floor(progress * (end - start) + start);

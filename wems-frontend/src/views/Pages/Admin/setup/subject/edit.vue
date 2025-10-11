@@ -304,68 +304,21 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import axios from 'axios'
 
-// Types
-interface Marhala {
-  id: number
-  marhala_name_bn: string
-}
-
-interface Subject {
-  id: number
-  name_bangla: string
-  subject_code: string
-}
-
-interface SubjectSetting {
-  id: number
-  marhala_id: number
-  subject_id: number
-  marhala_type: string
-  subject_names: string
-  student_type: string
-  syllabus_type: string
-  markaz_type: string
-  subject_type: string
-  subject_code: string
-  total_marks: number
-  pass_marks: number
-  status: 'active' | 'inactive'
-}
-
-interface FormData {
-  marhala_id: number | string
-  subject_id: number | string
-  marhala_type: string
-  subject_names: string
-  student_type: string
-  syllabus_type: string
-  markaz_type: string
-  subject_type: string
-  subject_code: string
-  total_marks: number | string
-  pass_marks: number | string
-  status: 'active' | 'inactive'
-}
-
-// Router
 const route = useRoute()
-const router = useRouter()
 
-// State
 const loading = ref(true)
 const processing = ref(false)
-const marhala = ref<Marhala>({} as Marhala)
-const subjects = ref<Subject[]>([])
-const subjectSetting = ref<SubjectSetting>({} as SubjectSetting)
-const errors = ref<Record<string, string>>({})
+const marhala = ref({})
+const subjects = ref([])
+const subjectSetting = ref({})
+const errors = ref({})
 
-// Form data
-const form = ref<FormData>({
+const form = ref({
   marhala_id: '',
   subject_id: '',
   marhala_type: '',
@@ -380,66 +333,49 @@ const form = ref<FormData>({
   status: 'active'
 })
 
-// Computed
 const marhalaName = computed(() => marhala.value?.marhala_name_bn || '')
 
 const isFormValid = computed(() => {
   return form.value.subject_id &&
-         form.value.syllabus_type &&
-         form.value.markaz_type &&
-         form.value.subject_type &&
-         form.value.student_type &&
-         form.value.total_marks &&
-         form.value.pass_marks &&
-         Number(form.value.pass_marks) <= Number(form.value.total_marks)
+    form.value.syllabus_type &&
+    form.value.markaz_type &&
+    form.value.subject_type &&
+    form.value.student_type &&
+    form.value.total_marks &&
+    form.value.pass_marks &&
+    Number(form.value.pass_marks) <= Number(form.value.total_marks)
 })
 
-// Methods
-const fetchSubjectData = async (): Promise<void> => {
+const fetchSubjectData = async () => {
   try {
     loading.value = true
     const settingsId = route.params.id
 
-    // First, get the subject settings to know which marhala we're dealing with
     const settingsResponse = await axios.get(`/api/subject-settings/${settingsId}/`)
-    console.log('Settings Response:', settingsResponse.data)
-
     if (settingsResponse.data.success) {
       const settingData = settingsResponse.data.data.subject_setting
-      console.log('Setting Data:', settingData)
       subjectSetting.value = settingData
 
-      // Check if marhala_id exists before making the second API call
       if (settingData && settingData.marhala_id) {
-        // Then get marhala and subjects data using our new API
         const dataResponse = await axios.get(`/api/marhala/${settingData.marhala_id}/subjects/`)
-        console.log('Marhala Response:', dataResponse.data)
-
         if (dataResponse.data.success) {
           marhala.value = dataResponse.data.data.marhala
           subjects.value = dataResponse.data.data.subjects
-
-          // Populate the form with existing data
           populateForm()
         }
       } else {
         showFlashMessage('error', 'সাবজেক্ট সেটিংস এ মারহালা তথ্য পাওয়া যায়নি।')
       }
     }
-  } catch (error) {
-    console.error('Error fetching subject data:', error)
+  } catch {
     showFlashMessage('error', 'তথ্য লোড করতে সমস্যা হয়েছে। পরে আবার চেষ্টা করুন।')
   } finally {
     loading.value = false
   }
 }
 
-const populateForm = (): void => {
+const populateForm = () => {
   if (subjectSetting.value) {
-    console.log('Populating form with:', subjectSetting.value)
-    console.log('subject_type from API:', subjectSetting.value.subject_type)
-    console.log('student_type from API:', subjectSetting.value.student_type)
-
     form.value = {
       marhala_id: subjectSetting.value.marhala_id || '',
       subject_id: subjectSetting.value.subject_id || '',
@@ -454,21 +390,14 @@ const populateForm = (): void => {
       pass_marks: subjectSetting.value.pass_marks || '',
       status: subjectSetting.value.status || 'active'
     }
-
-    console.log('Form populated with:', form.value)
-    console.log('Form subject_type:', form.value.subject_type)
-    console.log('Form student_type:', form.value.student_type)
-  } else {
-    console.log('No subjectSetting data to populate form')
   }
 }
 
-const showFlashMessage = (type: 'success' | 'error', message: string): void => {
+const showFlashMessage = (type, message) => {
   const flashContainer = document.getElementById('flash-messages')
   if (!flashContainer) return
 
   const flashMessage = document.createElement('div')
-
   const baseClasses = 'mb-6 border-l-4 p-6 rounded-r-sm relative transform transition-all duration-300 ease-in-out shadow-sm'
 
   if (type === 'success') {
@@ -510,8 +439,6 @@ const showFlashMessage = (type: 'success' | 'error', message: string): void => {
   }
 
   flashContainer.appendChild(flashMessage)
-
-  // Auto-remove after 5 seconds
   setTimeout(() => {
     if (flashMessage.parentNode) {
       flashMessage.classList.add('opacity-0', 'scale-95')
@@ -524,7 +451,7 @@ const showFlashMessage = (type: 'success' | 'error', message: string): void => {
   }, 5000)
 }
 
-const submit = async (): Promise<void> => {
+const submit = async () => {
   try {
     processing.value = true
     errors.value = {}
@@ -534,22 +461,18 @@ const submit = async (): Promise<void> => {
 
     if (response.data.success) {
       showFlashMessage('success', response.data.message || 'বিষয় সেটিংস সফলভাবে আপডেট করা হয়েছে।')
-      // Refresh data to show updated values
       await fetchSubjectData()
     }
-  } catch (error: unknown) {
+  } catch (error) {
     if (error && typeof error === 'object' && 'response' in error) {
-      const axiosError = error as { response?: { data?: { errors?: Record<string, string> } } }
+      const axiosError = error
       if (axiosError.response?.data?.errors) {
         errors.value = axiosError.response.data.errors
-        console.error('Validation errors:', axiosError.response.data.errors)
         showFlashMessage('error', 'ফর্মে কিছু ত্রুটি রয়েছে। অনুগ্রহ করে চেক করুন।')
       } else {
-        console.error('Error updating data:', error)
         showFlashMessage('error', 'একটি ত্রুটি ঘটেছে। পরে আবার চেষ্টা করুন।')
       }
     } else {
-      console.error('Error updating data:', error)
       showFlashMessage('error', 'একটি ত্রুটি ঘটেছে। পরে আবার চেষ্টা করুন।')
     }
   } finally {
@@ -557,13 +480,12 @@ const submit = async (): Promise<void> => {
   }
 }
 
-const resetForm = (): void => {
+const resetForm = () => {
   populateForm()
   errors.value = {}
 }
 
-// Watchers
-watch(() => form.value.subject_id, (newValue: string | number) => {
+watch(() => form.value.subject_id, (newValue) => {
   if (newValue) {
     const selectedSubject = subjects.value.find(subject => subject.id === parseInt(newValue.toString()))
     if (selectedSubject) {
@@ -574,7 +496,6 @@ watch(() => form.value.subject_id, (newValue: string | number) => {
   }
 })
 
-// Lifecycle
 onMounted(() => {
   fetchSubjectData()
 })

@@ -1,8 +1,7 @@
 <template>
   <nav
     class="bg-gray-900 fixed top-0 left-0 w-full z-50 shadow-lg border-b border-gray-800 classic-navbar"
-    style="                                                                    font-family: 'SolaimanLipi', sans-serif;
-                                                "
+    style="font-family: 'SolaimanLipi', sans-serif;"
   >
     <!-- Top accent line -->
     <div class="h-1 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-800"></div>
@@ -129,7 +128,7 @@
   </nav>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref } from 'vue'
 const mobileMenuOpen = ref(false)
 function toggleMobileMenu() {
@@ -139,7 +138,6 @@ function toggleMobileMenu() {
 
 <style scoped>
 .classic-navbar {
-  /* Remove extra gap with sidebar if sidebar is fixed left */
   margin-left: 0 !important;
 }
 .classic-nav-btn {

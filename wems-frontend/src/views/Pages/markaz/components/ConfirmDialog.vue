@@ -31,74 +31,53 @@
   </Dialog>
 </template>
 
-<script setup lang="ts">
-import Dialog from 'primevue/dialog';
-import { ref, watch } from 'vue';
+<script setup>
+import Dialog from 'primevue/dialog'
+import { ref, watch } from 'vue'
 
-/**
- * Accept both modelValue (default v-model) and visible (v-model:visible)
- * so the component works whether parent uses v-model or v-model:visible.
- */
-const props = defineProps<{
-  modelValue?: boolean;
-  visible?: boolean;
-  title?: string;
-  description?: string;
-  confirmLabel?: string;
-  cancelLabel?: string;
-}>();
+const props = defineProps({
+  modelValue: Boolean,
+  visible: Boolean,
+  title: String,
+  description: String,
+  confirmLabel: String,
+  cancelLabel: String
+})
 
-const emit = defineEmits<{
-  (e: 'update:modelValue', v: boolean): void;
-  (e: 'update:visible', v: boolean): void;
-  (e: 'confirm'): void;
-}>();
+const emit = defineEmits(['update:modelValue', 'update:visible', 'confirm'])
 
-/**
- * local visible state that syncs with either props.modelValue or props.visible
- */
-const visibleLocal = ref<boolean>(!!(props.visible ?? props.modelValue));
+const visibleLocal = ref(!!(props.visible ?? props.modelValue))
 
-/**
- * Keep local state in sync when parent changes either prop
- */
 watch(
   () => props.visible,
   v => {
-    if (v !== undefined) visibleLocal.value = !!v;
+    if (v !== undefined) visibleLocal.value = !!v
   }
-);
+)
 watch(
   () => props.modelValue,
   v => {
-    if (v !== undefined) visibleLocal.value = !!v;
+    if (v !== undefined) visibleLocal.value = !!v
   }
-);
+)
 
-/**
- * When local changes (from UI actions), emit updates for both v-model variants
- * so parent receives the change whether it used v-model or v-model:visible.
- */
 watch(visibleLocal, v => {
-  emit('update:modelValue', v);
-  emit('update:visible', v);
-});
+  emit('update:modelValue', v)
+  emit('update:visible', v)
+})
 
-const title = props.title ?? 'Confirm';
-const description = props.description ?? '';
-const confirmLabel = props.confirmLabel ?? 'Confirm';
-const cancelLabel = props.cancelLabel ?? 'Cancel';
+const title = props.title ?? 'Confirm'
+const description = props.description ?? ''
+const confirmLabel = props.confirmLabel ?? 'Confirm'
+const cancelLabel = props.cancelLabel ?? 'Cancel'
 
 function confirm() {
-  // emit the confirm event to let parent handle the action
-  emit('confirm');
-  // close dialog
-  visibleLocal.value = false;
+  emit('confirm')
+  visibleLocal.value = false
 }
 
 function cancel() {
-  // close dialog (will emit update:modelValue & update:visible via watcher)
-  visibleLocal.value = false;
+  visibleLocal.value = false
 }
 </script>
 

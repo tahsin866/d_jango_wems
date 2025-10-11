@@ -109,38 +109,19 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { reactive, watch, computed } from 'vue';
+<script setup>
+import { reactive, watch, computed } from 'vue'
 
-type StudentInfo = {
-  name_bn?: string;
-  name_en?: string;
-  name_ar?: string;
-  father_name_bn?: string;
-  father_name_en?: string;
-  father_name_ar?: string;
-  mother_name_bn?: string;
-  mother_name_en?: string;
-  mother_name_ar?: string;
-  Date_of_birth?: string;
-  BRN_no?: string;
-  NID_no?: string;
-  mobile_no?: string;
-  [key: string]: any;
-};
+const props = defineProps({
+  modelValue: Object
+})
 
-const props = defineProps<{
-  modelValue?: StudentInfo;
-}>();
+const emit = defineEmits(['update:modelValue'])
 
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: StudentInfo): void;
-}>();
-
-const isDark = computed(() => document.documentElement.classList.contains('dark'));
+const isDark = computed(() => document.documentElement.classList.contains('dark'))
 
 // local reactive copy to avoid mutating prop directly
-const local = reactive<StudentInfo>({
+const local = reactive({
   name_bn: props.modelValue?.name_bn ?? '',
   name_en: props.modelValue?.name_en ?? '',
   name_ar: props.modelValue?.name_ar ?? '',
@@ -154,13 +135,13 @@ const local = reactive<StudentInfo>({
   BRN_no: props.modelValue?.BRN_no ?? '',
   NID_no: props.modelValue?.NID_no ?? '',
   mobile_no: props.modelValue?.mobile_no ?? ''
-});
+})
 
 // keep local in sync when parent changes modelValue
 watch(
   () => props.modelValue,
   (newVal) => {
-    if (!newVal) return;
+    if (!newVal) return
     Object.assign(local, {
       name_bn: newVal.name_bn ?? '',
       name_en: newVal.name_en ?? '',
@@ -175,19 +156,19 @@ watch(
       BRN_no: newVal.BRN_no ?? '',
       NID_no: newVal.NID_no ?? '',
       mobile_no: newVal.mobile_no ?? ''
-    });
+    })
   },
   { deep: true, immediate: true }
-);
+)
 
 // emit updates when local changes
 watch(
   local,
   (val) => {
-    emit('update:modelValue', { ...val });
+    emit('update:modelValue', { ...val })
   },
   { deep: true }
-);
+)
 </script>
 
 <style scoped>

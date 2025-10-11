@@ -1,8 +1,5 @@
 <template>
-  <div
-    style="font-family: 'SolaimanLipi', sans-serif;"
-    class="min-h-screen flex items-center justify-center classic-search-bg"
-  >
+  <div style="font-family: 'SolaimanLipi', sans-serif;" class="min-h-screen flex items-center justify-center classic-search-bg">
     <div class="w-full max-w-md">
       <div class="bg-white border border-[#d2d6de] shadow-lg rounded-lg px-8 py-10 classic-search-card">
         <!-- Error Flash -->
@@ -71,31 +68,22 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import axios, { AxiosError } from 'axios'
+import axios from 'axios'
 
 const router = useRouter()
 
-interface ErrorDetail {
-  detail?: string | Record<string, string>;
-}
-
-type MadrashaForm = {
-  elhaqno: string;
-  mobile: string;
-}
-
-const form = ref<MadrashaForm>({
+const form = ref({
   elhaqno: '',
   mobile: ''
 })
 
-const errors = ref<{ elhaqno?: string; mobile?: string }>({})
+const errors = ref({})
 const processing = ref(false)
-const errorFlash = ref<string | null>(null)
-const loadingMessage = ref<string>('')
+const errorFlash = ref(null)
+const loadingMessage = ref('')
 
 // Computed property to check if form is valid
 const isFormValid = computed(() => {
@@ -104,7 +92,7 @@ const isFormValid = computed(() => {
 
 const SECRET_FRONT_KEY = import.meta.env.VITE_AES_KEY || ''
 
-async function encryptAESGCM(plainText: string, base64Key: string) {
+async function encryptAESGCM(plainText, base64Key) {
   const keyBuffer = Uint8Array.from(atob(base64Key), c => c.charCodeAt(0));
   const cryptoKey = await window.crypto.subtle.importKey(
     'raw',
@@ -170,18 +158,18 @@ const submit = async () => {
       }
     }
   } catch (error) {
-    const axiosError = error as AxiosError
-    const data = axiosError.response?.data as ErrorDetail
+    // AxiosError handling in JS
+    const data = error?.response?.data
 
-    if (axiosError.code === 'ECONNABORTED') {
+    if (error?.code === 'ECONNABORTED') {
       errorFlash.value = 'সার্ভার রেসপন্স করতে বেশি সময় নিচ্ছে। অনুগ্রহ করে আবার চেষ্টা করুন।'
     } else if (data?.detail) {
       if (typeof data.detail === 'object') {
-        errors.value = data.detail as Record<string, string>
+        errors.value = data.detail
         errorFlash.value = Object.values(data.detail).join(' | ')
       } else {
-        errors.value.mobile = data.detail as string
-        errorFlash.value = data.detail as string
+        errors.value.mobile = data.detail
+        errorFlash.value = data.detail
       }
     } else {
       errorFlash.value = 'সার্ভার ইরোর! অনুগ্রহ করে পরে চেষ্টা করুন।'

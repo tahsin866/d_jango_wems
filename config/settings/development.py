@@ -7,8 +7,15 @@ from .base import *
 # Development-specific settings
 DEBUG = True
 
-# Use ALLOWED_HOSTS from environment variable or base.py
-# ALLOWED_HOSTS is set in base.py from environment variable
+# Override ALLOWED_HOSTS for development to allow Docker containers
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'host.docker.internal',
+    'wems-django',  # Docker service name
+    '0.0.0.0',      # Allow all for development
+    '*'             # Allow all hosts in development
+]
 
 # Enable Django debug toolbar if needed
 # INSTALLED_APPS += ['debug_toolbar']

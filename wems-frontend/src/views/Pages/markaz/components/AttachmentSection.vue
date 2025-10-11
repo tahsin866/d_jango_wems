@@ -132,50 +132,50 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { defineProps, ref } from 'vue';
+<script setup>
+import { ref } from 'vue'
 
-const props = defineProps({
-    muhtamimFile: Object,
-    muhtamimPreview: String,
-    presidentFile: Object,
-    presidentPreview: String,
-    committeeFile: Object,
-    committeePreview: String
-});
+defineProps({
+  muhtamimFile: Object,
+  muhtamimPreview: String,
+  presidentFile: Object,
+  presidentPreview: String,
+  committeeFile: Object,
+  committeePreview: String
+})
 
 // For preview dialog
-const previewDialogVisible = ref(false);
-const previewUrl = ref('');
-const previewDialogTitle = ref('ফাইল প্রিভিউ');
+const previewDialogVisible = ref(false)
+const previewUrl = ref('')
+const previewDialogTitle = ref('ফাইল প্রিভিউ')
 
-const emit = defineEmits(['file-upload', 'remove-file']);
+const emit = defineEmits(['file-upload', 'remove-file'])
 
 // Detect if URL is a PDF
-const isPDF = (url: string) => {
-    if (!url) return false;
-    return url.toLowerCase().includes('.pdf') || url.startsWith('data:application/pdf');
-};
+const isPDF = url => {
+  if (!url) return false
+  return url.toLowerCase().includes('.pdf') || url.startsWith('data:application/pdf')
+}
 
 // Open preview dialog
-const previewFile = (url: string) => {
-    previewUrl.value = url;
-    if (isPDF(url)) {
-        previewDialogTitle.value = 'PDF দস্তাবেজ প্রিভিউ';
-    } else {
-        previewDialogTitle.value = 'ছবি প্রিভিউ';
-    }
-    previewDialogVisible.value = true;
-};
+const previewFile = url => {
+  previewUrl.value = url
+  if (isPDF(url)) {
+    previewDialogTitle.value = 'PDF দস্তাবেজ প্রিভিউ'
+  } else {
+    previewDialogTitle.value = 'ছবি প্রিভিউ'
+  }
+  previewDialogVisible.value = true
+}
 
 // File select handler
-const handleFileSelect = (event: any, type: string) => {
-    let files: File[] = [];
-    if (event && event.target && event.target.files) {
-        files = Array.from(event.target.files);
-    }
-    emit('file-upload', { target: { files } }, type);
-};
+const handleFileSelect = (event, type) => {
+  let files = []
+  if (event && event.target && event.target.files) {
+    files = Array.from(event.target.files)
+  }
+  emit('file-upload', { target: { files } }, type)
+}
 </script>
 
 <style scoped>

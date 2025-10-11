@@ -94,11 +94,11 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref } from 'vue'
 
 // Fake analytics chart data (sparkline)
-function getRandomData(len = 20, base = 1000, variation = 80): number[] {
+function getRandomData(len = 20, base = 1000, variation = 80) {
   let val = base
   return Array.from({ length: len }, () => {
     val += Math.floor(Math.random() * variation - variation / 2)
@@ -106,18 +106,7 @@ function getRandomData(len = 20, base = 1000, variation = 80): number[] {
   })
 }
 
-type Stat = {
-  title: string
-  value: string
-  change: string
-  icon: string
-  color: 'indigo' | 'blue' | 'slate' | 'gray'
-  trend: number[]
-  trendUp: boolean
-  tooltip: string
-}
-
-const stats = ref<Stat[]>([
+const stats = ref([
   {
     title: 'মোট মাদরাসা',
     value: '১৫,৪৮৯',
@@ -160,12 +149,11 @@ const stats = ref<Stat[]>([
   }
 ])
 
-// Tooltip visibility
-const tooltipIndex = ref<number | null>(null)
-const showTooltip = (idx: number) => (tooltipIndex.value = idx)
+const tooltipIndex = ref(null)
+const showTooltip = (idx) => (tooltipIndex.value = idx)
 const hideTooltip = () => (tooltipIndex.value = null)
 
-const getColorClasses = (color: Stat['color']) => {
+const getColorClasses = (color) => {
   const colorMap = {
     indigo: {
       bg: 'bg-indigo-500',

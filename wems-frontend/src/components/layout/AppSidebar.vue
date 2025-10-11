@@ -108,8 +108,8 @@
   </aside>
 </template>
 
-<script setup lang="ts">
-import { type Component, markRaw } from "vue";
+<script setup>
+import { markRaw } from "vue";
 import { useRoute } from "vue-router";
 import {
   CalenderIcon,
@@ -137,24 +137,7 @@ import { useSidebar } from "@/composables/useSidebar";
 const route = useRoute();
 const { isExpanded, isMobileOpen, isHovered, openSubmenu } = useSidebar();
 
-type SubMenuItem = {
-  label: string;
-  icon: Component;
-  to: string;
-  new?: boolean;
-  pro?: boolean;
-};
-
-type MenuItem = {
-  label: string;
-  icon: Component;
-  to?: string;
-  key?: string;
-  items?: SubMenuItem[];
-};
-
-// --- Full Menu Data ---
-const menuItems: MenuItem[] = [
+const menuItems = [
   {
     label: 'ড্যাশবোর্ড',
     icon: markRaw(HomeIcon),
@@ -287,24 +270,23 @@ const menuItems: MenuItem[] = [
   }
 ];
 
-const isActive = (path: string) => route.path === path;
+const isActive = (path) => route.path === path;
 
-const toggleSubmenu = (groupIndex: number) => {
+const toggleSubmenu = (groupIndex) => {
   const currentKey = `${groupIndex}`;
   openSubmenu.value = openSubmenu.value === currentKey ? null : currentKey;
 };
 
-const isSubmenuOpen = (groupIndex: number) => {
+const isSubmenuOpen = (groupIndex) => {
   const key = `${groupIndex}`;
   return (
     openSubmenu.value === key ||
     (
       Array.isArray(menuItems[groupIndex].items) &&
-      menuItems[groupIndex].items.some((subItem: SubMenuItem) => isActive(subItem.to))
+      menuItems[groupIndex].items.some(subItem => isActive(subItem.to))
     )
   );
 };
-
 </script>
 
 <style scoped>

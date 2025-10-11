@@ -349,11 +349,10 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 
-// Fee label mapping for classic style, no green
 const regularFeeLabels = {
   fee1: 'নিয়মিত ফি',
   invest1Men: 'অনিয়মিত (যেমনি)',
@@ -367,35 +366,7 @@ const lateFeeLabels = {
   invest2Others: 'অনিয়মিত (অন্যান্য)'
 }
 
-// Types
-type ExamSetup = {
-  id: number
-  exam_name: string
-  arabic_year: string
-  bangla_year: string
-  english_year: string
-}
-
-type FeeRow = {
-  examName: string
-  marhala_id: number
-  dateFrom1: string | null
-  dateTo1: string | null
-  fee1: number | null
-  invest1Men: number | null
-  invest1Madan: number | null
-  invest1Others: number | null
-  dateFrom2: string | null
-  dateTo2: string | null
-  fee2: number | null
-  invest2Men: number | null
-  invest2Madan: number | null
-  invest2Others: number | null
-  id?: number
-}
-
-// State
-const examSetup = ref<ExamSetup | null>({
+const examSetup = ref({
   id: 1,
   exam_name: '৪৬ তম কেন্দ্রীয় পরীক্ষা',
   arabic_year: '১৪৪৬',
@@ -403,21 +374,19 @@ const examSetup = ref<ExamSetup | null>({
   english_year: '২০২৫'
 })
 
-const rows = ref<FeeRow[]>([])
-const expandedCards = ref<{ [key: number]: boolean }>({ 0: true })
-const activeTab = ref<{ [key: number]: string }>({ 0: 'regular' })
-const expandAll = ref<boolean>(false)
+const rows = ref([])
+const expandedCards = ref({ 0: true })
+const activeTab = ref({ 0: 'regular' })
+const expandAll = ref(false)
 
-const marhalaNames = ref<string[]>([])
-const marhalaList = ref<{ id: number, name: string }[]>([])
+const marhalaNames = ref([])
+const marhalaList = ref([])
 
-// Computed
 const formattedTitle = computed(() => {
   if (!examSetup.value) return ''
   return `${examSetup.value.exam_name} ${examSetup.value.arabic_year} হিজরি/${examSetup.value.bangla_year} বঙ্গাব্দ/${examSetup.value.english_year} ইসাব্দ`
 })
 
-// Utils
 const getCurrentDate = () => {
   const date = new Date()
   return date.toLocaleDateString('bn-BD', { year: 'numeric', month: 'long', day: 'numeric' })
@@ -426,18 +395,18 @@ const getCurrentTime = () => {
   const date = new Date()
   return date.toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' })
 }
-function isCardFilled(row: FeeRow): boolean {
+function isCardFilled(row) {
   return !!(row.dateFrom1 && row.dateTo1 && row.fee1 &&
             row.dateFrom2 && row.dateTo2 && row.fee2)
 }
-function filledCards(): number {
+function filledCards() {
   return rows.value.filter(row => isCardFilled(row)).length
 }
-function formatAmount(amount: number | null): string {
+function formatAmount(amount) {
   if (!amount) return '0'
   return new Intl.NumberFormat('bn-BD').format(amount)
 }
-function calculateDateDifference(start: string | null, end: string | null): string {
+function calculateDateDifference(start, end) {
   if (!start || !end) return 'নির্ধারিত নয়'
   const startDate = new Date(start)
   const endDate = new Date(end)
@@ -448,8 +417,7 @@ function calculateDateDifference(start: string | null, end: string | null): stri
   return `${diffDays} দিন`
 }
 
-// Actions
-function toggleCard(index: number) {
+function toggleCard(index) {
   expandedCards.value[index] = !expandedCards.value[index]
   if (!activeTab.value[index]) {
     activeTab.value[index] = 'regular'
@@ -464,7 +432,7 @@ function toggleExpand() {
     }
   })
 }
-function copyToAllCards(sourceRow: FeeRow) {
+function copyToAllCards(sourceRow) {
   if (confirm('আপনি কি নিশ্চিত যে এই কার্ডের ডাটা সমস্ত কার্ডে কপি করতে চান?')) {
     rows.value = rows.value.map(row => ({
       ...row,
@@ -483,7 +451,7 @@ function copyToAllCards(sourceRow: FeeRow) {
     }))
   }
 }
-function resetSingleCard(index: number) {
+function resetSingleCard(index) {
   if (confirm('আপনি কি নিশ্চিত যে এই কার্ডের ডাটা রিসেট করতে চান?')) {
     rows.value[index] = {
       ...rows.value[index],
@@ -527,7 +495,6 @@ function downloadExcel() {
   alert('এক্সেল ডাউনলোড ফাংশন বাস্তবায়ন করা হবে।')
 }
 
-// API Calls
 const fetchMarhalaNames = async () => {
   const response = await axios.get('http://127.0.0.1:8000/api/marhalas/')
   if (response.data.success) {
@@ -569,7 +536,6 @@ const getExamSetupIdFromUrl = () => {
 }
 const examSetupId = ref(getExamSetupIdFromUrl())
 
-// Update All Fees
 async function updateAllFees() {
   let successCount = 0
   let failCount = 0
@@ -610,7 +576,6 @@ async function updateAllFees() {
   alert(`সফলভাবে আপডেট হয়েছে: ${successCount} | ব্যর্থ: ${failCount}`)
 }
 
-// Lifecycle
 onMounted(() => {
   expandedCards.value = { 0: true }
   activeTab.value = { 0: 'regular' }

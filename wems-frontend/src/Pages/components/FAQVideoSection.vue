@@ -82,7 +82,7 @@
   </section>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref } from 'vue'
 const faqs = [
   {
@@ -102,8 +102,8 @@ const faqs = [
     answer: 'আমাদের সাথে যোগাযোগের বিভিন্ন মাধ্যম...'
   }
 ]
-const activeFAQ = ref<number|null>(null)
-const toggleFAQ = (index: number) => {
+const activeFAQ = ref(null)
+const toggleFAQ = (index) => {
   activeFAQ.value = activeFAQ.value === index ? null : index
 }
 </script>

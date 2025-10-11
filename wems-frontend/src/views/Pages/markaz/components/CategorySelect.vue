@@ -26,8 +26,12 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { defineEmits, defineProps } from 'vue';
-const props = defineProps({ modelValue: String });
-defineEmits(['update:modelValue']);
+<script setup>
+defineProps({
+  modelValue: {
+    type: String,
+    default: ''
+  }
+})
+defineEmits(['update:modelValue'])
 </script>

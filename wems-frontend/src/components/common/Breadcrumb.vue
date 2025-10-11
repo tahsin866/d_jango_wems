@@ -40,20 +40,13 @@
   </nav>
 </template>
 
-<script setup lang="ts">
-defineOptions({ name: 'CommonBreadcrumb' })
+<script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
-interface BreadcrumbItem {
-  name: string
-  path?: string
-  isLast?: boolean
-}
-
 const route = useRoute()
 
-const breadcrumbMap: Record<string, BreadcrumbItem[]> = {
+const breadcrumbMap = {
   '/admin/dashboard': [{ name: 'ড্যাশবোর্ড', path: '/admin/dashboard' }],
   '/admin/user/setup': [{ name: 'সেটাপ সংক্রান্ত', path: '#' }, { name: 'ব্যবহারকারী সেটাপ', path: '/admin/user/setup' }],
   '/admin/marhala/setup': [{ name: 'সেটাপ সংক্রান্ত', path: '#' }, { name: 'মারহালা লিস্ট', path: '/admin/marhala/setup' }],
@@ -87,9 +80,9 @@ const breadcrumbItems = computed(() => {
   return items
 })
 
-function generateBreadcrumbFromPath(path: string): BreadcrumbItem[] {
+function generateBreadcrumbFromPath(path) {
   const segments = path.split('/').filter(segment => segment !== '')
-  const items: BreadcrumbItem[] = []
+  const items = []
   if (path.startsWith('/admin')) items.push({ name: 'অ্যাডমিন প্যানেল', path: '/admin' })
   else if (path.startsWith('/user')) items.push({ name: 'ইউজার প্যানেল', path: '/user' })
   const pageTitle = String(route.meta?.title || segments[segments.length - 1] || 'পেজ')

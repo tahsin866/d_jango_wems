@@ -420,39 +420,23 @@
 
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed, watch, onMounted } from 'vue'
-
 import { RouterLink } from 'vue-router'
 
-/** Types */
-type ApplicationFee = {
-  marhala_id: number
-  marhala_name_bn: string
-  regularStartDate?: string | null
-  regularEndDate?: string | null
-  regularFee?: number | string | null
-  lateStartDate?: string | null
-  lateEndDate?: string | null
-  lateFee?: number | string | null
-  regularStudents?: number | string | null
-  irregularStudents?: number | string | null
-}
-
-/** Reactive state */
-const examFees = ref<ApplicationFee[]>([])
-const examName = ref<string>('লোড হচ্ছে...')
-const globalFilterValue = ref<string>('')
-const currentPage = ref<number>(1)
-const rowsPerPage = ref<number>(10)
-const sortField = ref<string | null>(null)
-const sortOrder = ref<'asc' | 'desc'>('asc')
-const totalPages = ref<number>(1)
-const displayedExamFees = ref<ApplicationFee[]>([])
-const isLoading = ref<boolean>(true)
-const showFilters = ref<boolean>(false)
-const showCustomColumns = ref<boolean>(false)
-const visibleColumns = ref<Record<string, boolean>>({
+const examFees = ref([])
+const examName = ref('লোড হচ্ছে...')
+const globalFilterValue = ref('')
+const currentPage = ref(1)
+const rowsPerPage = ref(10)
+const sortField = ref(null)
+const sortOrder = ref('asc')
+const totalPages = ref(1)
+const displayedExamFees = ref([])
+const isLoading = ref(true)
+const showFilters = ref(false)
+const showCustomColumns = ref(false)
+const visibleColumns = ref({
   marhala_name_bn: true,
   regularStartDate: true,
   regularEndDate: true,
@@ -471,17 +455,9 @@ const filterOptions = ref({
   minLateFee: '',
   maxLateFee: '',
   hasLateRegistration: 'all'
-} as {
-  marhalaFilter: string
-  minRegularFee: string
-  maxRegularFee: string
-  minLateFee: string
-  maxLateFee: string
-  hasLateRegistration: 'all' | 'yes' | 'no'
 })
 
-/** Mock data */
-const mockData: ApplicationFee[] = [
+const mockData = [
   {
     marhala_id: 1,
     marhala_name_bn: 'কাঙ্ক্ষিত মারহালা ১',
@@ -520,7 +496,6 @@ const mockData: ApplicationFee[] = [
   }
 ]
 
-/** Fetch (mock) */
 const fetchExamFees = async () => {
   isLoading.value = true
   await new Promise(resolve => setTimeout(resolve, 300))
@@ -530,8 +505,7 @@ const fetchExamFees = async () => {
   setTimeout(() => { isLoading.value = false }, 120)
 }
 
-/** Helpers and logic */
-const parseNum = (v: any) => {
+const parseNum = (v) => {
   const n = Number(v)
   return Number.isFinite(n) ? n : 0
 }
@@ -573,11 +547,11 @@ const updateDisplayedData = () => {
 
   if (sortField.value) {
     data.sort((a, b) => {
-      const field = sortField.value as keyof ApplicationFee
-      let valueA: any = (a as any)[field]
-      let valueB: any = (b as any)[field]
+      const field = sortField.value
+      let valueA = a[field]
+      let valueB = b[field]
 
-      if (['regularFee', 'lateFee', 'regularStudents', 'irregularStudents'].includes(field as string)) {
+      if (['regularFee', 'lateFee', 'regularStudents', 'irregularStudents'].includes(field)) {
         valueA = parseNum(valueA)
         valueB = parseNum(valueB)
       } else if (typeof valueA === 'string' && typeof valueB === 'string') {
@@ -616,7 +590,7 @@ const resetFilters = () => {
   updateDisplayedData()
 }
 
-const sort = (field: string) => {
+const sort = (field) => {
   if (sortField.value === field) sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
   else {
     sortField.value = field
@@ -625,7 +599,7 @@ const sort = (field: string) => {
   updateDisplayedData()
 }
 
-const toggleColumn = (column: string) => {
+const toggleColumn = (column) => {
   visibleColumns.value[column] = !visibleColumns.value[column]
 }
 
@@ -647,7 +621,7 @@ const exportToExcel = () => {
   window.alert('Export to Excel (mock) — nothing exported in demo mode.')
 }
 
-const formatDate = (dateString?: string | null) => {
+const formatDate = (dateString) => {
   if (!dateString) return 'N/A'
   try {
     const date = new Date(dateString)
@@ -658,7 +632,7 @@ const formatDate = (dateString?: string | null) => {
   }
 }
 
-const formatNumber = (num: number | string | undefined | null) => {
+const formatNumber = (num) => {
   if (num === undefined || num === null) return '0'
   const n = Number(num)
   if (!Number.isFinite(n)) return String(num)
@@ -709,8 +683,8 @@ const getCurrentTime = () => {
   }).format(date)
 }
 
-const getColumnName = (column: string) => {
-  const names: Record<string, string> = {
+const getColumnName = (column) => {
+  const names = {
     'marhala_name_bn': 'মারহালা',
     'regularStartDate': 'নিয়মিত (শুরু)',
     'regularEndDate': 'নিয়মিত (শেষ)',
@@ -724,8 +698,8 @@ const getColumnName = (column: string) => {
   return names[column] || column
 }
 
-const getPageNumbers = (): (number | string)[] => {
-  const pages: (number | string)[] = []
+const getPageNumbers = () => {
+  const pages = []
   const maxVisiblePages = 5
   if (totalPages.value <= maxVisiblePages) {
     for (let i = 1; i <= totalPages.value; i++) pages.push(i)
@@ -749,10 +723,7 @@ const getPageNumbers = (): (number | string)[] => {
   return pages
 }
 
-/** New: build route paths without Inertia route() helper
- *  Adjust paths here if your app uses different route structure.
- */
-const getOldRegistrationPath = (marhalaId?: number | null) => {
+const getOldRegistrationPath = (marhalaId) => {
   return marhalaId ? `/students-registration/old-stu-reg-form?marhalaId=${marhalaId}` : '/students-registration/old-stu-reg-form'
 }
 

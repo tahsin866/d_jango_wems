@@ -314,87 +314,49 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, onMounted, watch, computed } from 'vue';
-import { useRouter } from 'vue-router';
-import axios from 'axios';
+<script setup>
+import { ref, onMounted, watch, computed } from 'vue'
+import axios from 'axios'
 
-const router = useRouter();
-const route = (name: string, params: Record<string, string | number> = {}) => {
-  const routes: Record<string, string> = {
+const route = (name, params = {}) => {
+  const routes = {
     'subjects_for_Admin.subject_setup_list': '/admin/subject/settings/create',
     'subjects_for_Admin.subject_setings_edit': `/admin/subject/settings/${params.id}/edit`
-  };
-  return routes[name] || '#';
-};
-
-interface ApiSubjectSettings {
-  id: number;
-  subject_code: string;
-  related_subject_code: string;
-  subject_names: string;
-  marhala_name: string;
-  subject_type: string;
-  syllabus_type: string;
-  total_marks: number;
-  pass_marks: number;
-  status: string;
-  markaz_type: string;
-  student_type: string;
-  marhala_type: string;
-  marhala: number;
-  subject: number;
+  }
+  return routes[name] || '#'
 }
 
-interface Subject {
-  id: number;
-  code: string;
-  Subject_Names: string;
-  Marhala_type: string;
-  subject_type: string;
-  student_type: string;
-  markaz_type: string;
-  total_marks: number;
-  pass_marks: number;
-  theory_marks: number;
-  practical_marks: number;
-  syllabus_type: string;
-  status: string;
-}
-
-const subjects = ref<Subject[]>([]);
-const searchTerm = ref('');
-const markazType = ref('');
-const marhalaType = ref('');
-const status = ref('');
-const marhalaTypes = ref<string[]>([]);
-const sortField = ref('code');
-const sortDirection = ref<'asc'|'desc'>('asc');
-const sortOption = ref('code-asc');
-const currentPage = ref(1);
-const rowsPerPage = ref(10);
-const selectedSubject = ref<Subject | null>(null);
-const isLoading = ref(false);
+const subjects = ref([])
+const searchTerm = ref('')
+const markazType = ref('')
+const marhalaType = ref('')
+const status = ref('')
+const marhalaTypes = ref([])
+const sortField = ref('code')
+const sortDirection = ref('asc')
+const sortOption = ref('code-asc')
+const currentPage = ref(1)
+const rowsPerPage = ref(10)
+const selectedSubject = ref(null)
+const isLoading = ref(false)
 
 const fetchData = async () => {
   try {
-    isLoading.value = true;
-    console.log('Loading subject data...');
-
+    isLoading.value = true
     const response = await axios.get('http://127.0.0.1:8000/api/subject-settings/', {
       params: {
         marhala_id: marhalaType.value || undefined,
         page: 1,
-        page_size: 200  // Reduced to 200 for faster loading
+        page_size: 200
       },
-      timeout: 10000  // 10 second timeout
-    });
+      timeout: 10000
+    })
     if (response.data.success) {
-      subjects.value = response.data.data.map((item: ApiSubjectSettings) => ({
+      subjects.value = response.data.data.map(item => ({
         id: item.id,
-        code: item.related_subject_code || item.subject_code || '', // Use related subject code first, fallback to direct subject_code
+        code: item.related_subject_code || item.subject_code || '',
         Subject_Names: item.subject_names,
-        Marhala_type: item.marhala_name || item.marhala_type, // Use related marhala name first, fallback to direct marhala_type
+        Marhala_type: item.marhala_name || item.marhala_type,
         subject_type: item.subject_type,
         student_type: item.student_type,
         markaz_type: item.markaz_type,
@@ -404,139 +366,136 @@ const fetchData = async () => {
         practical_marks: Math.round(item.total_marks * 0.3),
         syllabus_type: item.syllabus_type,
         status: item.status
-      }));
-      // Extract unique marhala types for filter dropdown
+      }))
       const uniqueMarhalas = response.data.data
-        .map((item: ApiSubjectSettings) => item.marhala_name || item.marhala_type)
-        .filter(Boolean);
-      marhalaTypes.value = Array.from(new Set(uniqueMarhalas)) as string[];
+        .map(item => item.marhala_name || item.marhala_type)
+        .filter(Boolean)
+      marhalaTypes.value = Array.from(new Set(uniqueMarhalas))
     } else {
-      subjects.value = [];
-      marhalaTypes.value = [];
-      alert('ডেটা লোড করতে সমস্যা হয়েছে। দয়া করে পরে আবার চেষ্টা করুন।');
+      subjects.value = []
+      marhalaTypes.value = []
+      alert('ডেটা লোড করতে সমস্যা হয়েছে। দয়া করে পরে আবার চেষ্টা করুন।')
     }
-  } catch (error: unknown) {
-    console.error('API Error:', error);
-    subjects.value = [];
-    marhalaTypes.value = [];
-    alert('ডেটা লোড করতে সমস্যা হয়েছে। দয়া করে পরে আবার চেষ্টা করুন।');
+  } catch (error) {
+    subjects.value = []
+    marhalaTypes.value = []
+    alert('ডেটা লোড করতে সমস্যা হয়েছে। দয়া করে পরে আবার চেষ্টা করুন।')
   } finally {
-    isLoading.value = false;
+    isLoading.value = false
   }
-};
+}
 
 const resetFilters = () => {
-  searchTerm.value = '';
-  markazType.value = '';
-  marhalaType.value = '';
-  status.value = '';
-  currentPage.value = 1;
-  fetchData();
-};
+  searchTerm.value = ''
+  markazType.value = ''
+  marhalaType.value = ''
+  status.value = ''
+  currentPage.value = 1
+  fetchData()
+}
 
-const sortBy = (field: string) => {
+const sortBy = field => {
   if (sortField.value === field) {
-    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
+    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
   } else {
-    sortField.value = field;
-    sortDirection.value = 'asc';
+    sortField.value = field
+    sortDirection.value = 'asc'
   }
-  sortOption.value = `${field}-${sortDirection.value}`;
-};
+  sortOption.value = `${field}-${sortDirection.value}`
+}
 
 const handleSortChange = () => {
-  const [field, direction] = sortOption.value.split('-');
-  sortField.value = field;
-  sortDirection.value = direction as ('asc'|'desc');
-};
+  const [field, direction] = sortOption.value.split('-')
+  sortField.value = field
+  sortDirection.value = direction
+}
 
 const getActiveCount = computed(() => {
-  return subjects.value.filter(subject => subject.status === 'active').length;
-});
+  return subjects.value.filter(subject => subject.status === 'active').length
+})
 
-const viewSubjectDetails = (subject: Subject) => {
-  selectedSubject.value = subject;
-  alert(`বিষয় বিস্তারিত: ${subject.Subject_Names}`);
-};
+const viewSubjectDetails = subject => {
+  selectedSubject.value = subject
+  alert(`বিষয় বিস্তারিত: ${subject.Subject_Names}`)
+}
 
 const filteredSubjects = computed(() => {
-  let filtered = subjects.value;
+  let filtered = subjects.value
   if (searchTerm.value) {
-    const search = searchTerm.value.toLowerCase();
+    const search = searchTerm.value.toLowerCase()
     filtered = filtered.filter(subject =>
       subject.Subject_Names.toLowerCase().includes(search) ||
       subject.code.toLowerCase().includes(search)
-    );
+    )
   }
   if (marhalaType.value) {
-    filtered = filtered.filter(subject => subject.Marhala_type === marhalaType.value);
+    filtered = filtered.filter(subject => subject.Marhala_type === marhalaType.value)
   }
   if (markazType.value) {
-    filtered = filtered.filter(subject => subject.markaz_type === markazType.value);
+    filtered = filtered.filter(subject => subject.markaz_type === markazType.value)
   }
   if (status.value) {
-    filtered = filtered.filter(subject => subject.status === status.value);
+    filtered = filtered.filter(subject => subject.status === status.value)
   }
-  return filtered;
-});
+  return filtered
+})
 
 const sortedSubjects = computed(() => {
   return [...filteredSubjects.value].sort((a, b) => {
-    const fieldA = a[sortField.value as keyof Subject];
-    const fieldB = b[sortField.value as keyof Subject];
-    if (fieldA == null || fieldB == null) return 0;
+    const fieldA = a[sortField.value]
+    const fieldB = b[sortField.value]
+    if (fieldA == null || fieldB == null) return 0
     if (typeof fieldA === 'number' && typeof fieldB === 'number') {
-      return sortDirection.value === 'asc' ? fieldA - fieldB : fieldB - fieldA;
+      return sortDirection.value === 'asc' ? fieldA - fieldB : fieldB - fieldA
     }
-    const valA = String(fieldA).toLowerCase();
-    const valB = String(fieldB).toLowerCase();
-    if (valA < valB) return sortDirection.value === 'asc' ? -1 : 1;
-    if (valA > valB) return sortDirection.value === 'asc' ? 1 : -1;
-    return 0;
-  });
-});
+    const valA = String(fieldA).toLowerCase()
+    const valB = String(fieldB).toLowerCase()
+    if (valA < valB) return sortDirection.value === 'asc' ? -1 : 1
+    if (valA > valB) return sortDirection.value === 'asc' ? 1 : -1
+    return 0
+  })
+})
 
-const totalPages = computed(() => Math.ceil(filteredSubjects.value.length / rowsPerPage.value));
-const startIndex = computed(() => (currentPage.value - 1) * rowsPerPage.value);
+const totalPages = computed(() => Math.ceil(filteredSubjects.value.length / rowsPerPage.value))
+const startIndex = computed(() => (currentPage.value - 1) * rowsPerPage.value)
 const endIndex = computed(() => {
-  const end = startIndex.value + rowsPerPage.value;
-  return end > filteredSubjects.value.length ? filteredSubjects.value.length : end;
-});
-const paginatedSubjects = computed(() => sortedSubjects.value.slice(startIndex.value, endIndex.value));
+  const end = startIndex.value + rowsPerPage.value
+  return end > filteredSubjects.value.length ? filteredSubjects.value.length : end
+})
+const paginatedSubjects = computed(() => sortedSubjects.value.slice(startIndex.value, endIndex.value))
 
 const displayedPages = computed(() => {
-  const pages: (number | string)[] = [];
-  const maxVisiblePages = 5;
+  const pages = []
+  const maxVisiblePages = 5
   if (totalPages.value <= maxVisiblePages) {
-    for (let i = 1; i <= totalPages.value; i++) pages.push(i);
+    for (let i = 1; i <= totalPages.value; i++) pages.push(i)
   } else {
-    const leftBound = Math.max(1, currentPage.value - 1);
-    const rightBound = Math.min(totalPages.value, currentPage.value + 1);
-    if (leftBound > 1) pages.push(1);
-    if (leftBound > 2) pages.push('...');
-    for (let i = leftBound; i <= rightBound; i++) pages.push(i);
-    if (rightBound < totalPages.value - 1) pages.push('...');
-    if (rightBound < totalPages.value) pages.push(totalPages.value);
+    const leftBound = Math.max(1, currentPage.value - 1)
+    const rightBound = Math.min(totalPages.value, currentPage.value + 1)
+    if (leftBound > 1) pages.push(1)
+    if (leftBound > 2) pages.push('...')
+    for (let i = leftBound; i <= rightBound; i++) pages.push(i)
+    if (rightBound < totalPages.value - 1) pages.push('...')
+    if (rightBound < totalPages.value) pages.push(totalPages.value)
   }
-  return pages;
-});
+  return pages
+})
 
-const goToPage = (page: number | string) => {
-  if (typeof page === 'number') currentPage.value = page;
-};
-const prevPage = () => { if (currentPage.value > 1) currentPage.value--; };
-const nextPage = () => { if (currentPage.value < totalPages.value) currentPage.value++; };
-const firstPage = () => { currentPage.value = 1; };
-const lastPage = () => { currentPage.value = totalPages.value; };
+const goToPage = page => {
+  if (typeof page === 'number') currentPage.value = page
+}
+const prevPage = () => { if (currentPage.value > 1) currentPage.value-- }
+const nextPage = () => { if (currentPage.value < totalPages.value) currentPage.value++ }
+const firstPage = () => { currentPage.value = 1 }
+const lastPage = () => { currentPage.value = totalPages.value }
 
-// Auto fetch and reset page on filter/sort/search
 watch([searchTerm, markazType, marhalaType, status], () => {
-  currentPage.value = 1;
-});
+  currentPage.value = 1
+})
 
 onMounted(() => {
-  fetchData();
-});
+  fetchData()
+})
 </script>
 
 <style scoped>

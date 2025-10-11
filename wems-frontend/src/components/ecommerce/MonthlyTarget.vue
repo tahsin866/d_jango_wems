@@ -122,7 +122,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed } from 'vue'
 import DropdownMenu from '../common/DropdownMenu.vue'
 const menuItems = [
@@ -136,5 +136,4 @@ const props = defineProps({
   },
 })
 const series = computed(() => [props.value])
-// VueApexCharts import/remove: Not needed for classic progress bar!
 </script>

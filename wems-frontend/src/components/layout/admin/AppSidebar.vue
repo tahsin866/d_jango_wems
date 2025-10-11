@@ -13,7 +13,6 @@
     <!-- Sidebar Header / Logo -->
     <div class="flex items-center justify-center h-16 border-b border-gray-700 bg-gray-900">
       <div class="flex items-center gap-2">
-        <!-- <div class="bg-gray-700 px-2 py-1 rounded-sm text-gray-200 shadow font-bold text-lg">EM</div> -->
         <h1 class="text-xl font-bold text-gray-200 tracking-wide font-sans" style="letter-spacing: 1px;">
           <span class="ml-1">{{ departmentDisplayName }}</span>
         </h1>
@@ -82,8 +81,8 @@
   </aside>
 </template>
 
-<script setup lang="ts">
-import { ref, onMounted, markRaw} from 'vue'
+<script setup>
+import { ref, onMounted, markRaw } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSidebar } from '@/composables/useSidebar'
 import { useAuthAndSidebar } from '@/composables/useAuthAndSidebar'
@@ -98,41 +97,7 @@ const router = useRouter()
 const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar()
 const { getCurrentUser } = useAuthAndSidebar()
 
-// Define a proper type for icon components
-type IconComponent = Component
-
-interface MenuItem {
-  label: string
-  href?: string
-  icon: IconComponent
-  iconName?: string
-  items?: SubMenuItem[]
-}
-
-interface SubMenuItem {
-  label: string
-  href: string
-  icon: IconComponent
-  iconName?: string
-}
-
-// Define API response types
-interface ApiMenuItem {
-  label: string
-  href?: string
-  icon?: string
-  iconName?: string
-  items?: ApiSubMenuItem[]
-}
-
-interface ApiSubMenuItem {
-  label: string
-  href: string
-  icon?: string
-  iconName?: string
-}
-
-const iconMap: Record<string, IconComponent> = {
+const iconMap = {
   HomeIcon: markRaw(HomeIcon),
   SettingsIcon: markRaw(SettingsIcon),
   BarChartIcon: markRaw(BarChartIcon),
@@ -153,39 +118,39 @@ const iconMap: Record<string, IconComponent> = {
   SchoolIcon: markRaw(SchoolIcon)
 }
 
-function getIconComponent(iconName: string): IconComponent {
+function getIconComponent(iconName) {
   return iconMap[iconName] || iconMap.HomeIcon
 }
 
-const openSubmenu = ref<string | null>(null)
-const departmentDisplayName = ref('এক্সাম মেনেজমেন্ট')  // Default fallback
-const defaultMenuItems: MenuItem[] = [
+const openSubmenu = ref(null)
+const departmentDisplayName = ref('এক্সাম মেনেজমেন্ট')
+const defaultMenuItems = [
   {
     label: 'ই এম ড্যাশবোর্ড',
     href: '/admin/dashboard',
     icon: getIconComponent('HomeIcon'),
-    items: undefined // Ensure 'items' property exists
+    items: undefined
   }
 ]
-const menuItems = ref<MenuItem[]>(defaultMenuItems)
+const menuItems = ref(defaultMenuItems)
 const CACHE_KEY = 'sidebar_menu_cache'
 const CACHE_VERSION_KEY = 'sidebar_cache_version'
 const CACHE_EXPIRY_HOURS = 24
 
-function getCachedData(): MenuItem[] | null {
+function getCachedData() {
   try {
     const cachedData = localStorage.getItem(CACHE_KEY)
     const cacheVersion = localStorage.getItem(CACHE_VERSION_KEY)
     const currentTime = new Date().getTime()
 
     if (cachedData && cacheVersion) {
-      const cached = JSON.parse(cachedData) as ApiMenuItem[]
+      const cached = JSON.parse(cachedData)
       const version = JSON.parse(cacheVersion)
       if (currentTime - version.timestamp < CACHE_EXPIRY_HOURS * 60 * 60 * 1000) {
-        return cached.map((item: ApiMenuItem) => ({
+        return cached.map(item => ({
           ...item,
           icon: getIconComponent(item.iconName || 'HomeIcon'),
-          items: item.items?.map((subItem: ApiSubMenuItem) => ({
+          items: item.items?.map(subItem => ({
             ...subItem,
             icon: getIconComponent(subItem.iconName || 'DocsIcon')
           }))
@@ -198,18 +163,19 @@ function getCachedData(): MenuItem[] | null {
   return null
 }
 
-function setCachedData(data: MenuItem[]): void {
+function setCachedData(data) {
   try {
     const cacheData = data.map(item => ({
       ...item,
       iconName: getIconNameFromComponent(item.icon),
       icon: undefined,
-      items: item.items?.map((subItem: SubMenuItem) => ({
+      items: item.items?.map(subItem => ({
         ...subItem,
         iconName: getIconNameFromComponent(subItem.icon),
         icon: undefined
       }))
-    }))
+    })
+    )
     localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData))
     localStorage.setItem(CACHE_VERSION_KEY, JSON.stringify({
       timestamp: new Date().getTime(),
@@ -220,7 +186,7 @@ function setCachedData(data: MenuItem[]): void {
   }
 }
 
-function getIconNameFromComponent(component: IconComponent): string {
+function getIconNameFromComponent(component) {
   for (const [name, comp] of Object.entries(iconMap)) {
     if (comp === component) return name
   }
@@ -232,7 +198,7 @@ onMounted(async () => {
   await loadDepartmentName()
 })
 
-async function loadSidebarData(): Promise<void> {
+async function loadSidebarData() {
   const cachedData = getCachedData()
   if (cachedData && cachedData.length > 1) {
     menuItems.value = [
@@ -242,169 +208,122 @@ async function loadSidebarData(): Promise<void> {
   }
 
   try {
-    // Get current user info using the composable
     const userData = await getCurrentUser()
     const userId = userData?.id
     const departmentId = userData?.department_id
 
-    // Build API URL with user_id and department_id parameters
     let apiUrl = 'http://127.0.0.1:8080/api/sidebar/'
     const params = []
-    if (userId) {
-      params.push(`user_id=${userId}`)
-    }
-    if (departmentId) {
-      params.push(`department_id=${departmentId}`)
-    }
-    if (params.length > 0) {
-      apiUrl += `?${params.join('&')}`
-    }
+    if (userId) params.push(`user_id=${userId}`)
+    if (departmentId) params.push(`department_id=${departmentId}`)
+    if (params.length > 0) apiUrl += `?${params.join('&')}`
 
-    console.log(`Loading sidebar from: ${apiUrl}`)
     const response = await axios.get(apiUrl)
 
     if (response.data.sidebar_data && Array.isArray(response.data.sidebar_data)) {
-      const freshData: MenuItem[] = [
+      const freshData = [
         defaultMenuItems[0],
-        ...response.data.sidebar_data.map((item: ApiMenuItem) => ({
+        ...response.data.sidebar_data.map(item => ({
           label: item.label,
           key: item.label.toLowerCase().replace(/\s+/g, '_'),
-          icon: getIconComponent(
-            item.iconName || item.icon || 'HomeIcon'
-          ),
-          items: item.items?.map((subItem: ApiSubMenuItem) => ({
+          icon: getIconComponent(item.iconName || item.icon || 'HomeIcon'),
+          items: item.items?.map(subItem => ({
             label: subItem.label,
             href: subItem.href,
-            icon: getIconComponent(
-              subItem.iconName || subItem.icon || 'DocsIcon'
-            )
+            icon: getIconComponent(subItem.iconName || subItem.icon || 'DocsIcon')
           }))
         }))
       ]
       menuItems.value = freshData
       setCachedData(freshData)
 
-      // Log department info for debugging
       if (response.data.department_name) {
-        console.log(`✅ Sidebar loaded for department: ${response.data.department_name} (ID: ${response.data.department_id})`)
-        console.log(`📊 Total modules loaded: ${response.data.total_modules || (freshData.length - 1)}`)
+        // Debug log
       }
     }
   } catch (error) {
-    console.error('❌ Failed to load sidebar data:', error)
     if (!cachedData) {
-      // If no cached data and API fails, try fallback without user_id
       try {
         const fallbackResponse = await axios.get('http://127.0.0.1:8080/api/sidebar/')
         if (fallbackResponse.data.sidebar_data && Array.isArray(fallbackResponse.data.sidebar_data)) {
-          const freshData: MenuItem[] = [
+          const freshData = [
             defaultMenuItems[0],
-            ...fallbackResponse.data.sidebar_data.map((item: ApiMenuItem) => ({
+            ...fallbackResponse.data.sidebar_data.map(item => ({
               label: item.label,
               key: item.label.toLowerCase().replace(/\s+/g, '_'),
-              icon: getIconComponent(
-                item.iconName || item.icon || 'HomeIcon'
-              ),
-              items: item.items?.map((subItem: ApiSubMenuItem) => ({
+              icon: getIconComponent(item.iconName || item.icon || 'HomeIcon'),
+              items: item.items?.map(subItem => ({
                 label: subItem.label,
                 href: subItem.href,
-                icon: getIconComponent(
-                  subItem.iconName || subItem.icon || 'DocsIcon'
-                )
+                icon: getIconComponent(subItem.iconName || subItem.icon || 'DocsIcon')
               }))
             }))
           ]
           menuItems.value = freshData
           setCachedData(freshData)
-          console.log('⚠️ Using fallback sidebar (all modules)')
         }
       } catch (fallbackError) {
-        console.error('❌ Fallback sidebar loading also failed:', fallbackError)
+        // ignore
       }
     }
   }
 }
 
-async function loadDepartmentName(): Promise<void> {
+async function loadDepartmentName() {
   try {
-    // Get current user info
     const userData = await getCurrentUser()
     const departmentId = userData?.department_id
 
     if (departmentId) {
-      console.log(`🏢 Loading department name for ID: ${departmentId}`)
-
       const response = await axios.get(`http://127.0.0.1:8080/api/admin/departments/name/${departmentId}/`)
-
       if (response.data.success && response.data.department_name) {
         departmentDisplayName.value = response.data.department_name
-        console.log(`✅ Department name loaded: ${response.data.department_name}`)
       } else {
-        console.warn('⚠️ Department name not found, using fallback')
         departmentDisplayName.value = 'এক্সাম মেনেজমেন্ট'
       }
     } else {
-      console.warn('⚠️ No department ID found for user, using fallback')
       departmentDisplayName.value = 'এক্সাম মেনেজমেন্ট'
     }
   } catch (error) {
-    console.error('❌ Failed to load department name:', error)
     departmentDisplayName.value = 'এক্সাম মেনেজমেন্ট'
   }
 }
 
-const isActive = (href: string): boolean => window.location.pathname === href
-const toggleSubmenu = (groupIndex: string | number): void => {
+const isActive = (href) => window.location.pathname === href
+const toggleSubmenu = (groupIndex) => {
   const currentKey = `${groupIndex}`
   openSubmenu.value = openSubmenu.value === currentKey ? null : currentKey
 }
-const isSubmenuOpen = (groupIndex: string | number): boolean => {
+const isSubmenuOpen = (groupIndex) => {
   const key = `${groupIndex}`
   const index = typeof groupIndex === 'number' ? groupIndex : Number(groupIndex)
   return (
     openSubmenu.value === key ||
     (
       Array.isArray(menuItems.value[index]?.items) &&
-      menuItems.value[index].items!.some((subItem: SubMenuItem) => isActive(subItem.href))
+      menuItems.value[index].items?.some(subItem => isActive(subItem.href))
     )
   )
 }
-const clearSidebarCache = async (userId?: number): Promise<void> => {
-  // Clear local cache
+const clearSidebarCache = async (userId) => {
   localStorage.removeItem(CACHE_KEY)
   localStorage.removeItem(CACHE_VERSION_KEY)
-
   try {
-    // Get current user if no userId provided
     if (!userId) {
       const userData = await getCurrentUser()
       userId = userData?.id
     }
-
-    // Clear server-side cache
     if (userId) {
       await axios.post('http://127.0.0.1:8080/api/clear-department-cache/', {
         user_id: userId
       })
-      console.log(`Cleared sidebar cache for user ${userId}`)
     } else {
       await axios.post('http://127.0.0.1:8080/api/clear-department-cache/')
-      console.log('Cleared all sidebar cache')
     }
-  } catch (error) {
-    console.error('Failed to clear server cache:', error)
-  }
-
-  // Reload sidebar data
+  } catch (error) {}
   await loadSidebarData()
 }
 
-declare global {
-  interface Window {
-    clearSidebarCache: (userId?: number) => Promise<void>
-    refreshSidebar: () => Promise<void>
-  }
-}
 window.clearSidebarCache = clearSidebarCache
 window.refreshSidebar = loadSidebarData
 </script>

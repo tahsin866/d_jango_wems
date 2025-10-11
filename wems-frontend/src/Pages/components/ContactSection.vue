@@ -328,7 +328,7 @@
   </section>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed } from 'vue'
 
 const isLoggedIn = ref(true)

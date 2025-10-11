@@ -33,24 +33,16 @@
   </div>
 </template>
 
-<script setup lang="ts">
-interface Agreement {
-  main_madrasa: string;
-  exam_name: string;
-  application_date: string;
-  markaz_type: string;
-  main_total_students: number;
-  associated_total_students: number;
-  associated_madrasas: string[];
-}
+<script setup>
+const props = defineProps({
+  agreement: Object
+})
+const emit = defineEmits(['close'])
 
-defineProps<{ agreement: Agreement }>();
-defineEmits(['close']);
-
-function formatDate(dateStr: string) {
-  if (!dateStr) return '';
-  const parts = dateStr.split('-');
-  return `${parts[2]}/${parts[1]}/${parts[0]}`;
+function formatDate(dateStr) {
+  if (!dateStr) return ''
+  const parts = dateStr.split('-')
+  return `${parts[2]}/${parts[1]}/${parts[0]}`
 }
 </script>
 

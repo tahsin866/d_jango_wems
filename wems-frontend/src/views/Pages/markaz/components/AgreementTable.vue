@@ -102,7 +102,7 @@
                       icon="pi pi-eye"
                       class="text-lg text-gray-700"
                       :menuStyle="splitMenuStyle"
-                      @click="openPanel(item)"
+                      @click="onView(item)"
                     />
                   </div>
                 </td>
@@ -254,72 +254,64 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { computed, ref } from 'vue';
-import type { Agreement } from '@/views/Pages/markaz/composable/useAgreements';
-const panelOpen = ref(false);
-const currentItem = ref<Agreement | null>(null);
+<script setup>
+import { computed, ref, defineProps, defineEmits, reactive } from 'vue'
+import { useAgreements } from '@/views/Pages/markaz/composable/useAgreements'
+import { useRouter } from 'vue-router'
+import SplitButton from 'primevue/splitbutton'
 
-function openPanel(item: Agreement) {
-  currentItem.value = item;
-  panelOpen.value = true;
+const panelOpen = ref(false)
+const currentItem = ref(null)
+
+function openPanel(item) {
+  currentItem.value = item
+  panelOpen.value = true
 }
 
 // PDF Download function (dummy)
 function downloadPDF() {
-  // Here you can use jsPDF or any pdf lib, now just demo
-  alert('PDF ডাউনলোড হচ্ছে...');
+  alert('PDF ডাউনলোড হচ্ছে...')
 }
+
+const props = defineProps({
+  loading: Boolean,
+  agreements: Array,
+  filtered: Array
+})
+
+const emit = defineEmits(['view', 'edit', 'delete', 'submit'])
 
 const totalStudents = computed(() => {
-  return props.filtered.reduce((sum, item) => sum + (item.main_total_students || 0) + (item.associated_total_students || 0), 0);
-});
-import { useAgreements } from '@/views/Pages/markaz/composable/useAgreements';
-const { deleteAgreementById } = useAgreements();
-import { useRouter } from 'vue-router';
-const router = useRouter();
-import SplitButton from 'primevue/splitbutton';
+  return props.filtered.reduce(
+    (sum, item) =>
+      sum +
+      (item.main_total_students || 0) +
+      (item.associated_total_students || 0),
+    0
+  )
+})
 
-function formatDate(dateStr: string) {
-  if (!dateStr) return '';
-  const d = new Date(dateStr);
-  const day = d.getDate().toString().padStart(2, '0');
-  const month = (d.getMonth() + 1).toString().padStart(2, '0');
-  const year = d.getFullYear();
-  return `${day}/${month}/${year}`;
+const { deleteAgreementById } = useAgreements()
+const router = useRouter()
+const splitMenuStyle = reactive({})
+
+function onView(item) {
+  openPanel(item)
+  emit('view', item)
 }
-import { defineProps, defineEmits, reactive } from 'vue';
-import type { Agreement } from '@/views/Pages/markaz/composable/useAgreements';
 
-const props = defineProps<{
-  loading: boolean;
-  agreements?: Agreement[];
-  filtered: Agreement[];
-}>();
+const onDelete = item => {
+  deleteAgreementById(item.id)
+  emit('delete', item)
+}
 
-const emit = defineEmits<{
-  (e: 'view', item: Agreement): void;
-  (e: 'edit', item: Agreement): void;
-  (e: 'delete', item: Agreement): void;
-  (e: 'submit', item: Agreement): void;
-}>();
-
-const splitMenuStyle = reactive<Record<string, string>>({});
-
-const onView = (item: Agreement) => emit('view', item);
-
-const onDelete = (item: Agreement) => {
-  deleteAgreementById(item.id);
-  emit('delete', item);
-};
-
-function getMenuItems(item: Agreement) {
+function getMenuItems(item) {
   return [
     {
       label: 'সম্পাদনা',
       icon: 'pi pi-pencil',
       command: () => {
-        router.push({ name: 'MarkazEdit', params: { id: item.id } });
+        router.push({ name: 'MarkazEdit', params: { id: item.id } })
       }
     },
     {
@@ -335,40 +327,49 @@ function getMenuItems(item: Agreement) {
       icon: 'pi pi-send',
       command: () => emit('submit', item)
     }
-  ];
+  ]
 }
 
-function getStatusLabel(status: string) {
+function formatDate(dateStr) {
+  if (!dateStr) return ''
+  const d = new Date(dateStr)
+  const day = d.getDate().toString().padStart(2, '0')
+  const month = (d.getMonth() + 1).toString().padStart(2, '0')
+  const year = d.getFullYear()
+  return `${day}/${month}/${year}`
+}
+
+function getStatusLabel(status) {
   switch (status) {
     case 'pending':
-      return 'খসড়া';
+      return 'খসড়া'
     case 'submitted':
-      return 'দাখিলকৃত';
+      return 'দাখিলকৃত'
     case 'processing':
-      return 'প্রক্রিয়াধীন';
+      return 'প্রক্রিয়াধীন'
     case 'approved':
-      return 'অনুমোদিত';
+      return 'অনুমোদিত'
     case 'rejected':
-      return 'ফেরত';
+      return 'ফেরত'
     default:
-      return 'অজানা';
+      return 'অজানা'
   }
 }
 
-function statusClass(status: string) {
+function statusClass(status) {
   switch (status) {
     case 'pending':
-      return 'bg-yellow-100 text-yellow-800 border border-yellow-300';
+      return 'bg-yellow-100 text-yellow-800 border border-yellow-300'
     case 'submitted':
-      return 'bg-blue-100 text-blue-800 border border-blue-300';
+      return 'bg-blue-100 text-blue-800 border border-blue-300'
     case 'processing':
-      return 'bg-purple-100 text-purple-800 border border-purple-300';
+      return 'bg-purple-100 text-purple-800 border border-purple-300'
     case 'approved':
-      return 'bg-green-100 text-green-800 border border-green-300';
+      return 'bg-green-100 text-green-800 border border-green-300'
     case 'rejected':
-      return 'bg-red-100 text-red-800 border border-red-300';
+      return 'bg-red-100 text-red-800 border border-red-300'
     default:
-      return 'bg-gray-100 text-gray-800 border border-gray-300';
+      return 'bg-gray-100 text-gray-800 border border-gray-300'
   }
 }
 </script>

@@ -365,127 +365,58 @@
     </div>
 </template>
 
-<script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue';
-import { useRoute } from 'vue-router';
-import axios from 'axios';
+<script setup>
+import { ref, onMounted, computed, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import axios from 'axios'
 
 // Type definitions
-interface Student {
-  id: number;
-  Name: string;
-  Father?: string;
-  Mother?: string;
-  DateofBirth?: string;
-  Class?: string;
-  Roll?: string;
-  reg_id?: string;
-  Division?: string;
-  Madrasha?: string;
-  Markaj?: string;
-  student_type?: string;
-  year?: string;
-  marhalaId?: string;
-  CID?: string;
-}
-
-interface StudentBasic {
-  id: number;
-  student_name_bn: string;
-  father_name_bn: string;
-  mother_name_bn?: string;
-  date_of_birth?: string;
-  roll_no: string;
-  reg_no: string;
-  year: string;
-  marhala_id: string;
-}
-
-interface StudentResult {
-  label: string;
-  value: number;
-  division: string;
-  result_type: string;
-}
-
-interface StudentResultsData {
-  madrasha?: string;
-  markaj?: string;
-  class_name?: string;
-  irregular_subjects?: string[];
-}
-
-interface MarhalaOption {
-  id: string;
-  name: string;
-}
-
-interface ApiResponse {
-  session_key?: string; // 🚀 Added for Redis cache system
-  student_basic?: StudentBasic;
-  student_results?: {
-    subjects?: StudentResult[];
-    madrasha?: string;
-    markaj?: string;
-    class_name?: string;
-    irregular_subjects?: string[];
-  };
-  error?: string;
-}
-
-const marhalaName = ref<string>('মারহালা নাম');
-
-const route = useRoute();
+const marhalaName = ref('মারহালা নাম')
+const route = useRoute()
 
 onMounted(async () => {
-  // Get marhalaId from route param
-  const marhalaId = Array.isArray(route.params.marhala_id) ? route.params.marhala_id[0] : route.params.marhala_id || '2';
-  currentMarhalaId.value = marhalaId;
+  const marhalaId = Array.isArray(route.params.marhala_id) ? route.params.marhala_id[0] : route.params.marhala_id || '2'
+  currentMarhalaId.value = marhalaId
 
-  // Get marhala name from API
   try {
-    const res = await axios.get(`/api/marhalas/${marhalaId}/`);
-    marhalaName.value = res.data.name_bn || 'মারহালা';
+    const res = await axios.get(`/api/marhalas/${marhalaId}/`)
+    marhalaName.value = res.data.name_bn || 'মারহালা'
   } catch {
-    marhalaName.value = 'মারহালা';
+    marhalaName.value = 'মারহালা'
   }
 
-  // Fetch years from backend API
   try {
-    const yearsRes = await axios.get('/api/admin/registration/oldstudent/years/');
-    years.value = yearsRes.data;
+    const yearsRes = await axios.get('/api/admin/registration/oldstudent/years/')
+    years.value = yearsRes.data
   } catch {
-    years.value = [];
+    years.value = []
   }
 
-  fadeIn.value = true;
-});
-const years = ref<string[]>([]);
-const loading = ref<boolean>(false);
-const currentMarhalaId = ref<string>('2');
-const showError = ref<boolean>(false);
-const errorMessage = ref<string>('');
-const searchPerformed = ref<boolean>(false);
-const isSearching = ref<boolean>(false);
-const fadeIn = ref<boolean>(false);
+  fadeIn.value = true
+})
 
-// Search filters
-const selectedMarhala = ref<string>('');
-const selectedYear = ref<string>('');
-const rollNumber = ref<string>('');
-const registrationNumber = ref<string>('');
+const years = ref([])
+const loading = ref(false)
+const currentMarhalaId = ref('2')
+const showError = ref(false)
+const errorMessage = ref('')
+const searchPerformed = ref(false)
+const isSearching = ref(false)
+const fadeIn = ref(false)
 
-// Student data refs with proper types
-const student = ref<Student | null>(null);
-const studentBasic = ref<StudentBasic | null>(null);
-const studentResults = ref<StudentResult[]>([]);
-const studentResultsData = ref<StudentResultsData>({});
+const selectedMarhala = ref('')
+const selectedYear = ref('')
+const rollNumber = ref('')
+const registrationNumber = ref('')
 
-// current user (fake)
-const currentUser: string = 'tahsin866';
+const student = ref(null)
+const studentBasic = ref(null)
+const studentResults = ref([])
+const studentResultsData = ref({})
 
-/* --- Computed / Derived --- */
-const availableMarhalas = computed<MarhalaOption[]>(() => {
+const currentUser = 'tahsin866'
+
+const availableMarhalas = computed(() => {
   const allMarhalas = [
     { id: '2', name: 'ফযীলত' },
     { id: '3', name: 'সানাবিয়া উলইয়া' },
@@ -494,167 +425,149 @@ const availableMarhalas = computed<MarhalaOption[]>(() => {
     { id: '6', name: 'ইবতিদাইয়্যাহ' },
     { id: '7', name: 'হিফযুল কুরআন' },
     { id: '8', name: 'ইলমুত তাজবীদ ওয়াল ক্বিরাআত' }
-  ];
+  ]
 
-  // Keep same filtering logic as original (demo)
-  if (currentMarhalaId.value === '9') return allMarhalas.filter((m) => ['2', '3'].includes(m.id));
-  if (currentMarhalaId.value === '10') return allMarhalas.filter((m) => ['4', '3'].includes(m.id));
-  if (currentMarhalaId.value === '11') return allMarhalas.filter((m) => ['5', '4'].includes(m.id));
-  if (currentMarhalaId.value === '12') return allMarhalas.filter((m) => ['6', '5'].includes(m.id));
-  if (currentMarhalaId.value === '14') return allMarhalas.filter((m) => ['6', '7'].includes(m.id));
-  return allMarhalas;
-});
+  if (currentMarhalaId.value === '9') return allMarhalas.filter(m => ['2', '3'].includes(m.id))
+  if (currentMarhalaId.value === '10') return allMarhalas.filter(m => ['4', '3'].includes(m.id))
+  if (currentMarhalaId.value === '11') return allMarhalas.filter(m => ['5', '4'].includes(m.id))
+  if (currentMarhalaId.value === '12') return allMarhalas.filter(m => ['6', '5'].includes(m.id))
+  if (currentMarhalaId.value === '14') return allMarhalas.filter(m => ['6', '7'].includes(m.id))
+  return allMarhalas
+})
 
 const hasSearchCriteria = computed(() => {
-  return !!(selectedMarhala.value || selectedYear.value || rollNumber.value || registrationNumber.value);
-});
+  return !!(selectedMarhala.value || selectedYear.value || rollNumber.value || registrationNumber.value)
+})
 
-/* --- Functions for UI behavior --- */
-const showErrorMessage = (message: string): void => {
-  errorMessage.value = message;
-  showError.value = true;
+const showErrorMessage = (message) => {
+  errorMessage.value = message
+  showError.value = true
   setTimeout(() => {
-    showError.value = false;
-  }, 5000);
-};
+    showError.value = false
+  }, 5000)
+}
 
-const searchStudents = async (): Promise<void> => {
-  loading.value = true;
-  isSearching.value = true;
-  searchPerformed.value = true;
-  showError.value = false;
-  student.value = null;
-  studentBasic.value = null;
-  studentResults.value = [];
-  studentResultsData.value = {};
+const searchStudents = async () => {
+  loading.value = true
+  isSearching.value = true
+  searchPerformed.value = true
+  showError.value = false
+  student.value = null
+  studentBasic.value = null
+  studentResults.value = []
+  studentResultsData.value = {}
 
   try {
     const params = {
-      marhala: selectedMarhala.value, // এখানে cid যাবে
+      marhala: selectedMarhala.value,
       year: selectedYear.value,
       roll: rollNumber.value,
       registration: registrationNumber.value,
-      marhalaId: currentMarhalaId.value // backend-এ header_marhala_id হিসেবে যাবে
-    };
-    const res = await axios.get<ApiResponse>('/api/admin/registration/oldstudent/search/', { params });
+      marhalaId: currentMarhalaId.value
+    }
+    const res = await axios.get('/api/admin/registration/oldstudent/search/', { params })
     if (res.data && res.data.student_basic) {
-      studentBasic.value = res.data.student_basic;
+      studentBasic.value = res.data.student_basic
 
-      // 🚀 REDIS CACHE SYSTEM: Save session key instead of full data
       if (res.data.session_key) {
         try {
           const sessionData = {
             session_key: res.data.session_key,
-            student_preview: res.data.student_basic // Store basic info for display
-          };
-          sessionStorage.setItem('oldStudentRedisSession', JSON.stringify(sessionData));
-          // Session saved successfully
-        } catch {
-          // Could not save Redis session
-        }
+            student_preview: res.data.student_basic
+          }
+          sessionStorage.setItem('oldStudentRedisSession', JSON.stringify(sessionData))
+        } catch {}
       } else {
-        // Fallback: Save full search result to sessionStorage (backward compatibility)
         try {
-          sessionStorage.setItem('oldStudentSearchResult', JSON.stringify(res.data));
-          // Fallback: Search result saved
-        } catch {
-          // Could not save search result
-        }
-      }      if (res.data.student_results) {
-        // Store the subjects array
+          sessionStorage.setItem('oldStudentSearchResult', JSON.stringify(res.data))
+        } catch {}
+      }
+      if (res.data.student_results) {
         if (res.data.student_results.subjects) {
-          studentResults.value = res.data.student_results.subjects;
+          studentResults.value = res.data.student_results.subjects
         }
-
-        // Store the common data separately, including irregular_subjects
         studentResultsData.value = {
           madrasha: res.data.student_results.madrasha || 'N/A',
           markaj: res.data.student_results.markaj || 'N/A',
           class_name: res.data.student_results.class_name || 'N/A',
           irregular_subjects: res.data.student_results.irregular_subjects || []
-        };
+        }
       }
-      showError.value = false;
+      showError.value = false
     } else if (res.data && res.data.error) {
-      showErrorMessage(res.data.error); // eligibility error দেখান
+      showErrorMessage(res.data.error)
     } else {
-      showErrorMessage('রেজাল্ট পাওয়া যায়নি');
+      showErrorMessage('রেজাল্ট পাওয়া যায়নি')
     }
   } catch {
-    showErrorMessage('একটি ত্রুটি ঘটেছে');
+    showErrorMessage('একটি ত্রুটি ঘটেছে')
   } finally {
     setTimeout(() => {
-      loading.value = false;
-      isSearching.value = false;
-    }, 300);
+      loading.value = false
+      isSearching.value = false
+    }, 300)
   }
-};
+}
 
-const resetSearch = (): void => {
-  selectedMarhala.value = '';
-  selectedYear.value = '';
-  rollNumber.value = '';
-  registrationNumber.value = '';
-  student.value = null;
-  studentBasic.value = null;
-  studentResults.value = [];
-  studentResultsData.value = {};
-  showError.value = false;
-  searchPerformed.value = false;
-};
+const resetSearch = () => {
+  selectedMarhala.value = ''
+  selectedYear.value = ''
+  rollNumber.value = ''
+  registrationNumber.value = ''
+  student.value = null
+  studentBasic.value = null
+  studentResults.value = []
+  studentResultsData.value = {}
+  showError.value = false
+  searchPerformed.value = false
+}
 
-/* --- Router-link targets (use route() helper when available otherwise fallback paths) --- */
 const listUrl = computed(() => {
-  return { path: '/students/list' };
-});
+  return { path: '/students/list' }
+})
 
-/* --- Prefill via sessionStorage to avoid showing in URL --- */
-const prefillAndGo = (student: StudentBasic | null) => {
+const prefillAndGo = (student) => {
   try {
-    if (!student) return;
+    if (!student) return
     const payload = {
       name_bn: student.student_name_bn || '',
       father_name_bn: student.father_name_bn || '',
       Date_of_birth: student.date_of_birth || ''
-    };
-    sessionStorage.setItem('oldRegPrefill', JSON.stringify(payload));
+    }
+    sessionStorage.setItem('oldRegPrefill', JSON.stringify(payload))
   } catch {}
-};
+}
 
-const getCurrentDate = (): string => {
-  // keep the fixed date from your original example
-  const date = new Date('2025-07-18 00:32:51');
+const getCurrentDate = () => {
+  const date = new Date('2025-07-18 00:32:51')
   return new Intl.DateTimeFormat('bn-BD', {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
-  }).format(date);
-};
+  }).format(date)
+}
 
-// removed unused getStudentTypeBadge
+const getDivisionBadge = (division) => {
+  if (!division) return 'bg-gray-100 text-gray-700 border border-gray-200'
+  if (division === 'রাসিব') return 'bg-red-100 text-red-700 border border-red-200'
+  if (division.includes('মমতাজ')) return 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+  if (division.includes('জায়্যিদ')) return 'bg-blue-100 text-blue-700 border border-blue-200'
+  return 'bg-gray-100 text-gray-700 border border-gray-200'
+}
 
-const getDivisionBadge = (division?: string): string => {
-  if (!division) return 'bg-gray-100 text-gray-700 border border-gray-200';
-  if (division === 'রাসিব') return 'bg-red-100 text-red-700 border border-red-200';
-  if (division.includes('মমতাজ')) return 'bg-emerald-100 text-emerald-700 border border-emerald-200';
-  if (division.includes('জায়্যিদ')) return 'bg-blue-100 text-blue-700 border border-blue-200';
-  return 'bg-gray-100 text-gray-700 border border-gray-200';
-};
+const getResultTypeBadge = (resultType) => {
+  if (!resultType) return 'bg-gray-100 text-gray-700 border border-gray-200'
+  if (resultType.trim() === 'নিয়মিত') return 'bg-green-100 text-green-700 border border-green-200'
+  if (resultType.includes('অনিয়মিত')) return 'bg-yellow-100 text-yellow-700 border border-yellow-200'
+  if (resultType.trim() === 'মানোউন্নয়ন') return 'bg-purple-100 text-purple-700 border border-purple-300'
+  return 'bg-gray-100 text-gray-700 border border-gray-200'
+}
 
-const getResultTypeBadge = (resultType?: string): string => {
-  if (!resultType) return 'bg-gray-100 text-gray-700 border border-gray-200';
-  if (resultType.trim() === 'নিয়মিত') return 'bg-green-100 text-green-700 border border-green-200';
-  if (resultType.includes('অনিয়মিত')) return 'bg-yellow-100 text-yellow-700 border border-yellow-200';
-  if (resultType.trim() === 'মানোউন্নয়ন') return 'bg-purple-100 text-purple-700 border border-purple-300';
-  return 'bg-gray-100 text-gray-700 border border-gray-200';
-};
-
-/* --- Watchers: auto-search when criteria change after a search was already performed --- */
 watch([selectedMarhala, selectedYear, rollNumber, registrationNumber], () => {
   if (searchPerformed.value && hasSearchCriteria.value) {
-    searchStudents();
+    searchStudents()
   }
-});
+})
 </script>
 
 <style scoped>

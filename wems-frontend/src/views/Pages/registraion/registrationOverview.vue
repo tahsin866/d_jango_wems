@@ -226,42 +226,41 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed, watch, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import axios from 'axios'
 
-// ... script section unchanged ...
-const registrationOverview = ref<any[]>([])
-const examName = ref<string>('লোড হচ্ছে...')
-const globalFilterValue = ref<string>('')
-const currentPage = ref<number>(1)
-const rowsPerPage = ref<number>(10)
-const totalPages = ref<number>(1)
-const isLoading = ref<boolean>(true)
-const displayedRows = ref<any[]>([])
-const latestExamSetupId = ref<number|null>(null)
+const registrationOverview = ref([])
+const examName = ref('লোড হচ্ছে...')
+const globalFilterValue = ref('')
+const currentPage = ref(1)
+const rowsPerPage = ref(10)
+const totalPages = ref(1)
+const isLoading = ref(true)
+const displayedRows = ref([])
+const latestExamSetupId = ref(null)
 
 const fetchOverview = async () => {
   isLoading.value = true
   try {
-    const latestSetupRes = await axios.get('/api/central-exam/exam-setups/latest/');
+    const latestSetupRes = await axios.get('/api/central-exam/exam-setups/latest/')
     const latestSetup = latestSetupRes.data?.data
     if (latestSetup && latestSetup.id) {
       latestExamSetupId.value = latestSetup.id
-      examName.value = latestSetup.exam_name || 'পরীক্ষা';
+      examName.value = latestSetup.exam_name || 'পরীক্ষা'
       const feesRes = await axios.get(`/api/admin/registration/overview?exam_setup_id=${latestSetup.id}`)
       registrationOverview.value = feesRes.data
     } else {
       registrationOverview.value = []
       examName.value = 'কোনো পরীক্ষার সেটআপ নেই'
     }
-    updateDisplayedData();
+    updateDisplayedData()
   } catch {
-    registrationOverview.value = [];
-    examName.value = 'API ত্রুটি';
+    registrationOverview.value = []
+    examName.value = 'API ত্রুটি'
   }
-  isLoading.value = false;
+  isLoading.value = false
 }
 
 const updateDisplayedData = () => {
@@ -304,14 +303,14 @@ onMounted(() => {
 })
 
 // Helper: Get field from row
-function getFeeField(row: any, field: string, isMoney = false) {
+function getFeeField(row, field, isMoney = false) {
   if (!row || row[field] === undefined || row[field] === null) return 'NA'
   if (isMoney) return `৳ ${formatNumber(row[field])}`
   if (field.includes('date')) return formatDate(row[field])
   return row[field]
 }
 
-const formatDate = (dateString?: string | null) => {
+const formatDate = (dateString) => {
   if (!dateString) return 'N/A'
   try {
     const date = new Date(dateString)
@@ -322,7 +321,7 @@ const formatDate = (dateString?: string | null) => {
   }
 }
 
-const formatNumber = (num: number | string | undefined | null) => {
+const formatNumber = (num) => {
   if (num === undefined || num === null) return '0'
   const n = Number(num)
   if (!Number.isFinite(n)) return String(num)
@@ -339,8 +338,8 @@ const getCurrentTime = () => {
   return new Intl.DateTimeFormat('bn-BD', { hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(date)
 }
 
-const getPageNumbers = (): (number | string)[] => {
-  const pages: (number | string)[] = []
+const getPageNumbers = () => {
+  const pages = []
   const maxVisiblePages = 5
   if (totalPages.value <= maxVisiblePages) {
     for (let i = 1; i <= totalPages.value; i++) pages.push(i)
@@ -364,16 +363,11 @@ const getPageNumbers = (): (number | string)[] => {
   return pages
 }
 
-interface RegistrationRow {
-  marhala_id: number;
-  // add other fields as needed
+function getOldRegistrationPath(row) {
+  return `/student/old/verify/${row.marhala_id}`
 }
 
-function getOldRegistrationPath(row: RegistrationRow) {
-  return `/student/old/verify/${row.marhala_id}`;
-}
-
-function getRegistrationTablePath(row: RegistrationRow) {
+function getRegistrationTablePath() {
   return `/registration/list`
 }
 </script>

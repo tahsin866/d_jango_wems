@@ -1,23 +1,8 @@
-<script setup lang="ts">
-import { ref } from 'vue';
+<script setup>
+import { ref } from 'vue'
 
-type ExamCenter = {
-  id: number;
-  name: string;
-  location: string;
-  capacity: string;
-  assignedStudents: string;
-  status: 'active' | 'inactive';
-};
-
-type CenterSummary = {
-  totalCenters: string;
-  totalCapacity: string;
-  assignedStudents: string;
-  remainingCapacity: string;
-};
-
-const examCenters = ref<ExamCenter[]>([
+// Types removed, now pure JS
+const examCenters = ref([
   {
     id: 1,
     name: 'দারুল উলুম মাদরাসা কেন্দ্র',
@@ -58,44 +43,44 @@ const examCenters = ref<ExamCenter[]>([
     assignedStudents: '২৮৫',
     status: 'active'
   }
-]);
+])
 
-const centerSummary = ref<CenterSummary>({
+const centerSummary = ref({
   totalCenters: '৩৪৫',
   totalCapacity: '১,৫০,০০০',
   assignedStudents: '১,৪৫,৬৭৮',
   remainingCapacity: '৪,৩২২'
-});
+})
 
-const selectedCenter = ref<ExamCenter | null>(null);
-const showModal = ref(false);
+const selectedCenter = ref(null)
+const showModal = ref(false)
 
 // Current date/time and user information
-const currentDateTime = '2025-08-07 07:01:22';
-const currentUser = 'tahsin866';
+const currentDateTime = '2025-08-07 07:01:22'
+const currentUser = 'tahsin866'
 
-function showCenterDetails(center: ExamCenter) {
-  selectedCenter.value = center;
-  showModal.value = true;
+function showCenterDetails(center) {
+  selectedCenter.value = center
+  showModal.value = true
 }
 
 function closeCenterDetails() {
-  showModal.value = false;
+  showModal.value = false
   setTimeout(() => {
-    selectedCenter.value = null;
-  }, 200);
+    selectedCenter.value = null
+  }, 200)
 }
 
-function calculatePercentage(assigned: string, capacity: string): number {
-  const cleanAssigned = parseInt(assigned.replace(/,/g, ''));
-  const cleanCapacity = parseInt(capacity.replace(/,/g, ''));
-  return (cleanAssigned / cleanCapacity) * 100;
+function calculatePercentage(assigned, capacity) {
+  const cleanAssigned = parseInt(assigned.replace(/,/g, ''))
+  const cleanCapacity = parseInt(capacity.replace(/,/g, ''))
+  return (cleanAssigned / cleanCapacity) * 100
 }
 
-function getCapacityColorClass(percentage: number): string {
-  if (percentage >= 90) return 'bg-red-600';
-  if (percentage >= 75) return 'bg-amber-500';
-  return 'bg-green-600';
+function getCapacityColorClass(percentage) {
+  if (percentage >= 90) return 'bg-red-600'
+  if (percentage >= 75) return 'bg-amber-500'
+  return 'bg-green-600'
 }
 </script>
 

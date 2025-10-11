@@ -571,8 +571,8 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, reactive, computed, onMounted, watch } from 'vue';
+<script setup>
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import SplitButton from 'primevue/splitbutton'
 import InputSwitch from 'primevue/inputswitch'
 import InputText from 'primevue/inputtext'
@@ -582,130 +582,70 @@ import InputIcon from 'primevue/inputicon'
 import Calendar from 'primevue/calendar'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
-import ColumnGroup from 'primevue/columngroup'
-import Row from 'primevue/row'
+// import ColumnGroup from 'primevue/columngroup'
+// import Row from 'primevue/row'
 import 'primeicons/primeicons.css'
 
-interface MarkazMadrasha {
-  id: number;
-  madrasha_id: number | string;
-  center_id: number;
-  center_name_display: string;
-  serial_number: string;
-  mtype: string;
-  elhaqno: string;
-  stage: string;
-  stageserial: string;
-  mnname: string;
-  ara_mname: string;
-  mname: string;
-  did: number;
-  des_id: number;
-  tid: number;
-  village: string;
-  post: string;
-  mobile: string;
-  enabledisable: string;
-  status?: string;
-  year: string | null;
-  mmlabel: string;
-  editdate: string;
-  created_at: string;
-  updated_at: string;
-  division_name: string;
-  district_name: string;
-  thana_name: string;
-  stage_display: string;
-  student_type_display: string;
-  student_type?: string;
-  [key: string]: unknown;
-  location: string;
-}
+const totalCount = ref(0)
+const loading = ref(false)
+const error = ref(null)
+const currentPage = ref(1)
+const itemsPerPage = ref(10)
+const sampleData = ref([])
+const cacheStatus = ref(null)
 
-interface Column {
-  key: string;
-  label: string;
-  visible: boolean;
-  sortable: boolean;
-}
-
-// State
-const totalCount = ref(0);
-const loading = ref(false);
-const error = ref<string | null>(null);
-const currentPage = ref(1);
-const itemsPerPage = ref(10);
-const sampleData = ref<MarkazMadrasha[]>([]);
-type CacheStatus = { cached?: boolean; cache_backend?: string };
-const cacheStatus = ref<CacheStatus | null>(null);
-
-// Statistics state
 const statisticsData = ref({
   total_markaz: 0,
   male_count: 0,
   female_count: 0,
   active_count: 0
-});
-const statisticsLoading = ref(false);
+})
+const statisticsLoading = ref(false)
 
-// Filter dropdown state
-const availableDivisions = ref<Array<{did: number, division: string}>>([]);
-const availableDistricts = ref<Array<{did: number, desid: number, district: string}>>([]);
-const availableThanas = ref<Array<{des_id: number, thana_id: number, thana: string}>>([]);
-const availableCenters = ref<Array<{id: number, name: string, code: string}>>([]);
+const availableDivisions = ref([])
+const availableDistricts = ref([])
+const availableThanas = ref([])
+const availableCenters = ref([])
 const filtersLoading = ref({
   divisions: false,
   districts: false,
   thanas: false,
   centers: false
-});
+})
 
 const fetchData = async () => {
-  loading.value = true;
-  error.value = null;
-  console.log('Fetching markaz data from:', `/api/admin/markaz/markaz-list/?page=${currentPage.value}&page_size=${itemsPerPage.value}`);
+  loading.value = true
+  error.value = null
   try {
-    const response = await fetch(`/api/admin/markaz/markaz-list/?page=${currentPage.value}&page_size=${itemsPerPage.value}`);
-    console.log('Response status:', response.status);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const data = await response.json();
-    console.log('API Response:', data);
+    const response = await fetch(`/api/admin/markaz/markaz-list/?page=${currentPage.value}&page_size=${itemsPerPage.value}`)
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+    const data = await response.json()
     if (Array.isArray(data.results)) {
-      sampleData.value = (data.results as Array<MarkazMadrasha & { status?: string }>).map((row) => ({
+      sampleData.value = data.results.map(row => ({
         ...row,
         enabledisable: row.status === '1' ? '1' : '0'
-      }));
-      totalCount.value = data.total;
+      }))
+      totalCount.value = data.total
       cacheStatus.value = {
         cached: data.cached || false,
         cache_backend: 'unknown'
-      };
-      console.log('Data loaded successfully. Sample count:', data.results.length, 'Total count:', data.total, 'Cached:', data.cached);
+      }
     } else {
-      console.log('Invalid data format - results is not an array:', data);
-      sampleData.value = [];
-      totalCount.value = 0;
+      sampleData.value = []
+      totalCount.value = 0
     }
   } catch (err) {
-    console.error('Error fetching data:', err);
-    if (err instanceof Error) {
-      error.value = err.message;
-    } else {
-      error.value = 'Failed to fetch data';
-    }
-    sampleData.value = [];
-    totalCount.value = 0;
+    error.value = err instanceof Error ? err.message : 'Failed to fetch data'
+    sampleData.value = []
+    totalCount.value = 0
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-};
+}
 
-const onStatusSwitch = async (item: MarkazMadrasha, val: string) => {
-  // optimistic UI update
-  const prev = item.enabledisable;
-  item.enabledisable = val;
+const onStatusSwitch = async (item, val) => {
+  const prev = item.enabledisable
+  item.enabledisable = val
   try {
     const res = await fetch(`/api/admin/markaz/status/${item.id}/`, {
       method: 'POST',
@@ -714,93 +654,80 @@ const onStatusSwitch = async (item: MarkazMadrasha, val: string) => {
         'X-CSRFToken': getCsrfToken()
       },
       body: JSON.stringify({ status: val === '1' ? 1 : 0 })
-    });
-    if (!res.ok) {
-      throw new Error(`Failed to update status: ${res.status}`);
-    }
-    const data = await res.json();
-    // Ensure UI reflects backend truth; also map backend status to enabledisable for display
-    // Backend now returns status as string ('1' or '0')
-    const backendStatus = data.status === '1' ? '1' : '0';
-    item.enabledisable = backendStatus;
-    // Also update the item's status field to maintain consistency
-    item.status = data.status;
-  } catch (e) {
-    console.error(e);
-    // revert on error
-    item.enabledisable = prev;
-    alert('স্ট্যাটাস আপডেট ব্যর্থ হয়েছে');
+    })
+    if (!res.ok) throw new Error(`Failed to update status: ${res.status}`)
+    const data = await res.json()
+    const backendStatus = data.status === '1' ? '1' : '0'
+    item.enabledisable = backendStatus
+    item.status = data.status
+  } catch  {
+    item.enabledisable = prev
+    alert('স্ট্যাটাস আপডেট ব্যর্থ হয়েছে')
   }
-};
+}
 
-// Filter functions
 const fetchDivisions = async () => {
-  filtersLoading.value.divisions = true;
+  filtersLoading.value.divisions = true
   try {
-    const response = await fetch('/api/admin/markaz/divisions/');
+    const response = await fetch('/api/admin/markaz/divisions/')
     if (response.ok) {
-      const data = await response.json();
-      availableDivisions.value = data.results || [];
+      const data = await response.json()
+      availableDivisions.value = data.results || []
     }
-  } catch (error) {
-    console.error('Error fetching divisions:', error);
+  } catch  {
   } finally {
-    filtersLoading.value.divisions = false;
+    filtersLoading.value.divisions = false
   }
-};
+}
 
-const fetchDistricts = async (divisionId?: number) => {
-  filtersLoading.value.districts = true;
+const fetchDistricts = async (divisionId) => {
+  filtersLoading.value.districts = true
   try {
     const url = divisionId
       ? `/api/admin/markaz/districts/?did=${divisionId}`
-      : '/api/admin/markaz/districts/';
-    const response = await fetch(url);
+      : '/api/admin/markaz/districts/'
+    const response = await fetch(url)
     if (response.ok) {
-      const data = await response.json();
-      availableDistricts.value = data.results || [];
+      const data = await response.json()
+      availableDistricts.value = data.results || []
     }
-  } catch (error) {
-    console.error('Error fetching districts:', error);
+  } catch  {
   } finally {
-    filtersLoading.value.districts = false;
+    filtersLoading.value.districts = false
   }
-};
+}
 
-const fetchThanas = async (districtId?: number) => {
-  filtersLoading.value.thanas = true;
+const fetchThanas = async (districtId) => {
+  filtersLoading.value.thanas = true
   try {
     const url = districtId
       ? `/api/admin/markaz/thanas/?district_id=${districtId}`
-      : '/api/admin/markaz/thanas/';
-    const response = await fetch(url);
+      : '/api/admin/markaz/thanas/'
+    const response = await fetch(url)
     if (response.ok) {
-      const data = await response.json();
-      availableThanas.value = data.results || [];
+      const data = await response.json()
+      availableThanas.value = data.results || []
     }
-  } catch (error) {
-    console.error('Error fetching thanas:', error);
+  } catch  {
   } finally {
-    filtersLoading.value.thanas = false;
+    filtersLoading.value.thanas = false
   }
-};
+}
 
 const fetchCenters = async () => {
-  filtersLoading.value.centers = true;
+  filtersLoading.value.centers = true
   try {
-    const response = await fetch('/api/admin/markaz/centers/');
+    const response = await fetch('/api/admin/markaz/centers/')
     if (response.ok) {
-      const data = await response.json();
-      availableCenters.value = data.results || [];
+      const data = await response.json()
+      availableCenters.value = data.results || []
     }
-  } catch (error) {
-    console.error('Error fetching centers:', error);
+  } catch  {
   } finally {
-    filtersLoading.value.centers = false;
+    filtersLoading.value.centers = false
   }
-};
+}
 
-// Filters
 const filters = reactive({
   search: '',
   division: '',
@@ -815,67 +742,58 @@ const filters = reactive({
   year: '',
   fromDate: '',
   toDate: ''
-});
+})
 
-// Watch for division changes
 watch(() => filters.division, async (newDivisionId) => {
   if (newDivisionId) {
-    const division = availableDivisions.value.find(d => d.division === newDivisionId);
+    const division = availableDivisions.value.find(d => d.division === newDivisionId)
     if (division) {
-      await fetchDistricts(division.did);
-      await fetchThanas(); // Clear thanas when division changes
+      await fetchDistricts(division.did)
+      await fetchThanas()
     }
   } else {
-    await fetchDistricts(); // Fetch all districts
-    await fetchThanas(); // Fetch all thanas
+    await fetchDistricts()
+    await fetchThanas()
   }
-  // Reset dependent filters
-  filters.district = '';
-  filters.thana = '';
-});
+  filters.district = ''
+  filters.thana = ''
+})
 
-// Watch for district changes
 watch(() => filters.district, async (newDistrictName) => {
   if (newDistrictName && filters.division) {
-    const district = availableDistricts.value.find(d => d.district === newDistrictName);
+    const district = availableDistricts.value.find(d => d.district === newDistrictName)
     if (district) {
-      await fetchThanas(district.desid);
+      await fetchThanas(district.desid)
     }
   } else if (!filters.division) {
-    await fetchThanas(); // Fetch all thanas if no division selected
+    await fetchThanas()
   }
-  // Reset thana filter
-  filters.thana = '';
-});
+  filters.thana = ''
+})
 
 onMounted(() => {
-  fetchData();
-  fetchStatistics();
-  fetchDivisions();
-  fetchDistricts();
-  fetchThanas();
-  fetchCenters();
-});
+  fetchData()
+  fetchStatistics()
+  fetchDivisions()
+  fetchDistricts()
+  fetchThanas()
+  fetchCenters()
+})
 
 watch([currentPage, itemsPerPage], () => {
-  fetchData();
-});
-const showColumnMenu = ref(false);
-const showAdvancedFilters = ref(false);
+  fetchData()
+})
 
-// Initialize columns with default visibility
-const initializeColumns = (): Column[] => {
-  // Try to load saved column settings from localStorage
-  const savedColumns = localStorage.getItem('markazTableColumns');
+const showColumnMenu = ref(false)
+const showAdvancedFilters = ref(false)
+
+const initializeColumns = () => {
+  const savedColumns = localStorage.getItem('markazTableColumns')
   if (savedColumns) {
     try {
-      return JSON.parse(savedColumns);
-    } catch (e) {
-      console.error('Error parsing saved columns:', e);
-    }
+      return JSON.parse(savedColumns)
+    } catch  {}
   }
-
-  // Default columns if no saved settings
   return [
     { key: 'id', label: 'আইডি', visible: true, sortable: true },
     { key: 'center_id', label: 'কেন্দ্রের ধরণ', visible: true, sortable: true },
@@ -888,294 +806,198 @@ const initializeColumns = (): Column[] => {
     { key: 'mobile', label: 'মোবাইল', visible: true, sortable: true },
     { key: 'status', label: 'স্ট্যটাস', visible: true, sortable: true },
     { key: 'actions', label: 'একশন', visible: true, sortable: false }
-  ];
-};
+  ]
+}
 
-const availableColumns = ref<Column[]>(initializeColumns());
+const availableColumns = ref(initializeColumns())
 
-// Sorting and pagination
-const sortField = ref('id');
-const sortDirection = ref<'asc' | 'desc'>('asc');
+const sortField = ref('id')
+const sortDirection = ref('asc')
 
-// Computed properties
 const visibleColumns = computed(() => {
-  return availableColumns.value.filter(column => column.visible);
-});
+  return availableColumns.value.filter(column => column.visible)
+})
 
 const filteredData = computed(() => {
-  console.log('Computing filteredData. Current page data length:', sampleData.value.length);
-  let filtered = sampleData.value;
+  let filtered = sampleData.value
 
-  // Apply client-side filtering to the current page data
-  // Note: For better performance, these filters should be moved to backend API calls
-
-  // Search filter
   if (filters.search) {
-    const search = filters.search.toLowerCase();
-    filtered = filtered.filter((item: MarkazMadrasha) =>
+    const search = filters.search.toLowerCase()
+    filtered = filtered.filter(item =>
       item.mname?.toLowerCase().includes(search) ||
       item.village?.toLowerCase().includes(search) ||
       item.mobile?.includes(search) ||
       item.madrasha_id?.toString().includes(search) ||
       item.district_name?.toLowerCase().includes(search) ||
       item.thana_name?.toLowerCase().includes(search)
-    );
-    console.log('After search filter, length:', filtered.length);
+    )
   }
 
-  // Division filter
   if (filters.division) {
-    filtered = filtered.filter((item: MarkazMadrasha) => item.division_name === filters.division);
+    filtered = filtered.filter(item => item.division_name === filters.division)
   }
 
-  // District filter
   if (filters.district) {
-    filtered = filtered.filter((item: MarkazMadrasha) => item.district_name === filters.district);
+    filtered = filtered.filter(item => item.district_name === filters.district)
   }
 
-  // Thana filter
   if (filters.thana) {
-    filtered = filtered.filter((item: MarkazMadrasha) => item.thana_name === filters.thana);
+    filtered = filtered.filter(item => item.thana_name === filters.thana)
   }
 
-  // Stage filter
   if (filters.stage) {
-    filtered = filtered.filter((item: MarkazMadrasha) => item.stage_display === filters.stage);
+    filtered = filtered.filter(item => item.stage_display === filters.stage)
   }
 
-  // Student type filter
   if (filters.student_type) {
-    const studentTypeMap: { [key: string]: string } = {
+    const studentTypeMap = {
       'Male': 'ছাত্র',
       'Female': 'ছাত্রী'
-    };
-    filtered = filtered.filter((item: MarkazMadrasha) => item.student_type_display === studentTypeMap[filters.student_type]);
+    }
+    filtered = filtered.filter(item => item.student_type_display === studentTypeMap[filters.student_type])
   }
 
-  // Center filter
   if (filters.center_id) {
-    filtered = filtered.filter((item: MarkazMadrasha) => item.center_id.toString() === filters.center_id);
+    filtered = filtered.filter(item => item.center_id.toString() === filters.center_id)
   }
 
-  // Mtype filter
   if (filters.mtype) {
-    filtered = filtered.filter((item: MarkazMadrasha) => item.mtype === filters.mtype);
+    filtered = filtered.filter(item => item.mtype === filters.mtype)
   }
 
-  // Status filter
   if (filters.enabledisable !== '') {
-    filtered = filtered.filter((item: MarkazMadrasha) => item.enabledisable === filters.enabledisable);
+    filtered = filtered.filter(item => item.enabledisable === filters.enabledisable)
   }
 
-  // School ID filter
   if (filters.school_id) {
-    filtered = filtered.filter((item: MarkazMadrasha) =>
+    filtered = filtered.filter(item =>
       item.madrasha_id?.toString().toLowerCase().includes(filters.school_id.toLowerCase())
-    );
+    )
   }
 
-  // Year filter
   if (filters.year) {
-    filtered = filtered.filter((item: MarkazMadrasha) => item.year === filters.year);
+    filtered = filtered.filter(item => item.year === filters.year)
   }
 
-  // Date range filter
   if (filters.fromDate) {
-    const fromDate = new Date(filters.fromDate);
-    filtered = filtered.filter((item: MarkazMadrasha) => new Date(item.created_at) >= fromDate);
+    const fromDate = new Date(filters.fromDate)
+    filtered = filtered.filter(item => new Date(item.created_at) >= fromDate)
   }
 
   if (filters.toDate) {
-    const toDate = new Date(filters.toDate);
-    toDate.setHours(23, 59, 59, 999); // Include the entire day
-    filtered = filtered.filter((item: MarkazMadrasha) => new Date(item.created_at) <= toDate);
+    const toDate = new Date(filters.toDate)
+    toDate.setHours(23, 59, 59, 999)
+    filtered = filtered.filter(item => new Date(item.created_at) <= toDate)
   }
 
   // Sorting
-  filtered.sort((a: MarkazMadrasha, b: MarkazMadrasha) => {
-    const aVal = a[sortField.value as keyof MarkazMadrasha];
-    const bVal = b[sortField.value as keyof MarkazMadrasha];
-    if (aVal == null && bVal == null) return 0;
-    if (aVal == null) return 1;
-    if (bVal == null) return -1;
+  filtered.sort((a, b) => {
+    const aVal = a[sortField.value]
+    const bVal = b[sortField.value]
+    if (aVal == null && bVal == null) return 0
+    if (aVal == null) return 1
+    if (bVal == null) return -1
     if (sortDirection.value === 'asc') {
-      return aVal > bVal ? 1 : -1;
+      return aVal > bVal ? 1 : -1
     } else {
-      return aVal < bVal ? 1 : -1;
+      return aVal < bVal ? 1 : -1
     }
-  });
+  })
 
-  console.log('Final filteredData length:', filtered.length);
-  return filtered;
-});
-
-const paginatedData = computed(() => {
-  // Since we're using backend pagination, paginatedData is just the filtered current page data
-  return filteredData.value;
-});
+  return filtered
+})
 
 const totalPages = computed(() => {
-  // Use total count from backend API response
-  return Math.ceil(totalCount.value / itemsPerPage.value);
-});
+  return Math.ceil(totalCount.value / itemsPerPage.value)
+})
 
-// const visiblePages = computed(() => { /* handled by backend pagination UI */ return []; });
-
-const availableYears = computed<string[]>(() => {
+const availableYears = computed(() => {
   const years = [...new Set(sampleData.value
     .map(item => item.year)
-    .filter((y): y is string => typeof y === 'string' && y.length > 0))];
-  return years.sort();
-});
+    .filter(y => typeof y === 'string' && y.length > 0))]
+  return years.sort()
+})
 
-const activeCount = computed(() => {
-  return statisticsData.value.active_count;
-});
+const activeCount = computed(() => statisticsData.value.active_count)
+const maleCount = computed(() => statisticsData.value.male_count)
+const femaleCount = computed(() => statisticsData.value.female_count)
 
-const maleCount = computed(() => {
-  return statisticsData.value.male_count;
-});
-
-const femaleCount = computed(() => {
-  return statisticsData.value.female_count;
-});
-
-// Methods
 const clearFilters = () => {
-  filters.search = '';
-  filters.division = '';
-  filters.district = '';
-  filters.thana = '';
-  filters.stage = '';
-  filters.student_type = '';
-  filters.mtype = '';
-  filters.enabledisable = '';
-  filters.center_id = '';
-  filters.school_id = '';
-  filters.year = '';
-  filters.fromDate = '';
-  filters.toDate = '';
-  currentPage.value = 1;
-};
+  filters.search = ''
+  filters.division = ''
+  filters.district = ''
+  filters.thana = ''
+  filters.stage = ''
+  filters.student_type = ''
+  filters.mtype = ''
+  filters.enabledisable = ''
+  filters.center_id = ''
+  filters.school_id = ''
+  filters.year = ''
+  filters.fromDate = ''
+  filters.toDate = ''
+  currentPage.value = 1
+}
 
 const fetchStatistics = async () => {
-  statisticsLoading.value = true;
+  statisticsLoading.value = true
   try {
-    const response = await fetch('/api/admin/markaz/statistics/');
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const data = await response.json();
+    const response = await fetch('/api/admin/markaz/statistics/')
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+    const data = await response.json()
     statisticsData.value = {
       total_markaz: data.total_markaz,
       male_count: data.male_count,
       female_count: data.female_count,
       active_count: data.active_count
-    };
-    console.log('Statistics data loaded:', statisticsData.value);
-  } catch (err) {
-    console.error('Error fetching statistics:', err);
+    }
+  } catch  {
   } finally {
-    statisticsLoading.value = false;
+    statisticsLoading.value = false
   }
-};
+}
 
 const refreshData = () => {
-  fetchData();
-  fetchStatistics();
-};
+  fetchData()
+  fetchStatistics()
+}
 
 const toggleColumnMenu = () => {
-  showColumnMenu.value = !showColumnMenu.value;
-};
+  showColumnMenu.value = !showColumnMenu.value
+}
 
 const toggleAdvancedFilters = () => {
-  showAdvancedFilters.value = !showAdvancedFilters.value;
-};
+  showAdvancedFilters.value = !showAdvancedFilters.value
+}
 
 const updateColumnVisibility = () => {
-  // Save column settings to localStorage
-  localStorage.setItem('markazTableColumns', JSON.stringify(availableColumns.value));
-};
+  localStorage.setItem('markazTableColumns', JSON.stringify(availableColumns.value))
+}
 
-const sortBy = (field: string) => {
-  if (sortField.value === field) {
-    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
-  } else {
-    sortField.value = field;
-    sortDirection.value = 'asc';
-  }
-};
 
-// PrimeVue DataTable event handlers
-const onPage = (event: any) => {
-  currentPage.value = event.page + 1;
-  itemsPerPage.value = event.rows;
-};
+const onPage = event => {
+  currentPage.value = event.page + 1
+  itemsPerPage.value = event.rows
+}
 
-const onSort = (event: any) => {
-  sortField.value = event.sortField;
-  sortDirection.value = event.sortOrder === 1 ? 'asc' : 'desc';
-};
+const onSort = event => {
+  sortField.value = event.sortField
+  sortDirection.value = event.sortOrder === 1 ? 'asc' : 'desc'
+}
 
-// const prevPage = () => {}; // not used in current template
-// const nextPage = () => {}; // not used in current template
+const viewItem = () => {}
+const editItem = () => {}
+const deleteItem = () => {}
+const sendMessage = () => {}
+const sendEmail = () => {}
 
-const viewItem = (item: MarkazMadrasha) => {
-  console.log('View item:', item);
-  // Implement view functionality
-};
+const downloadExcel = () => {}
+const downloadCSV = () => {}
+const downloadPDF = () => {}
+const printData = () => { window.print() }
 
-const editItem = (item: MarkazMadrasha) => {
-  console.log('Edit item:', item);
-  // Implement edit functionality
-};
-
-const deleteItem = (item: MarkazMadrasha) => {
-  console.log('Delete item:', item);
-  // Implement delete functionality
-};
-
-const sendMessage = (item: MarkazMadrasha) => {
-  console.log('Send message:', item);
-  // Implement delete functionality
-};
-
-const sendEmail = (item: MarkazMadrasha) => {
-  console.log('Send email:', item);
-  // Implement delete functionality
-};
-
-const downloadExcel = () => {
-  // Excel download functionality
-  console.log('Download Excel');
-  // Implement Excel download
-};
-
-const downloadCSV = () => {
-  // CSV download functionality
-  console.log('Download CSV');
-  // Implement CSV download
-};
-
-const downloadPDF = () => {
-  // PDF download functionality
-  console.log('Download PDF');
-  // Implement PDF download
-};
-
-const printData = () => {
-  // Print functionality
-  window.print();
-};
-
-const activateItem = (item: MarkazMadrasha) => {
-  onStatusSwitch(item, '1');
-};
-
-const deactivateItem = (item: MarkazMadrasha) => {
-  onStatusSwitch(item, '0');
-};
+const activateItem = item => { onStatusSwitch(item, '1') }
+const deactivateItem = item => { onStatusSwitch(item, '0') }
 
 const clearCache = async () => {
   try {
@@ -1185,37 +1007,29 @@ const clearCache = async () => {
         'Content-Type': 'application/json',
         'X-CSRFToken': getCsrfToken()
       }
-    });
-
+    })
     if (response.ok) {
-      const result = await response.json();
-      console.log('Cache cleared:', result);
-      // Refresh data after clearing cache
-      await fetchData();
-      await fetchStatistics();
-    } else {
-      console.error('Failed to clear cache');
+      await fetchData()
+      await fetchStatistics()
     }
-  } catch (error) {
-    console.error('Error clearing cache:', error);
-  }
-};
+  } catch  {}
+}
 
-const getCsrfToken = (): string => {
-  const name = 'csrftoken';
-  let cookieValue: string | null = null;
+const getCsrfToken = () => {
+  const name = 'csrftoken'
+  let cookieValue = null
   if (document.cookie && document.cookie !== '') {
-    const cookies = document.cookie.split(';');
+    const cookies = document.cookie.split(';')
     for (let i = 0; i < cookies.length; i++) {
-      const cookie = cookies[i].trim();
+      const cookie = cookies[i].trim()
       if (cookie.substring(0, name.length + 1) === (name + '=')) {
-        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-        break;
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1))
+        break
       }
     }
   }
-  return cookieValue ?? '';
-};
+  return cookieValue ?? ''
+}
 </script>
 
 <style scoped>

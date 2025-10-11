@@ -1,17 +1,9 @@
-<script setup lang="ts">
+<script setup>
 import { ref, onMounted } from 'vue'
 import Chart from 'chart.js/auto'
 
-
-
-type ExamAnalyticsType = {
-  passRate: string
-  averageGrade: string
-  topSubject: string
-  lowestSubject: string
-}
-
-const examAnalytics = ref<ExamAnalyticsType>({
+// Data structure, no TypeScript
+const examAnalytics = ref({
   passRate: '৮৫.৭%',
   averageGrade: '৩.৮৫',
   topSubject: 'হাদীস শরীফ',
@@ -24,7 +16,7 @@ const userName = 'tahsin866'
 
 onMounted(() => {
   // Pass Rate Chart
-  const passRateCtx = document.getElementById('passRateChart') as HTMLCanvasElement
+  const passRateCtx = document.getElementById('passRateChart')
   if (passRateCtx) {
     new Chart(passRateCtx, {
       type: 'doughnut',
@@ -48,7 +40,7 @@ onMounted(() => {
   }
 
   // Subject Performance Chart
-  const subjectCtx = document.getElementById('subjectPerformanceChart') as HTMLCanvasElement
+  const subjectCtx = document.getElementById('subjectPerformanceChart')
   if (subjectCtx) {
     new Chart(subjectCtx, {
       type: 'bar',
@@ -88,7 +80,7 @@ onMounted(() => {
   }
 
   // Yearly Trend Chart
-  const trendCtx = document.getElementById('yearlyTrendChart') as HTMLCanvasElement
+  const trendCtx = document.getElementById('yearlyTrendChart')
   if (trendCtx) {
     new Chart(trendCtx, {
       type: 'line',

@@ -82,11 +82,10 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
-defineOptions({ name: 'AuthSignup' })
 
 const route = useRoute()
 const router = useRouter()
@@ -104,15 +103,8 @@ const form = ref({
   nid_photo: null    // ভোটার আইডি কার্ডের ছবি
 })
 
-const errors = ref<Record<string, string>>({})
-const madrashaInfo = ref<{
-  madrasha_name?: string;
-  post?: string;
-  village?: string;
-  registration_code?: string;
-  elhaqno?: string;
-  mobile?: string;
-} | null>(null)
+const errors = ref({})
+const madrashaInfo = ref(null)
 
 onMounted(async () => {
   const info = localStorage.getItem('madrashaInfo')
@@ -130,7 +122,7 @@ onMounted(async () => {
     return
   }
 
-  const signupToken = route.query.token as string
+  const signupToken = route.query.token
   if (signupToken) {
     try {
       const response = await axios.get(`http://localhost:8000/auth/validate-signup-token/?token=${signupToken}`)
@@ -178,7 +170,7 @@ const submit = async () => {
         if (key === 'photo' || key === 'nid_photo') {
           formData.append(key, value)
         } else {
-          formData.append(key, value as string)
+          formData.append(key, value)
         }
       }
     })
@@ -211,7 +203,7 @@ const submit = async () => {
       console.error('Signup error:', error)
       alert('রেজিস্ট্রেশন ব্যর্থ হয়েছে!')
     }
-    (Object.keys(form.value) as Array<keyof typeof form.value>).forEach((key: keyof typeof form.value) => {
+    Object.keys(form.value).forEach((key) => {
       if (key === 'photo' || key === 'nid_photo') {
         form.value[key] = null
       } else {

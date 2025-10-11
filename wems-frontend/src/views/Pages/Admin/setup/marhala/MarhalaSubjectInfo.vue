@@ -201,34 +201,20 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 
 const router = useRouter()
 
-interface Subject {
-  subject_code: string
-  name_bangla: string
-  name_english: string
-  name_arabic: string
-  status: string
-}
-
-interface MarhalaForm {
-  marhala_name_bn: string
-  marhala_name_en: string
-  marhala_name_ar: string
-}
-
-const formData = ref<MarhalaForm>({
+const formData = ref({
   marhala_name_bn: '',
   marhala_name_en: '',
   marhala_name_ar: '',
 })
 
-const subjects = ref<Subject[]>([
+const subjects = ref([
   { subject_code: '', name_bangla: '', name_english: '', name_arabic: '', status: 'both' },
   { subject_code: '', name_bangla: '', name_english: '', name_arabic: '', status: 'both' },
   { subject_code: '', name_bangla: '', name_english: '', name_arabic: '', status: 'both' },
@@ -248,10 +234,10 @@ const subjectHeaders = [
   'অ্যাকশন'
 ]
 
-const subjectStatusLabels: Record<string, string> = {
-  'SRtype_1': 'ছাত্র',
-  'SRtype_0': 'ছাত্রী',
-  'both': 'উভয়'
+const subjectStatusLabels = {
+  SRtype_1: 'ছাত্র',
+  SRtype_0: 'ছাত্রী',
+  both: 'উভয়'
 }
 
 function addNewRow() {
@@ -264,7 +250,7 @@ function addNewRow() {
   })
 }
 
-function removeRow(index: number) {
+function removeRow(index) {
   subjects.value.splice(index, 1)
 }
 
@@ -330,7 +316,7 @@ async function handleSubmit() {
     } else {
       error.value = response.data.message || 'ডেটা সংরক্ষণে সমস্যা হয়েছে'
     }
-  } catch (err: unknown) {
+  } catch  {
     error.value = 'সার্ভারে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।'
   } finally {
     loading.value = false

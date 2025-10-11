@@ -1,22 +1,12 @@
 import { ref, computed } from 'vue'
 import axios from 'axios'
 
-interface UserData {
-  id: number
-  name: string
-  email: string
-  department_id?: number
-  department_name?: string
-  user_type?: string
-}
-
-const currentUser = ref<UserData | null>(null)
+const currentUser = ref(null)
 const isLoading = ref(false)
 
 export function useAuthAndSidebar() {
-
   // Load user data from various storage sources
-  function loadStoredUserData(): UserData | null {
+  function loadStoredUserData() {
     try {
       // Check localStorage first
       const localUser = localStorage.getItem('currentUser')
@@ -47,7 +37,7 @@ export function useAuthAndSidebar() {
   }
 
   // Store user data
-  function storeUserData(userData: UserData) {
+  function storeUserData(userData) {
     try {
       localStorage.setItem('currentUser', JSON.stringify(userData))
       sessionStorage.setItem('currentUser', JSON.stringify(userData))
@@ -74,12 +64,12 @@ export function useAuthAndSidebar() {
   }
 
   // Fetch user department info from API
-  async function fetchUserDepartmentInfo(userId: number): Promise<UserData | null> {
+  async function fetchUserDepartmentInfo(userId) {
     try {
       const response = await axios.get(`http://127.0.0.1:8000/api/user-department-info/?user_id=${userId}`)
 
       if (response.data.user_id) {
-        const userData: UserData = {
+        const userData = {
           id: response.data.user_id,
           name: response.data.user_name,
           email: response.data.user_email,
@@ -96,7 +86,7 @@ export function useAuthAndSidebar() {
   }
 
   // Get or load current user
-  async function getCurrentUser(): Promise<UserData | null> {
+  async function getCurrentUser() {
     if (currentUser.value) {
       return currentUser.value
     }

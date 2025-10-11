@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  wems-frontend:
+    build:
+      context: ./wems-frontend
+      dockerfile: Dockerfile.dev
+    container_name: wems-frontend-dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./wems-frontend:/app
+      - /app/node_modules  # Prevent host node_modules from overriding container's
+    environment:
+      - NODE_ENV=development
+      - VITE_API_BASE_URL=http://host.docker.internal:8000
+    networks:
+      - wems-network
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"  # Allow container to access host services
+
+networks:
+  wems-network:
+    driver: bridge

@@ -1,32 +1,12 @@
 import axios from 'axios'
 
 // Department-specific service for accounts department (department_id: 2)
-export interface AccountsModule {
-  label: string
-  icon: string
-  items: AccountsMenuItem[]
-  department_id: number
-}
-
-export interface AccountsMenuItem {
-  label: string
-  href: string
-  icon: string
-}
-
-export interface AccountsServiceResponse {
-  sidebar_data: AccountsModule[]
-  department_id: number
-  cached: boolean
-  message: string
-}
-
 class AccountsService {
-  private baseUrl = 'http://127.0.0.1:8000/api/sidebar'
-  private departmentId = 2 // Accounts department
+  baseUrl = 'http://127.0.0.1:8000/api/sidebar'
+  departmentId = 2 // Accounts department
 
   // Get accounts-specific sidebar data
-  async getSidebarData(): Promise<AccountsServiceResponse> {
+  async getSidebarData() {
     try {
       const response = await axios.get(`${this.baseUrl}/?department_id=${this.departmentId}`)
       return response.data
@@ -37,27 +17,27 @@ class AccountsService {
   }
 
   // Get department name
-  getDepartmentName(): string {
+  getDepartmentName() {
     return 'accounts'
   }
 
   // Get department display name
-  getDepartmentDisplayName(): string {
+  getDepartmentDisplayName() {
     return 'একাউন্টস'
   }
 
   // Generate welcome message for accounts dashboard
-  getWelcomeMessage(): string {
+  getWelcomeMessage() {
     return 'Hello accounts'
   }
 
   // Check if user has access to accounts module
-  hasAccess(userDepartmentId?: number): boolean {
+  hasAccess(userDepartmentId) {
     return userDepartmentId === this.departmentId
   }
 
   // Get accounts-specific menu items
-  getAccountingModules(): AccountsModule[] {
+  getAccountingModules() {
     return [
       {
         label: 'সাধারণ লেজার',

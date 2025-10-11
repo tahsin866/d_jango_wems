@@ -22,6 +22,12 @@ class OldStudentRegistrationView(APIView):
     def trim(self, val):
         return val[:255] if isinstance(val, str) and len(val) > 255 else val
 
+    def get_id_or_empty(self, val):
+        """Convert value to string ID or empty string"""
+        if val is None or val == '':
+            return ''
+        return str(val) if isinstance(val, (int, str)) else ''
+
     def get_user_madrasha_id(self, user_id):
         """Get madrasha_id from user_information table using user_id"""
         try:
@@ -323,9 +329,9 @@ class OldStudentRegistrationView(APIView):
                 id=basic.id,
                 defaults={
                     'student_id': basic.id,
-                    'division': self.trim(address.get('division', '')),
-                    'district': self.trim(address.get('district', '')),
-                    'thana': self.trim(address.get('thana', '')),
+                    'division': self.get_id_or_empty(address.get('did')),  # 🔥 FIXED: Use ID instead of name
+                    'district': self.get_id_or_empty(address.get('desid')),  # 🔥 FIXED: Use ID instead of name 
+                    'thana': self.get_id_or_empty(address.get('thana_id')),  # 🔥 FIXED: Use ID instead of name
                     'post_office': self.trim(address.get('post_office', '')),
                     'passport_photo': self.trim(address.get('passport_photo', '')),
                     'birth_certificate_no': self.trim(address.get('birth_certificate_no', '')),

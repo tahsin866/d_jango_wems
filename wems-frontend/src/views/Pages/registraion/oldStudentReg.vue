@@ -185,81 +185,30 @@
   </transition>
 </template>
 
-<script setup lang="ts">
-// TypeScript interface for secure token system
-interface SearchResult {
-  secure_token?: string;
-  session_key?: string; // 🚀 Added for Redis cache system
-  student_basic?: {
-    cid?: string | number;
-    srtype?: string;
-    students_type?: string;
-    exam_id?: string | number;
-    madrasha_id?: string | number;
-    marhala_id?: string | number;
-    ip_address?: string;
-    created_at?: string;
-    updated_at?: string;
-    student_name_bn?: string;
-    father_name_bn?: string;
-    date_of_birth?: string;
-    roll_no?: number;
-    reg_no?: number;
-    year?: number;
-    // add other fields as needed
-  };
-  student_results?: {
-    mid?: string;
-    srtype?: number;
-    subjects?: Array<{
-      result_type?: string;
-      [key: string]: string | number | undefined;
-    }>;
-    [key: string]: string | number | Array<unknown> | undefined;
-  };
-  // add other properties as needed
-};
+<script setup>
+import { watch, ref, onMounted, computed } from 'vue'
+import { useRoute } from 'vue-router'
+import { getCurrentUserId } from '@/stores/userProfile'
 
-import { watch, ref, onMounted, computed } from 'vue';
-import { useRoute } from 'vue-router';
-import { getCurrentUserId } from '@/stores/userProfile';
-
-const searchResult = ref<SearchResult | null>(null);
-
-// Register event handler for address filter updates
-async function onUpdateAddressFilters(filters: { division?: string; district?: string; Thana?: string }) {
-  const prev = { ...addressFilters.value };
-  addressFilters.value = {
-    division: filters.division ?? '',
-    district: filters.district ?? '',
-    Thana: filters.Thana ?? ''
-  };
-  // If division changed, reload districts and reset thana
-  if (addressFilters.value.division !== prev.division) {
-    await handleDivisionChange();
-  }
-  // District changes are handled by the watcher to load thanas
-}
-import OldStudentPersonalInfo from '@/views/Pages/registraion/components/OldStudentPersonalInfo.vue';
-import OldStudentAddressSection from '@/views/Pages/registraion/components/OldStudentAddressSection.vue';
-import OldStudentAttachments from '@/views/Pages/registraion/components/OldStudentAttachments.vue';
+import OldStudentPersonalInfo from '@/views/Pages/registraion/components/OldStudentPersonalInfo.vue'
+import OldStudentAddressSection from '@/views/Pages/registraion/components/OldStudentAddressSection.vue'
+import OldStudentAttachments from '@/views/Pages/registraion/components/OldStudentAttachments.vue'
 
 defineProps({
   roll: String,
   reg_id: String,
   CID: String,
   modelValue: Object
-});
+})
 
 // Dark mode detection
 const isDark = computed(() => {
-  return document.documentElement.classList.contains('dark');
-});
+  return document.documentElement.classList.contains('dark')
+})
 
 // Local state & forms
-
-function useForm<T extends Record<string, unknown>>(arg0: T) {
-  return ref({ ...arg0 });
+function useForm(obj) {
+  return ref({ ...obj })
 }
 
 const studentInfoForm = useForm({
@@ -301,255 +250,241 @@ const studentInfoForm = useForm({
   TID: '',
   student_image: '',
   irregular_sub: null,
-});
+})
 
 // File Attachments
-const studentPhoto = ref<File | null>(null);
-const studentPhotoPreview = ref<string | null>(null);
-const nidAttachment = ref<File | null>(null);
-const nidAttachmentPreview = ref<string | null>(null);
+const studentPhoto = ref(null)
+const studentPhotoPreview = ref(null)
+const nidAttachment = ref(null)
+const nidAttachmentPreview = ref(null)
 
 // Address Data
-type Division = { id: string; Division: string };
-type District = { DesID: string; District: string };
-type Thana = { Thana_ID: string; Thana: string };
+const divisions = ref([])
+const districts = ref([])
+const thanas = ref([])
 
-const divisions = ref<Division[]>([]);
-const districts = ref<District[]>([]);
-const thanas = ref<Thana[]>([]);
-
-const addressFilters = ref({ division: '', district: '', Thana: '' });
+const addressFilters = ref({ division: '', district: '', Thana: '' })
 
 // Watch for district change to load thanas
 watch(() => addressFilters.value.district, async (newDistrict, oldDistrict) => {
   if (newDistrict && newDistrict !== oldDistrict) {
-    await handleDistrictChange();
+    await handleDistrictChange()
   }
-});
+})
 
 const tabs = [
   'ব্যক্তিগত তথ্য',
   'ঠিকানা',
   'সংযুক্তি',
   'শেষ ধাপ'
-];
-const currentTab = ref(0);
-const loading = ref(true);
-const fadeIn = ref(false);
+]
+const currentTab = ref(0)
+const loading = ref(true)
+const fadeIn = ref(false)
 
 // Toast notification system
 const toast = ref({
   show: false,
   message: '',
-  type: 'success' // 'success' or 'error'
-});
+  type: 'success'
+})
 
-const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+const showToast = (message, type = 'success') => {
   toast.value = {
     show: true,
     message,
     type
-  };
-
-  // Auto hide after 5 seconds
+  }
   setTimeout(() => {
-    toast.value.show = false;
-  }, 5000);
-};
-
-// --- Fake data sources ---
+    toast.value.show = false
+  }, 5000)
+}
 
 // Real API functions
 const fetchDivisions = async () => {
-  const response = await fetch('/api/admin/madrasha/divisions/');
-  if (!response.ok) return [];
-  const data = await response.json();
-  return (data.results || []).map((item: { did: string; division: string }) => ({ id: String(item.did), Division: item.division }));
-};
-const fetchDistricts = async (divisionId: string) => {
-  const url = divisionId ? `/api/admin/madrasha/districts/?did=${divisionId}` : '/api/admin/madrasha/districts/';
-  const response = await fetch(url);
-  if (!response.ok) return [];
-  const data = await response.json();
-  return (data.results || []).map((item: { desid: string; district: string }) => ({ DesID: String(item.desid), District: item.district }));
-};
-const fetchThanas = async (districtId: string) => {
-  const url = districtId ? `/api/admin/madrasha/thanas/?district_id=${districtId}` : '/api/admin/madrasha/thanas/';
-  const response = await fetch(url);
-  if (!response.ok) return [];
-  const data = await response.json();
-  return (data.results || []).map((item: { thana_id: string; thana: string }) => ({ Thana_ID: String(item.thana_id), Thana: item.thana }));
-};
+  const response = await fetch('/api/admin/madrasha/divisions/')
+  if (!response.ok) return []
+  const data = await response.json()
+  return (data.results || []).map(item => ({ id: String(item.did), Division: item.division }))
+}
+const fetchDistricts = async (divisionId) => {
+  const url = divisionId ? `/api/admin/madrasha/districts/?did=${divisionId}` : '/api/admin/madrasha/districts/'
+  const response = await fetch(url)
+  if (!response.ok) return []
+  const data = await response.json()
+  return (data.results || []).map(item => ({ DesID: String(item.desid), District: item.district }))
+}
+const fetchThanas = async (districtId) => {
+  const url = districtId ? `/api/admin/madrasha/thanas/?district_id=${districtId}` : '/api/admin/madrasha/thanas/'
+  const response = await fetch(url)
+  if (!response.ok) return []
+  const data = await response.json()
+  return (data.results || []).map(item => ({ Thana_ID: String(item.thana_id), Thana: item.thana }))
+}
 
 const nextTab = () => {
-  if (currentTab.value < tabs.length - 1) currentTab.value++;
-};
+  if (currentTab.value < tabs.length - 1) currentTab.value++
+}
 const prevTab = () => {
-  if (currentTab.value > 0) currentTab.value--;
-};
+  if (currentTab.value > 0) currentTab.value--
+}
+
+const searchResult = ref(null)
 
 onMounted(async () => {
-  // 🚀 REDIS CACHE SYSTEM: Load session key first, then fallback
-  let sessionKey = null;
+  // REDIS CACHE SYSTEM: Load session key first, then fallback
+  let sessionKey = null
 
   try {
-    const storedSession = sessionStorage.getItem('oldStudentRedisSession');
+    const storedSession = sessionStorage.getItem('oldStudentRedisSession')
     if (storedSession) {
-      const sessionData = JSON.parse(storedSession);
+      const sessionData = JSON.parse(storedSession)
       if (sessionData.session_key) {
-        sessionKey = sessionData.session_key;
-        console.log('🚀 Redis session loaded successfully');
-
-        // Store session key for use in registration payload
-        searchResult.value = { session_key: sessionKey };
-
-        // Prefill from preview data (basic info for display)
+        sessionKey = sessionData.session_key
+        searchResult.value = { session_key: sessionKey }
         if (sessionData.student_preview) {
-          studentInfoForm.value.name_bn = sessionData.student_preview.student_name_bn || '';
-          studentInfoForm.value.father_name_bn = sessionData.student_preview.father_name_bn || '';
+          studentInfoForm.value.name_bn = sessionData.student_preview.student_name_bn || ''
+          studentInfoForm.value.father_name_bn = sessionData.student_preview.father_name_bn || ''
         }
       }
     }
   } catch (e) {
-    console.warn('Could not load Redis session from sessionStorage:', e);
+    console.warn('Could not load Redis session from sessionStorage:', e)
   }
 
   // Fallback: Load old search result if no Redis session
   if (!sessionKey) {
     try {
-      const storedSearchResult = sessionStorage.getItem('oldStudentSearchResult');
+      const storedSearchResult = sessionStorage.getItem('oldStudentSearchResult')
       if (storedSearchResult) {
-        searchResult.value = JSON.parse(storedSearchResult);
-        console.log('⚠️ Fallback: Loaded search result from sessionStorage:', searchResult.value);
+        searchResult.value = JSON.parse(storedSearchResult)
       }
     } catch (e) {
-      console.warn('Could not load search result from sessionStorage:', e);
+      console.warn('Could not load search result from sessionStorage:', e)
     }
   }
 
   // Prefill from sessionStorage (preferred) to avoid showing data in URL
   try {
-    const stored = sessionStorage.getItem('oldRegPrefill');
+    const stored = sessionStorage.getItem('oldRegPrefill')
     if (stored) {
-      const payload = JSON.parse(stored) as Partial<{ name_bn: string; father_name_bn: string; Date_of_birth: string }>;
-      if (payload.name_bn) studentInfoForm.value.name_bn = payload.name_bn;
-      if (payload.father_name_bn) studentInfoForm.value.father_name_bn = payload.father_name_bn;
-      if (payload.Date_of_birth) studentInfoForm.value.Date_of_birth = payload.Date_of_birth;
-      sessionStorage.removeItem('oldRegPrefill');
+      const payload = JSON.parse(stored)
+      if (payload.name_bn) studentInfoForm.value.name_bn = payload.name_bn
+      if (payload.father_name_bn) studentInfoForm.value.father_name_bn = payload.father_name_bn
+      if (payload.Date_of_birth) studentInfoForm.value.Date_of_birth = payload.Date_of_birth
+      sessionStorage.removeItem('oldRegPrefill')
     } else {
       // Fallback: Prefill from query params if provided
-      const route = useRoute();
-      const q = route.query as Record<string, string | string[]>;
-      const getQ = (key: string) => {
-        const v = q[key];
-        return Array.isArray(v) ? v[0] : (v ?? '');
-      };
-      const qbName = getQ('name_bn');
-      const qfName = getQ('father_name_bn');
-      const qDob = getQ('Date_of_birth');
-      if (qbName) studentInfoForm.value.name_bn = qbName as string;
-      if (qfName) studentInfoForm.value.father_name_bn = qfName as string;
-      if (qDob) studentInfoForm.value.Date_of_birth = qDob as string;
+      const route = useRoute()
+      const q = route.query
+      const getQ = key => {
+        const v = q[key]
+        return Array.isArray(v) ? v[0] : (v ?? '')
+      }
+      const qbName = getQ('name_bn')
+      const qfName = getQ('father_name_bn')
+      const qDob = getQ('Date_of_birth')
+      if (qbName) studentInfoForm.value.name_bn = qbName
+      if (qfName) studentInfoForm.value.father_name_bn = qfName
+      if (qDob) studentInfoForm.value.Date_of_birth = qDob
     }
   } catch {}
 
-  divisions.value = await fetchDivisions();
+  divisions.value = await fetchDivisions()
   if (addressFilters.value.division) {
-    districts.value = await fetchDistricts(addressFilters.value.division);
+    districts.value = await fetchDistricts(addressFilters.value.division)
   }
   if (addressFilters.value.district) {
-    thanas.value = await fetchThanas(addressFilters.value.district);
+    thanas.value = await fetchThanas(addressFilters.value.district)
   }
   setTimeout(() => {
-    fadeIn.value = true;
-    loading.value = false;
-  }, 120);
-});
+    fadeIn.value = true
+    loading.value = false
+  }, 120)
+})
 
-const handleFileUpload = (event: Event, type: string) => {
-  const input = event.target as HTMLInputElement;
-  const file = input?.files?.[0] ?? null;
-  if (!file) return;
+const handleFileUpload = (event, type) => {
+  const input = event.target
+  const file = input?.files?.[0] ?? null
+  if (!file) return
 
   try {
     if (type === 'studentPhoto') {
-      studentPhoto.value = file;
-      const reader = new FileReader();
-      reader.onload = (e: ProgressEvent<FileReader>) => {
-        studentPhotoPreview.value = (e.target?.result as string | null) ?? null;
-      };
-      reader.readAsDataURL(file);
-      showToast(`ছাত্রের ছবি আপলোড সফল হয়েছে: ${file.name}`, 'success');
+      studentPhoto.value = file
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        studentPhotoPreview.value = (e.target?.result ?? null)
+      }
+      reader.readAsDataURL(file)
+      showToast(`ছাত্রের ছবি আপলোড সফল হয়েছে: ${file.name}`, 'success')
     } else if (type === 'nidAttachment') {
-      nidAttachment.value = file;
-      const reader = new FileReader();
-      reader.onload = (e: ProgressEvent<FileReader>) => {
-        nidAttachmentPreview.value = (e.target?.result as string | null) ?? null;
-      };
-      reader.readAsDataURL(file);
-      showToast(`এনআইডি সংযুক্তি আপলোড সফল হয়েছে: ${file.name}`, 'success');
+      nidAttachment.value = file
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        nidAttachmentPreview.value = (e.target?.result ?? null)
+      }
+      reader.readAsDataURL(file)
+      showToast(`এনআইডি সংযুক্তি আপলোড সফল হয়েছে: ${file.name}`, 'success')
     }
   } catch (error) {
-    showToast('ফাইল আপলোডে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।', 'error');
+    showToast('ফাইল আপলোডে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।', 'error')
   }
-};
+}
 
-const removeFile = (type: string) => {
-  const fileName = type === 'studentPhoto' ? 'ছাত্রের ছবি' : 'এনআইডি সংযুক্তি';
+const removeFile = (type) => {
+  const fileName = type === 'studentPhoto' ? 'ছাত্রের ছবি' : 'এনআইডি সংযুক্তি'
   if (type === 'studentPhoto') {
-    studentPhoto.value = null;
-    studentPhotoPreview.value = null;
+    studentPhoto.value = null
+    studentPhotoPreview.value = null
   } else if (type === 'nidAttachment') {
-    nidAttachment.value = null;
-    nidAttachmentPreview.value = null;
+    nidAttachment.value = null
+    nidAttachmentPreview.value = null
   }
-  showToast(`${fileName} সরিয়ে ফেলা হয়েছে`, 'success');
-};
+  showToast(`${fileName} সরিয়ে ফেলা হয়েছে`, 'success')
+}
 
 const handleDivisionChange = async () => {
   try {
-    addressFilters.value.district = '';
-    addressFilters.value.Thana = '';
-    districts.value = [];
-    thanas.value = [];
-    if (!addressFilters.value.division) return;
-    districts.value = await fetchDistricts(addressFilters.value.division);
-    showToast('বিভাগ নির্বাচন করা হয়েছে, জেলা লোড হয়েছে', 'success');
+    addressFilters.value.district = ''
+    addressFilters.value.Thana = ''
+    districts.value = []
+    thanas.value = []
+    if (!addressFilters.value.division) return
+    districts.value = await fetchDistricts(addressFilters.value.division)
+    showToast('বিভাগ নির্বাচন করা হয়েছে, জেলা লোড হয়েছে', 'success')
   } catch (error) {
-    showToast('জেলা লোড করতে সমস্যা হয়েছে', 'error');
+    showToast('জেলা লোড করতে সমস্যা হয়েছে', 'error')
   }
-};
+}
 const handleDistrictChange = async () => {
   try {
-    addressFilters.value.Thana = '';
-    thanas.value = [];
-    if (!addressFilters.value.district) return;
-    thanas.value = await fetchThanas(addressFilters.value.district);
-    showToast('জেলা নির্বাচন করা হয়েছে, থানা লোড হয়েছে', 'success');
+    addressFilters.value.Thana = ''
+    thanas.value = []
+    if (!addressFilters.value.district) return
+    thanas.value = await fetchThanas(addressFilters.value.district)
+    showToast('জেলা নির্বাচন করা হয়েছে, থানা লোড হয়েছে', 'success')
   } catch (error) {
-    showToast('থানা লোড করতে সমস্যা হয়েছে', 'error');
+    showToast('থানা লোড করতে সমস্যা হয়েছে', 'error')
   }
-};
+}
 
 const updateFormData = () => {
   if (addressFilters.value.division) {
-    const sel = divisions.value.find(d => d.id == addressFilters.value.division);
-    if (sel) { studentInfoForm.value.division_name = sel.Division; studentInfoForm.value.DID = sel.id; }
+    const sel = divisions.value.find(d => d.id == addressFilters.value.division)
+    if (sel) { studentInfoForm.value.division_name = sel.Division; studentInfoForm.value.DID = sel.id }
   }
   if (addressFilters.value.district) {
-    const sel = districts.value.find(d => d.DesID == addressFilters.value.district);
-    if (sel) { studentInfoForm.value.district_name = sel.District; studentInfoForm.value.desId = sel.DesID; }
+    const sel = districts.value.find(d => d.DesID == addressFilters.value.district)
+    if (sel) { studentInfoForm.value.district_name = sel.District; studentInfoForm.value.desId = sel.DesID }
   }
   if (addressFilters.value.Thana) {
-    const sel = thanas.value.find(t => t.Thana_ID == addressFilters.value.Thana);
-    if (sel) { studentInfoForm.value.thana_name = sel.Thana; studentInfoForm.value.TID = sel.Thana_ID; }
+    const sel = thanas.value.find(t => t.Thana_ID == addressFilters.value.Thana)
+    if (sel) { studentInfoForm.value.thana_name = sel.Thana; studentInfoForm.value.TID = sel.Thana_ID }
   }
-};
-
-// Declare searchResult as a ref to avoid type errors
+}
 
 const submitStudentInfo = async () => {
-  updateFormData();
+  updateFormData()
   // Build payload for backend
   const personal = {
     student_name_bn: studentInfoForm.value.name_bn,
@@ -565,11 +500,9 @@ const submitStudentInfo = async () => {
     roll_no: studentInfoForm.value.past_Roll,
     marhala_id: studentInfoForm.value.marhala_id || searchResult.value?.student_basic?.marhala_id,
     mobile: studentInfoForm.value.mobile_no,
-    // Merge fields from search result
     cid: searchResult.value?.student_basic?.cid ?? studentInfoForm.value.marhala_id,
     srtype: searchResult.value?.student_basic?.srtype ?? null,
-  // Always use students_type from searchResult (not from form)
-  students_type: searchResult.value?.student_basic?.students_type ?? '',
+    students_type: searchResult.value?.student_basic?.students_type ?? '',
     exam_id: searchResult.value?.student_basic?.exam_id ?? null,
     madrasha_id: searchResult.value?.student_basic?.madrasha_id ?? null,
     irregular_sub: (studentInfoForm.value.irregular_sub === '' || studentInfoForm.value.irregular_sub === null)
@@ -578,8 +511,7 @@ const submitStudentInfo = async () => {
     ip_address: searchResult.value?.student_basic?.ip_address ?? '127.0.0.1',
     created_at: searchResult.value?.student_basic?.created_at ?? new Date().toISOString(),
     updated_at: searchResult.value?.student_basic?.updated_at ?? new Date().toISOString(),
-    // add other fields as needed
-  };
+  }
   const address = {
     division: studentInfoForm.value.division_name,
     did: studentInfoForm.value.DID ? Number(studentInfoForm.value.DID) : null,
@@ -590,90 +522,73 @@ const submitStudentInfo = async () => {
     birth_certificate_no: studentInfoForm.value.BRN_no,
     nid_no: studentInfoForm.value.NID_no,
     nid_photo: studentInfoForm.value.NID_attach,
-  };
+  }
   const attachments = {
     birth_no: studentInfoForm.value.BRN_no,
     birth_attach: studentPhotoPreview.value || '',
     nid_no: studentInfoForm.value.NID_no,
     nid_attach: nidAttachmentPreview.value || '',
-  };
-
-  loading.value = true;
-
-  // Minimal logging (production safe)
-  console.log('=== SUBMITTING REGISTRATION ===');
-  console.log('Students type:', personal.students_type || 'empty');
-  console.log('Session key present:', !!searchResult.value?.session_key);
-  console.log('===================================');
-
-  // 🔥 Get current user ID for marhala_id mapping
-  const currentUserId = getCurrentUserId();
-  if (currentUserId) {
-    console.log(`🔥 Sending user_id for marhala_id mapping: ${currentUserId}`);
-  } else {
-    console.log('⚠️ No current user ID found - marhala_id will use fallback logic');
   }
 
+  loading.value = true
+
+  const currentUserId = getCurrentUserId()
   try {
     const res = await fetch('/api/admin/registration/oldstudent/register/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        session_key: searchResult.value?.session_key, // 🚀 Send Redis session key
-        user_id: currentUserId, // 🔥 Send user_id for marhala_id mapping
+        session_key: searchResult.value?.session_key,
+        user_id: currentUserId,
         personal,
         address,
         attachments,
-        search_result: searchResult.value?.session_key ? undefined : searchResult.value // Fallback for backward compatibility
+        search_result: searchResult.value?.session_key ? undefined : searchResult.value
       })
-    });
-    let result = null;
+    })
+    let result = null
     try {
-      result = await res.json();
+      result = await res.json()
     } catch {
-      // If response is not JSON, show raw text (likely HTML error page)
-      const text = await res.text();
-      loading.value = false;
-      showToast('সংরক্ষণ ব্যর্থ: ' + text.slice(0, 300), 'error'); // Show first 300 chars
-      return;
+      const text = await res.text()
+      loading.value = false
+      showToast('সংরক্ষণ ব্যর্থ: ' + text.slice(0, 300), 'error')
+      return
     }
-    loading.value = false;
+    loading.value = false
     if (res.ok && result.success) {
-      // 🔥 Show detailed success message with field mapping info
-      const marhalaInfo = `marhala_id: ${result.marhala_id} (${result.marhala_id_source})`;
-      const madrashaInfo = `madrasha_id: ${result.madrasha_id} (${result.madrasha_id_source})`;
-      const mappingInfo = ` (${marhalaInfo}, ${madrashaInfo})`;
+      const marhalaInfo = `marhala_id: ${result.marhala_id} (${result.marhala_id_source})`
+      const madrashaInfo = `madrasha_id: ${result.madrasha_id} (${result.madrasha_id_source})`
+      const mappingInfo = ` (${marhalaInfo}, ${madrashaInfo})`
 
-      showToast(`ছাত্রের তথ্য সফলভাবে সংরক্ষণ করা হয়েছে! রেজিস্ট্রেশন নম্বর: ${result.reg_no}${mappingInfo}`, 'success');
-      console.log('✅ Registration successful:', {
-        student_id: result.student_id,
-        reg_no: result.reg_no,
-        marhala_id: result.marhala_id,
-        marhala_id_source: result.marhala_id_source,
-        madrasha_id: result.madrasha_id,
-        madrasha_id_source: result.madrasha_id_source,
-        action: result.action
-      });
-      // Optionally reset form or redirect
+      showToast(`ছাত্রের তথ্য সফলভাবে সংরক্ষণ করা হয়েছে! রেজিস্ট্রেশন নম্বর: ${result.reg_no}${mappingInfo}`, 'success')
     } else {
-      // 🔥 ENHANCED ERROR HANDLING
-      let errorMessage = result.message || result.error || 'Unknown error';
-
+      let errorMessage = result.message || result.error || 'Unknown error'
       if (result.code === 'REG_NO_OUT_OF_RANGE') {
-        errorMessage = `রেজিস্ট্রেশন নম্বর সমস্যা: ${result.error}. অনুগ্রহ করে আবার চেষ্টা করুন।`;
-        console.error('Registration number out of range:', result);
+        errorMessage = `রেজিস্ট্রেশন নম্বর সমস্যা: ${result.error}. অনুগ্রহ করে আবার চেষ্টা করুন।`
       } else if (result.code === 'DUPLICATE_REGISTRATION') {
-        errorMessage = `ডুপ্লিকেট রেজিস্ট্রেশন: এই রেজিস্ট্রেশন নম্বরটি ইতিমধ্যে বিদ্যমান (${result.reg_no})`;
-        console.error('Duplicate registration:', result);
+        errorMessage = `ডুপ্লিকেট রেজিস্ট্রেশন: এই রেজিস্ট্রেশন নম্বরটি ইতিমধ্যে বিদ্যমান (${result.reg_no})`
       }
-
-      showToast('সংরক্ষণ ব্যর্থ: ' + errorMessage, 'error');
+      showToast('সংরক্ষণ ব্যর্থ: ' + errorMessage, 'error')
     }
   } catch (err) {
-    loading.value = false;
-    showToast('সংরক্ষণ ব্যর্থ: ' + (err instanceof Error ? err.message : String(err)), 'error');
+    loading.value = false
+    showToast('সংরক্ষণ ব্যর্থ: ' + (err instanceof Error ? err.message : String(err)), 'error')
   }
-};
+}
+
+// Address filter event handler
+async function onUpdateAddressFilters(filters) {
+  const prev = { ...addressFilters.value }
+  addressFilters.value = {
+    division: filters.division ?? '',
+    district: filters.district ?? '',
+    Thana: filters.Thana ?? ''
+  }
+  if (addressFilters.value.division !== prev.division) {
+    await handleDivisionChange()
+  }
+}
 </script>
 
 <style scoped>
