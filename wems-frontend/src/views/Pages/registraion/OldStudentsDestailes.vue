@@ -19,9 +19,9 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
           <div>
-            <h3 class="text-sm font-medium text-red-800">Error loading student data</h3>
-            <p class="mt-1 text-sm text-red-700">{{ error }}</p>
-            <button @click="fetchStudentData(route.params.id)" class="mt-2 text-sm text-red-600 underline hover:text-red-800">
+            <h3 class="text-md font-semibold text-red-800">Error loading student data</h3>
+            <p class="mt-1 text-md text-red-700">{{ error }}</p>
+            <button @click="fetchStudentData(route.params.id)" class="mt-2 text-md text-red-600 underline hover:text-red-800">
               Try again
             </button>
           </div>
@@ -38,7 +38,7 @@
                 {{ studentData.status || 'Active' }}
               </span>
               <span v-if="studentData.is_old" class="bg-amber-100 text-amber-800 text-xs font-semibold px-2.5 py-0.5 rounded">
-                Old Student
+       পুরাতন ছাত্র
               </span>
             </div>
           </div>
@@ -63,14 +63,14 @@
               <h4 class="text-lg text-gray-600" dir="rtl">{{ studentData.student_name_ar }}</h4>
 
               <div class="mt-3 flex flex-wrap justify-center sm:justify-start gap-2">
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                  Roll: {{ studentData.roll_no }}
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-md font-semibold bg-blue-100 text-blue-800">
+                  রোন নম্বর: {{ studentData.roll_no }}
                 </span>
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                  Reg: {{ studentData.reg_no }}
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-md font-semibold bg-green-100 text-green-800">
+                  রেজিস্ট্রেশন নম্বর: {{ studentData.reg_no }}
                 </span>
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
-                  Year: {{ studentData.year }}
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-md font-semibold bg-purple-100 text-purple-800">
+                  শিক্ষাবর্ষ: {{ studentData.year }}
                 </span>
               </div>
             </div>
@@ -89,7 +89,7 @@
                   activeTab === tab.id
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-                  'whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm'
+                  'whitespace-nowrap py-4 px-6 border-b-2 font-semibold text-md'
                 ]"
               >
                 {{ tab.name }}
@@ -101,77 +101,78 @@
           <div class="p-6">
             <!-- Personal Information Tab -->
             <div v-if="activeTab === 'personal'" class="space-y-6">
-              <h3 class="text-lg font-medium text-gray-900">Personal Information</h3>
+              <h3 class="text-lg font-semibold text-gray-900">ব্যক্তিগত তথ্য</h3>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Student Details</h4>
+                  <h4 class="text-md font-semibold text-gray-500 uppercase tracking-wider">ছা্ত্রের তথ্য</h4>
                   <dl class="mt-2 space-y-2">
                     <div class="flex justify-between">
-                      <dt class="text-sm font-medium text-gray-600">Date of Birth:</dt>
-                      <dd class="text-sm text-gray-900">{{ formatDate(studentData.date_of_birth) }}</dd>
+                      <dt class="text-md
+                      text-gray-600">জন্ম-তারিখ:</dt>
+                      <dd class="text-md text-gray-900">{{ formatDate(studentData.date_of_birth) }}</dd>
                     </div>
                     <div class="flex justify-between">
-                      <dt class="text-sm font-medium text-gray-600">Mobile:</dt>
-                      <dd class="text-sm text-gray-900">{{ studentData.mobile }}</dd>
+                      <dt class="text-md font-semibold text-gray-600">মোবাইল:</dt>
+                      <dd class="text-md text-gray-900">{{ studentData.mobile }}</dd>
                     </div>
                     <div class="flex justify-between">
-                      <dt class="text-sm font-medium text-gray-600">Student Type:</dt>
-                      <dd class="text-sm text-gray-900">{{ studentData.students_type }}</dd>
+                      <dt class="text-md font-semibold text-gray-600">পরীক্ষার্থীর ধরণ:</dt>
+                      <dd class="text-md text-gray-900">{{ studentData.students_type }}</dd>
                     </div>
                   </dl>
                 </div>
 
                 <div>
-                  <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Father's Information</h4>
+                  <h4 class="text-md font-semibold text-gray-500 uppercase tracking-wider">পিতার ইনফরমেশন</h4>
                   <dl class="mt-2 space-y-2">
                     <div>
-                      <dt class="text-sm font-medium text-gray-600">Name (BN):</dt>
-                      <dd class="text-sm text-gray-900">{{ studentData.father_name_bn }}</dd>
+                      <dt class="text-md font-semibold text-gray-600">পিতার নাম (বাংলা):</dt>
+                      <dd class="text-md text-gray-900">{{ studentData.father_name_bn }}</dd>
                     </div>
                     <div>
-                      <dt class="text-sm font-medium text-gray-600">Name (EN):</dt>
-                      <dd class="text-sm text-gray-900">{{ studentData.father_name_en }}</dd>
+                      <dt class="text-md font-semibold text-gray-600">পিতার নাম (ইংরেজি):</dt>
+                      <dd class="text-md text-gray-900">{{ studentData.father_name_ar }}</dd>
                     </div>
                     <div>
-                      <dt class="text-sm font-medium text-gray-600">Name (AR):</dt>
-                      <dd class="text-sm text-gray-900" dir="rtl">{{ studentData.father_name_ar }}</dd>
+                      <dt class="text-md font-semibold text-gray-600">পিতার নাম (আরবি):</dt>
+                      <dd class="text-md text-gray-900" dir="rtl">{{ studentData.father_name_ar }}</dd>
                     </div>
                   </dl>
                 </div>
 
                 <div>
-                  <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Mother's Information</h4>
+                  <h4 class="text-md font-semibold text-gray-500 uppercase tracking-wider">মাতার ইনফরমেশন</h4>
                   <dl class="mt-2 space-y-2">
                     <div>
-                      <dt class="text-sm font-medium text-gray-600">Name (BN):</dt>
-                      <dd class="text-sm text-gray-900">{{ studentData.mother_name_bn }}</dd>
+                      <dt class="text-md font-semibold text-gray-600">Name (BN):</dt>
+                      <dd class="text-md text-gray-900">{{ studentData.mother_name_bn }}</dd>
                     </div>
                     <div>
-                      <dt class="text-sm font-medium text-gray-600">Name (EN):</dt>
-                      <dd class="text-sm text-gray-900">{{ studentData.mother_name_en }}</dd>
+                      <dt class="text-md font-semibold text-gray-600">Name (EN):</dt>
+                      <dd class="text-md text-gray-900">{{ studentData.mother_name_en }}</dd>
                     </div>
                     <div>
-                      <dt class="text-sm font-medium text-gray-600">Name (AR):</dt>
-                      <dd class="text-sm text-gray-900" dir="rtl">{{ studentData.mother_name_ar }}</dd>
+                      <dt class="text-md font-semibold text-gray-600">Name (AR):</dt>
+                      <dd class="text-md text-gray-900" dir="rtl">{{ studentData.mother_name_ar }}</dd>
                     </div>
                   </dl>
                 </div>
 
                 <div>
-                  <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider">System Information</h4>
+                  <h4 class="text-md font-semibold text-gray-500 uppercase tracking-wider">সিস্টেম ইনফরমেশন</h4>
                   <dl class="mt-2 space-y-2">
                     <div class="flex justify-between">
-                      <dt class="text-sm font-medium text-gray-600">IP Address:</dt>
-                      <dd class="text-sm text-gray-900">{{ studentData.ip_address }}</dd>
+                      <dt class="text-md font-semibold text-gray-600">আইপি এড্রেস:</dt>
+                      <dd class="text-md text-gray-900">{{ studentData.ip_address }}</dd>
                     </div>
                     <div class="flex justify-between">
-                      <dt class="text-sm font-medium text-gray-600">Created:</dt>
-                      <dd class="text-sm text-gray-900">{{ formatDateTime(studentData.created_at) }}</dd>
+                      <dt class="text-md font-semibold text-gray-600">Created:</dt>
+                      <dd class="text-md text-gray-900">{{ formatDateTime(studentData.created_at) }}</dd>
                     </div>
                     <div class="flex justify-between">
-                      <dt class="text-sm font-medium text-gray-600">Updated:</dt>
-                      <dd class="text-sm text-gray-900">{{ formatDateTime(studentData.updated_at) }}</dd>
+                      <dt class="text-md font-semibold text-gray-600">Updated:</dt>
+                      <dd class="text-md text-gray-900">{{ formatDateTime(studentData.updated_at) }}</dd>
                     </div>
                   </dl>
                 </div>
@@ -180,67 +181,67 @@
 
             <!-- Academic Information Tab -->
             <div v-if="activeTab === 'academic'" class="space-y-6">
-              <h3 class="text-lg font-medium text-gray-900">Academic Information</h3>
+              <h3 class="text-lg font-semibold text-gray-900">Academic Information</h3>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Enrollment Details</h4>
+                  <h4 class="text-md font-semibold text-gray-500 uppercase tracking-wider">Enrollment Details</h4>
                   <dl class="mt-2 space-y-2">
                     <div class="flex justify-between">
-                      <dt class="text-sm font-medium text-gray-600">Marhala ID:</dt>
-                      <dd class="text-sm text-gray-900">{{ studentData.marhala_id }}</dd>
+                      <dt class="text-md font-semibold text-gray-600">Marhala ID:</dt>
+                      <dd class="text-md text-gray-900">{{ studentData.marhala_id }}</dd>
                     </div>
                     <div class="flex justify-between">
-                      <dt class="text-sm font-medium text-gray-600">CID:</dt>
-                      <dd class="text-sm text-gray-900">{{ studentData.cid }}</dd>
+                      <dt class="text-md font-semibold text-gray-600">CID:</dt>
+                      <dd class="text-md text-gray-900">{{ studentData.cid }}</dd>
                     </div>
                     <div class="flex justify-between">
-                      <dt class="text-sm font-medium text-gray-600">Srtype:</dt>
-                      <dd class="text-sm text-gray-900">{{ studentData.srtype }}</dd>
+                      <dt class="text-md font-semibold text-gray-600">Srtype:</dt>
+                      <dd class="text-md text-gray-900">{{ studentData.srtype }}</dd>
                     </div>
                     <div class="flex justify-between">
-                      <dt class="text-sm font-medium text-gray-600">Exam ID:</dt>
-                      <dd class="text-sm text-gray-900">{{ studentData.exam_id }}</dd>
+                      <dt class="text-md font-semibold text-gray-600">Exam ID:</dt>
+                      <dd class="text-md text-gray-900">{{ studentData.exam_id }}</dd>
                     </div>
                   </dl>
                 </div>
 
                 <div>
-                  <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Institution Details</h4>
+                  <h4 class="text-md font-semibold text-gray-500 uppercase tracking-wider">Institution Details</h4>
                   <dl class="mt-2 space-y-2">
                     <div class="flex justify-between">
-                      <dt class="text-sm font-medium text-gray-600">Madrasha ID:</dt>
-                      <dd class="text-sm text-gray-900">{{ studentData.madrasha_id }}</dd>
+                      <dt class="text-md font-semibold text-gray-600">Madrasha ID:</dt>
+                      <dd class="text-md text-gray-900">{{ studentData.madrasha_id }}</dd>
                     </div>
                     <div class="flex justify-between">
-                      <dt class="text-sm font-medium text-gray-600">Markaz ID:</dt>
-                      <dd class="text-sm text-gray-900">{{ studentData.markaz_id }}</dd>
+                      <dt class="text-md font-semibold text-gray-600">Markaz ID:</dt>
+                      <dd class="text-md text-gray-900">{{ studentData.markaz_id }}</dd>
                     </div>
                     <div class="flex justify-between">
-                      <dt class="text-sm font-medium text-gray-600">Hijri Year:</dt>
-                      <dd class="text-sm text-gray-900">{{ studentData.hijri_year }}</dd>
+                      <dt class="text-md font-semibold text-gray-600">Hijri Year:</dt>
+                      <dd class="text-md text-gray-900">{{ studentData.hijri_year }}</dd>
                     </div>
                     <div class="flex justify-between">
-                      <dt class="text-sm font-medium text-gray-600">Bangla Year:</dt>
-                      <dd class="text-sm text-gray-900">{{ studentData.bangla_year }}</dd>
+                      <dt class="text-md font-semibold text-gray-600">Bangla Year:</dt>
+                      <dd class="text-md text-gray-900">{{ studentData.bangla_year }}</dd>
                     </div>
                   </dl>
                 </div>
 
                 <div>
-                  <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Academic Status</h4>
+                  <h4 class="text-md font-semibold text-gray-500 uppercase tracking-wider">Academic Status</h4>
                   <dl class="mt-2 space-y-2">
                     <div class="flex justify-between">
-                      <dt class="text-sm font-medium text-gray-600">Status:</dt>
-                      <dd class="text-sm text-gray-900">{{ studentData.status }}</dd>
+                      <dt class="text-md font-semibold text-gray-600">Status:</dt>
+                      <dd class="text-md text-gray-900">{{ studentData.status }}</dd>
                     </div>
                     <div class="flex justify-between">
-                      <dt class="text-sm font-medium text-gray-600">Is Old Student:</dt>
-                      <dd class="text-sm text-gray-900">{{ studentData.is_old ? 'Yes' : 'No' }}</dd>
+                      <dt class="text-md font-semibold text-gray-600">Is Old Student:</dt>
+                      <dd class="text-md text-gray-900">{{ studentData.is_old ? 'Yes' : 'No' }}</dd>
                     </div>
                     <div class="flex justify-between">
-                      <dt class="text-sm font-medium text-gray-600">Irregular Subjects:</dt>
-                      <dd class="text-sm text-gray-900">{{ studentData.irregular_sub }}</dd>
+                      <dt class="text-md font-semibold text-gray-600">Irregular Subjects:</dt>
+                      <dd class="text-md text-gray-900">{{ studentData.irregular_sub }}</dd>
                     </div>
                   </dl>
                 </div>
@@ -249,39 +250,39 @@
 
             <!-- NEW: Address & Documents Tab -->
             <div v-if="activeTab === 'address'" class="space-y-6">
-              <h3 class="text-lg font-medium text-gray-900">Address & Documents</h3>
+              <h3 class="text-lg font-semibold text-gray-900">Address & Documents</h3>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Address Information -->
                 <div>
-                  <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Contact Address</h4>
+                  <h4 class="text-md font-semibold text-gray-500 uppercase tracking-wider">Contact Address</h4>
                   <dl class="mt-2 space-y-2">
                     <div>
-                      <dt class="text-sm font-medium text-gray-600">Division:</dt>
-                      <dd class="text-sm text-gray-900">{{ studentAddressData.division || 'N/A' }}</dd>
+                      <dt class="text-md font-semibold text-gray-600">Division:</dt>
+                      <dd class="text-md text-gray-900">{{ studentAddressData.division || 'N/A' }}</dd>
                     </div>
                     <div>
-                      <dt class="text-sm font-medium text-gray-600">District:</dt>
-                      <dd class="text-sm text-gray-900">{{ studentAddressData.district || 'N/A' }}</dd>
+                      <dt class="text-md font-semibold text-gray-600">District:</dt>
+                      <dd class="text-md text-gray-900">{{ studentAddressData.district || 'N/A' }}</dd>
                     </div>
                     <div>
-                      <dt class="text-sm font-medium text-gray-600">Thana:</dt>
-                      <dd class="text-sm text-gray-900">{{ studentAddressData.thana || 'N/A' }}</dd>
+                      <dt class="text-md font-semibold text-gray-600">Thana:</dt>
+                      <dd class="text-md text-gray-900">{{ studentAddressData.thana || 'N/A' }}</dd>
                     </div>
                     <div>
-                      <dt class="text-sm font-medium text-gray-600">Post Office:</dt>
-                      <dd class="text-sm text-gray-900">{{ studentAddressData.post_office || 'N/A' }}</dd>
+                      <dt class="text-md font-semibold text-gray-600">Post Office:</dt>
+                      <dd class="text-md text-gray-900">{{ studentAddressData.post_office || 'N/A' }}</dd>
                     </div>
                   </dl>
                 </div>
 
                 <!-- Document Information -->
                 <div>
-                  <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Documents & Photos</h4>
+                  <h4 class="text-md font-semibold text-gray-500 uppercase tracking-wider">Documents & Photos</h4>
                   <div class="mt-2 space-y-4">
                     <!-- Passport -->
                     <div>
-                      <dt class="text-sm font-medium text-gray-600">Passport Photo:</dt>
+                      <dt class="text-md font-semibold text-gray-600">Passport Photo:</dt>
                       <dd class="mt-1">
                         <img
                           v-if="studentAddressData.passport_photo"
@@ -289,15 +290,15 @@
                           alt="Passport Photo"
                           class="h-24 w-24 rounded-lg border border-gray-300 object-cover"
                         >
-                        <span v-else class="text-sm text-gray-500">No photo available</span>
+                        <span v-else class="text-md text-gray-500">No photo available</span>
                       </dd>
                     </div>
 
                     <!-- Birth Certificate -->
                     <div>
-                      <dt class="text-sm font-medium text-gray-600">Birth Certificate No:</dt>
-                      <dd class="text-sm text-gray-900">{{ studentAddressData.birth_certificate_no || 'N/A' }}</dd>
-                      <dt class="text-sm font-medium text-gray-600 mt-2">Birth Certificate Photo:</dt>
+                      <dt class="text-md font-semibold text-gray-600">Birth Certificate No:</dt>
+                      <dd class="text-md text-gray-900">{{ studentAddressData.birth_certificate_no || 'N/A' }}</dd>
+                      <dt class="text-md font-semibold text-gray-600 mt-2">Birth Certificate Photo:</dt>
                       <dd class="mt-1">
                         <img
                           v-if="studentAddressData.birth_certificate_photo"
@@ -305,15 +306,15 @@
                           alt="Birth Certificate"
                           class="h-24 w-24 rounded-lg border border-gray-300 object-cover"
                         >
-                        <span v-else class="text-sm text-gray-500">No photo available</span>
+                        <span v-else class="text-md text-gray-500">No photo available</span>
                       </dd>
                     </div>
 
                     <!-- NID -->
                     <div>
-                      <dt class="text-sm font-medium text-gray-600">NID No:</dt>
-                      <dd class="text-sm text-gray-900">{{ studentAddressData.nid_no || 'N/A' }}</dd>
-                      <dt class="text-sm font-medium text-gray-600 mt-2">NID Photo:</dt>
+                      <dt class="text-md font-semibold text-gray-600">NID No:</dt>
+                      <dd class="text-md text-gray-900">{{ studentAddressData.nid_no || 'N/A' }}</dd>
+                      <dt class="text-md font-semibold text-gray-600 mt-2">NID Photo:</dt>
                       <dd class="mt-1">
                         <img
                           v-if="studentAddressData.nid_photo"
@@ -321,7 +322,7 @@
                           alt="NID Photo"
                           class="h-24 w-24 rounded-lg border border-gray-300 object-cover"
                         >
-                        <span v-else class="text-sm text-gray-500">No photo available</span>
+                        <span v-else class="text-md text-gray-500">No photo available</span>
                       </dd>
                     </div>
                   </div>
@@ -331,24 +332,24 @@
 
             <!-- Actions Tab -->
             <div v-if="activeTab === 'actions'" class="space-y-6">
-              <h3 class="text-lg font-medium text-gray-900">Actions</h3>
+              <h3 class="text-lg font-semibold text-gray-900">Actions</h3>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button @click="editStudent" class="inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <button @click="editStudent" class="inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm text-md font-semibold rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                   <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                   </svg>
                   Edit Student
                 </button>
 
-                <button @click="downloadPDF" class="inline-flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <button @click="downloadPDF" class="inline-flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-md font-semibold rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                   <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clip-rule="evenodd" />
                   </svg>
                   Download PDF
                 </button>
 
-                <button @click="printCertificate" class="inline-flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <button @click="printCertificate" class="inline-flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-md font-semibold rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                   <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
                     <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 1 1 0 000 2H6a2 2 0 100 4h2a2 2 0 100 4h2a1 1 0 100 2 2 2 0 01-2 2H6a2 2 0 01-2-2V5z" clip-rule="evenodd" />
@@ -356,7 +357,7 @@
                   Print Certificate
                 </button>
 
-                <button @click="deleteRecord" class="inline-flex justify-center items-center px-4 py-2 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                <button @click="deleteRecord" class="inline-flex justify-center items-center px-4 py-2 border border-red-300 shadow-sm text-md font-semibold rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
                   <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
                   </svg>

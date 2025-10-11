@@ -179,10 +179,37 @@ def create_student(student_data, user_id=None):
     Create a new student record
     """
     from .serializers import StudentBasicCreateUpdateSerializer
+    from apps.users.models import UserInformation
+    from apps.Markaz.models import MadrashaUnderCenter
     
     # Add audit fields
     if user_id:
         student_data['created_by'] = user_id
+
+    # Auto-derive madrasha_id & markaz_id if not explicitly provided.
+    # Logic:
+    #   1. Take user's madrasha_id from user_information.
+    #   2. Find row in madrasha_under_centers where child_madrasha_id == user.madrasha_id.
+    #   3. Use that row's parent_madrasha_id as markaz_id and store into student_basic.markaz_id.
+    #   4. Caller can still override by explicitly sending markaz_id in payload.
+    # This keeps backward compatibility while automating markaz mapping.
+        try:
+            user_info = UserInformation.objects.filter(user_id=user_id).first()
+            if user_info and user_info.madrasha_id:
+                # If caller did not pass madrasha_id, set from user info
+                if not student_data.get('madrasha_id'):
+                    student_data['madrasha_id'] = user_info.madrasha_id
+
+                # Only set markaz_id automatically if not already provided
+                if not student_data.get('markaz_id'):
+                    # Find mapping where child_madrasha_id == user's madrasha_id
+                    mapping = MadrashaUnderCenter.objects.filter(child_madrasha_id=str(user_info.madrasha_id)).first()
+                    if mapping and mapping.parent_madrasha_id:
+                        # parent_madrasha_id becomes markaz_id for student_basic
+                        student_data['markaz_id'] = int(mapping.parent_madrasha_id) if str(mapping.parent_madrasha_id).isdigit() else None
+        except Exception as e:
+            # Fail silently: we don't want student creation to break for mapping issues
+            print(f"[create_student] markaz auto-mapping failed: {e}")
     
     serializer = StudentBasicCreateUpdateSerializer(data=student_data)
     if serializer.is_valid():

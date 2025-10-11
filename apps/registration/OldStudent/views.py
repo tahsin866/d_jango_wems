@@ -68,11 +68,24 @@ class OldStudentRegistrationView(APIView):
         # 🔥 NEW LOGIC: Get user_id and map marhala_id from user_information table
         user_id = request.data.get('user_id')
         user_madrasha_id = None
+        auto_markaz_id = None
 
         if user_id:
             user_madrasha_id = self.get_user_madrasha_id(user_id)
             if user_madrasha_id:
                 print(f"🔥 Mapped madrasha_id from user_information: {user_madrasha_id} for user_id: {user_id}")
+                
+                # 🔥 AUTO-DERIVE markaz_id from madrasha_under_centers
+                try:
+                    from apps.Markaz.models import MadrashaUnderCenter
+                    mapping = MadrashaUnderCenter.objects.filter(child_madrasha_id=str(user_madrasha_id)).first()
+                    if mapping and mapping.parent_madrasha_id:
+                        auto_markaz_id = int(mapping.parent_madrasha_id) if str(mapping.parent_madrasha_id).isdigit() else None
+                        print(f"🔥 Auto-derived markaz_id: {auto_markaz_id} from parent_madrasha_id: {mapping.parent_madrasha_id}")
+                    else:
+                        print(f"⚠️ No markaz mapping found for madrasha_id: {user_madrasha_id}")
+                except Exception as e:
+                    print(f"⚠️ Failed to auto-derive markaz_id: {e}")
             else:
                 print(f"⚠️ Could not find madrasha_id for user_id: {user_id}")
         else:
@@ -252,7 +265,7 @@ class OldStudentRegistrationView(APIView):
                 'students_type': students_type_val or '',  # CharField - string
                 'exam_id': exam_id_val,  # IntegerField - int or None
                 'madrasha_id': madrasha_id_from_user if madrasha_id_from_user else (int(personal.get('madrasha_id')) if personal.get('madrasha_id') and str(personal.get('madrasha_id')).isdigit() else madrasha_id_val),  # 🔥 FIXED: user_information > personal > search_result
-                'markaz_id': None,  # IntegerField - None
+                'markaz_id': auto_markaz_id if auto_markaz_id else (int(personal.get('markaz_id')) if personal.get('markaz_id') and str(personal.get('markaz_id')).isdigit() else None),  # 🔥 NEW: Auto-derived markaz_id from madrasha_under_centers
                 'irregular_sub': personal.get('irregular_sub', ''),
                 'marhala_id': int(personal.get('marhala_id')) if personal.get('marhala_id') and str(personal.get('marhala_id')).isdigit() else (int(marhala_id) if marhala_id and marhala_id.isdigit() else None),  # 🔥 FIXED: From search_result/personal (NOT user_information)
                 'mobile': personal.get('mobile', ''),  # CharField - string from personal payload
@@ -355,7 +368,9 @@ class OldStudentRegistrationView(APIView):
             'marhala_id': basic.marhala_id,
             'marhala_id_source': 'search_result_or_form',
             'madrasha_id': basic.madrasha_id,
-            'madrasha_id_source': 'user_information' if madrasha_id_from_user else 'search_result_or_form'
+            'madrasha_id_source': 'user_information' if madrasha_id_from_user else 'search_result_or_form',
+            'markaz_id': basic.markaz_id,
+            'markaz_id_source': 'auto_derived_from_madrasha_under_centers' if auto_markaz_id else 'manual_or_none'
         }
 
         return Response(response_data, status=status.HTTP_201_CREATED)
