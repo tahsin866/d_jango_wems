@@ -33,9 +33,9 @@ class NewStudentSerializer(serializers.Serializer):
     birth_attach = serializers.CharField(required=False, allow_blank=True)
     nid_no = serializers.CharField(required=False, allow_blank=True)
     nid_attach = serializers.CharField(required=False, allow_blank=True)
-    marksheet = serializers.CharField(required=False, allow_blank=True)
-    passport_photo = serializers.CharField(required=False, allow_blank=True)
-    student_image = serializers.CharField(required=False, allow_blank=True)
+    marksheet = serializers.FileField(required=False, allow_null=True)
+    passport_photo = serializers.FileField(required=False, allow_null=True)
+    student_image = serializers.FileField(required=False, allow_null=True)
 
     # Misc
     students_type = serializers.CharField(required=False, allow_blank=True)

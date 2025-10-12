@@ -1,5 +1,5 @@
 <script setup>
-import { ref, defineEmits, defineProps, watch } from 'vue'
+import { ref, defineEmits, defineProps } from 'vue'
 import FileUpload from 'primevue/fileupload'
 import Button from 'primevue/button'
 
@@ -57,7 +57,9 @@ const emitUpdateFiles = () => {
 </script>
 
 <template>
-  <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mt-6">
+  <div
+    style="font-family: 'SolaimanLipi', sans-serif;"
+  class="bg-white overflow-hidden shadow-sm sm:rounded-lg mt-6">
     <div class="p-6 bg-white border-b border-gray-200">
       <h2 class="font-semibold text-xl text-gray-800 leading-tight mb-4">সংযুক্তি</h2>
       <div class="grid grid-cols-1 gap-6 md:grid-cols-3">

@@ -1,33 +1,20 @@
 import { ref, computed } from 'vue'
 import axios from '@/utils/axios'
 
-export interface UserProfile {
-  id: number
-  name: string
-  email: string
-  user_type_id: number
-  user_type_name: string
-  photo: string | null
-  is_admin: boolean
-  avatar_url: string | null
-  madrasha_id: number | null
-  madrasha_name: string | null
-}
-
 // Global state
-const user = ref<UserProfile | null>(null)
+const user = ref(null)
 const loading = ref(false)
-const error = ref<string | null>(null)
-const currentUserId = ref<number | null>(null)
+const error = ref(null)
+const currentUserId = ref(null)
 
 // Set user ID (call this after login)
-export function setCurrentUserId(userId: number) {
+export function setCurrentUserId(userId) {
   currentUserId.value = userId
   localStorage.setItem('current_user_id', userId.toString())
 }
 
 // Get user ID from storage
-export function getCurrentUserId(): number | null {
+export function getCurrentUserId() {
   if (currentUserId.value) {
     return currentUserId.value
   }
@@ -94,14 +81,16 @@ export async function fetchUserProfile() {
         throw new Error('No user_id available for fallback profile fetch');
       }
     }
-  } catch (err: unknown) {
+  } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Profile fetch failed'
     error.value = errorMessage
     console.error('Profile fetch error:', err)
   } finally {
     loading.value = false
   }
-}export async function updateProfile(profileData: Partial<UserProfile>) {
+}
+
+export async function updateProfile(profileData) {
   try {
     loading.value = true
     error.value = null
@@ -115,7 +104,7 @@ export async function fetchUserProfile() {
     } else {
       throw new Error(response.data.error || 'Failed to update profile')
     }
-  } catch (err: unknown) {
+  } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Profile update failed'
     error.value = errorMessage
     console.error('Profile update error:', err)
@@ -125,7 +114,7 @@ export async function fetchUserProfile() {
   }
 }
 
-export async function uploadProfilePhoto(photoFile: File) {
+export async function uploadProfilePhoto(photoFile) {
   try {
     loading.value = true
     error.value = null
@@ -146,7 +135,7 @@ export async function uploadProfilePhoto(photoFile: File) {
     } else {
       throw new Error(response.data.error || 'Failed to upload photo')
     }
-  } catch (err: unknown) {
+  } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Photo upload failed'
     error.value = errorMessage
     console.error('Photo upload error:', err)

@@ -38,7 +38,9 @@ const localForm = ref({
 
 // Watch for changes and emit updates
 watch(localForm, (newVal) => {
-  emit('update:modelValue', { ...props.modelValue, ...newVal })
+  const updatedData = { ...props.modelValue, ...newVal }
+  console.log('Board info updated:', updatedData)
+  emit('update:modelValue', updatedData)
 }, { deep: true })
 
 // Watch for external changes to modelValue
@@ -84,6 +86,19 @@ watch(() => localForm.value.board_name, (val) => {
   isNonBefaqBoard.value = !!val && val !== 'বেফাকুল মাদারিসিল আরাবিয়া বাংলাদেশ'
 })
 
+// Watch for address changes and emit updates
+watch(addressFilters, (newVal) => {
+  const addressData = {
+    division_id: newVal.division,
+    district_id: newVal.district,
+    thana_id: newVal.Thana
+  }
+  const updatedData = { ...props.modelValue, ...addressData }
+  console.log('🔄 Address data updated:', addressData)
+  console.log('📤 Emitting to parent:', updatedData)
+  emit('update:modelValue', updatedData)
+}, { deep: true })
+
 onMounted(async () => {
   await loadDivisions()
 })
@@ -91,14 +106,18 @@ onMounted(async () => {
 const loadDivisions = async () => {
   try {
     const response = await axios.get('/api/admin/madrasha/divisions/')
+    console.log('Divisions API response:', response.data)
     divisions.value = response.data.results || response.data
+    console.log('Divisions loaded:', divisions.value.length, divisions.value)
     return true
-  } catch {
+  } catch (error) {
+    console.error('Error loading divisions:', error)
     return false
   }
 }
 
 const handleDivisionChange = async () => {
+  console.log('🏛️ Division selected:', addressFilters.value.division)
   addressFilters.value.district = ''
   addressFilters.value.Thana = ''
   districts.value = []
@@ -106,22 +125,26 @@ const handleDivisionChange = async () => {
   if (!addressFilters.value.division) return
   try {
     const response = await axios.get(`/api/admin/madrasha/districts/?did=${addressFilters.value.division}`)
+    console.log('Districts API response:', response.data)
     districts.value = response.data.results || response.data
-  } catch {
-    // Handle error silently
+    console.log('Districts loaded:', districts.value.length, districts.value)
+  } catch (error) {
+    console.error('Error loading districts:', error)
   }
 }
 
 const handleDistrictChange = async () => {
+  console.log('🏘️ District selected:', addressFilters.value.district)
   addressFilters.value.Thana = ''
   thanas.value = []
   if (!addressFilters.value.district) return
   try {
     const response = await axios.get(`/api/admin/madrasha/thanas/?district_id=${addressFilters.value.district}`)
+    console.log('Thanas API response:', response.data)
     thanas.value = response.data.results || response.data
-    thanas.value = response.data
-  } catch {
-    // Handle error silently
+    console.log('Thanas loaded:', thanas.value.length, thanas.value)
+  } catch (error) {
+    console.error('Error loading thanas:', error)
   }
 }
 
@@ -157,8 +180,11 @@ watch(addressFilters, () => {
       updatedForm.thana_id = selectedThana.thana_id
     }
   }
+  console.log('Address updated:', updatedForm)
   emit('update:modelValue', updatedForm)
-}, { deep: true })</script>
+}, { deep: true })
+
+</script>
 
 <template>
   <div>

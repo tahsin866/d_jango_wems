@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, reactive,watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { getCurrentUserId } from '@/stores/userProfile'
 
 import PersonalInfo from '@/views/Pages/registraion/NewStudents/components/PersonalInfoStep.vue'
 import AddressInfo from '@/views/Pages/registraion/NewStudents/components/AddressInfoStep.vue'
@@ -8,7 +9,7 @@ import AttachmentsInfo from '@/views/Pages/registraion/NewStudents/components/At
 
 import axios from 'axios'
 
-const props = defineProps({
+defineProps({
   roll: String,
   reg_id: String,
   CID: String,
@@ -48,49 +49,73 @@ watch(boardOptions, (newVal) => {
 
 // Main form state (using reactive instead of useForm)
 const studentInfoForm = reactive({
-  name_bn: '',
-  name_en: '',
-  name_ar: '',
+  // Personal info (matches model fields)
+  student_name_bn: '',
+  student_name_ar: '',
+  student_name_en: '',
   father_name_bn: '',
-  father_name_en: '',
   father_name_ar: '',
+  father_name_en: '',
   mother_name_bn: '',
-  mother_name_en: '',
   mother_name_ar: '',
-  BRN_no: '',
-  NID_no: '',
-  past_Roll: '',
-  past_reg_id: '',
-  madrasha_id: '',
-  class: '',
-  Division: '',
-  Date_of_birth: '',
-  current_madrasha: '',
-  current_markaz: '',
-  student_type: '',
-  current_class: '',
-  exam_books_name: '',
-  mobile_no: '',
-  board_name: '',
+  mother_name_en: '',
+  date_of_birth: '',
+  mobile: '',
+
+  // Document numbers
+  birth_no: '',
+  nid_no: '',
+
+  // IDs
   marhala_id: '',
-  present_division_name: '',
-  presernt_DID: '',
-  present_district_name: '',
-  present_desId: '',
-  present_thana_name: '',
-  present_TID: '',
-  parmanent_division_name: '',
-  parmanent_DID: '',
-  parmanent_district_name: '',
-  parmanent_desId: '',
-  parmanent_thana_name: '',
-  parmanent_TID: '',
-  student_image: '',
-  NID_attach: null,
-  markaz_id: ''
+  madrasha_id: '',
+  markaz_id: '',
+  exam_id: '',
+
+  // Board info (NEW FIELDS)
+  board_id: '',
+  irregular_year: '',
+  board_name: '', // For UI binding
+  board_year: '',  // For UI binding
+
+  // Address info
+  division_id: '',
+  district_id: '',
+  thana_id: '',
+
+  // Files
+  student_image: null,
+  marksheet: null,
+
+  // Additional fields for compatibility
+  roll_no: '',
+  reg_no: '',
+  year: '',
+  status: 'active',
+  students_type: '',
+  is_old: 0
 })
 
-// File refs for attachments
+// Watch for address and board changes in studentInfoForm (after initialization)
+watch(() => [studentInfoForm.division_id, studentInfoForm.district_id, studentInfoForm.thana_id, studentInfoForm.board_name, studentInfoForm.board_year], (newValues) => {
+  console.log('📍 Parent received address/board data:', {
+    division_id: newValues[0],
+    district_id: newValues[1],
+    thana_id: newValues[2],
+    board_name: newValues[3],
+    board_year: newValues[4]
+  })
+
+  // Update board_id when board_name changes
+  if (newValues[3]) {
+    studentInfoForm.board_id = getBoardIdFromName(newValues[3])
+  }
+
+  // Update irregular_year when board_year changes
+  if (newValues[4]) {
+    studentInfoForm.irregular_year = newValues[4]
+  }
+}, { deep: true })// File refs for attachments
 const studentPhotoFile = ref(null)
 const birthCertificateFile = ref(null)
 const marksheetFile = ref(null)
@@ -127,7 +152,6 @@ onMounted(async () => {
     const marhalaResponse = await axios.get(`/api/student-registration/${marhalaId}`)
     examName.value = marhalaResponse.data.examName
     marhalaName.value = marhalaResponse.data.marhalaName
-    studentInfoForm.current_class = marhalaResponse.data.marhalaName
     studentInfoForm.marhala_id = marhalaId
 
     // Fetch board options
@@ -146,12 +170,6 @@ const gotoStep = (step) => {
 }
 
 // Data update from children
-const updatePersonalInfo = (info) => {
-  Object.assign(studentInfoForm, info)
-}
-const updateAddressInfo = (info) => {
-  Object.assign(studentInfoForm, info)
-}
 const updateAttachments = (files) => {
   studentPhotoFile.value = files.studentPhoto
   birthCertificateFile.value = files.birthCertificate
@@ -161,51 +179,81 @@ const updateAttachments = (files) => {
 // Submit main form
 const submitStudentInfo = async () => {
   try {
-    // Prepare data for new student registration API
-    const registrationData = {
-      // Personal info
-      student_name_bn: studentInfoForm.name_bn || '',
-      student_name_ar: studentInfoForm.name_ar || '',
-      student_name_en: studentInfoForm.name_en || '',
-      father_name_bn: studentInfoForm.father_name_bn || '',
-      father_name_ar: studentInfoForm.father_name_ar || '',
-      father_name_en: studentInfoForm.father_name_en || '',
-      mother_name_bn: studentInfoForm.mother_name_bn || '',
-      mother_name_ar: studentInfoForm.mother_name_ar || '',
-      mother_name_en: studentInfoForm.mother_name_en || '',
-      date_of_birth: studentInfoForm.Date_of_birth || null,
-      mobile: studentInfoForm.mobile_no || '',
+    console.log('Current studentInfoForm before submit:', studentInfoForm)
+    console.log('Files - Photo:', studentPhotoFile.value, 'Marksheet:', marksheetFile.value)
 
-      // Board info (new fields)
-      board_name: studentInfoForm.board_name || '',
-      board_id: getBoardIdFromName(studentInfoForm.board_name),
-      irregular_year: studentInfoForm.board_year || '',
+    // Create FormData for file uploads
+    const formData = new FormData()
 
-      // IDs
-      marhala_id: currentMarhalaId.value,
-      madrasha_id: studentInfoForm.madrasha_id || null,
-      markaz_id: studentInfoForm.markaz_id || null,
+    // Personal info
+    formData.append('student_name_bn', studentInfoForm.student_name_bn || '')
+    formData.append('student_name_ar', studentInfoForm.student_name_ar || '')
+    formData.append('student_name_en', studentInfoForm.student_name_en || '')
+    formData.append('father_name_bn', studentInfoForm.father_name_bn || '')
+    formData.append('father_name_ar', studentInfoForm.father_name_ar || '')
+    formData.append('father_name_en', studentInfoForm.father_name_en || '')
+    formData.append('mother_name_bn', studentInfoForm.mother_name_bn || '')
+    formData.append('mother_name_ar', studentInfoForm.mother_name_ar || '')
+    formData.append('mother_name_en', studentInfoForm.mother_name_en || '')
 
-      // Address (using IDs)
-      division_id: studentInfoForm.presernt_DID || '',
-      district_id: studentInfoForm.present_desId || '',
-      thana_id: studentInfoForm.present_TID || '',
+    // Date format conversion to YYYY-MM-DD
+    let formattedDate = ''
+    if (studentInfoForm.date_of_birth) {
+      const date = new Date(studentInfoForm.date_of_birth)
+      formattedDate = date.toISOString().split('T')[0] // YYYY-MM-DD format
+    }
+    formData.append('date_of_birth', formattedDate)
+    formData.append('mobile', studentInfoForm.mobile || '')
 
-      // Attachments
-      birth_no: studentInfoForm.BRN_no || '',
-      birth_attach: studentInfoForm.NID_attach || '',
-      nid_no: studentInfoForm.NID_no || '',
-      nid_attach: studentInfoForm.NID_attach || '',
-      marksheet: marksheetFile.value || '',
-      student_image: studentPhotoFile.value || '',
+    // Board info (using board_id and irregular_year from model)
+    formData.append('board_id', studentInfoForm.board_id || getBoardIdFromName(studentInfoForm.board_name) || '')
+    formData.append('irregular_year', studentInfoForm.irregular_year || studentInfoForm.board_year || '')
+
+    // IDs - marhala_id from route, madrasha_id and markaz_id will be auto-detected by backend
+    formData.append('marhala_id', currentMarhalaId.value || '')
+
+    // Get actual user_id from session like OldStudent
+    const currentUserId = getCurrentUserId()
+    formData.append('user_id', currentUserId || '1') // Use actual user session or fallback to 1
+    // Remove madrasha_id and markaz_id - they will be auto-detected from user session
+
+    // Address (using IDs from AddressInfoStep)
+    console.log('Address fields to submit:')
+    console.log('division_id:', studentInfoForm.division_id)
+    console.log('district_id:', studentInfoForm.district_id)
+    console.log('thana_id:', studentInfoForm.thana_id)
+    console.log('board_name:', studentInfoForm.board_name)
+    console.log('board_year:', studentInfoForm.board_year)
+
+    formData.append('division_id', studentInfoForm.division_id || '')
+    formData.append('district_id', studentInfoForm.district_id || '')
+    formData.append('thana_id', studentInfoForm.thana_id || '')
+
+    // Document numbers
+    formData.append('birth_no', studentInfoForm.birth_no || '')
+    formData.append('nid_no', studentInfoForm.nid_no || '')
+    formData.append('birth_attach', '')
+    formData.append('nid_attach', '')
+
+    // File attachments
+    if (studentPhotoFile.value) {
+      formData.append('student_image', studentPhotoFile.value)
+    }
+    if (marksheetFile.value) {
+      formData.append('marksheet', marksheetFile.value)
     }
 
-    console.log('Submitting registration data:', registrationData)
+    console.log('Submitting FormData with files...')
+
+    // Debug FormData contents
+    for (let [key, value] of formData.entries()) {
+      console.log(`FormData ${key}:`, value)
+    }
 
     // Submit to new student registration API
-    const response = await axios.post('/api/admin/registration/newstudent/register/', registrationData, {
+    const response = await axios.post('/api/admin/registration/newstudent/register/', formData, {
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'multipart/form-data'
       }
     })
 
@@ -218,6 +266,9 @@ const submitStudentInfo = async () => {
     // Error message
     showToastMessage('ছাত্রের তথ্য সংরক্ষণ করতে সমস্যা হয়েছে', 'error')
     console.error('Error saving student information:', error)
+    if (error.response) {
+      console.error('Error response:', error.response.data)
+    }
   }
 }
 
