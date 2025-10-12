@@ -96,6 +96,11 @@ const studentInfoForm = reactive({
   is_old: 0
 })
 
+// Deep merge function for child updates
+const updateStudentInfo = (updatedFields) => {
+  Object.assign(studentInfoForm, updatedFields)
+}
+
 // Watch for address and board changes in studentInfoForm (after initialization)
 watch(() => [studentInfoForm.division_id, studentInfoForm.district_id, studentInfoForm.thana_id, studentInfoForm.board_name, studentInfoForm.board_year], (newValues) => {
   console.log('📍 Parent received address/board data:', {
@@ -105,17 +110,15 @@ watch(() => [studentInfoForm.division_id, studentInfoForm.district_id, studentIn
     board_name: newValues[3],
     board_year: newValues[4]
   })
-
   // Update board_id when board_name changes
   if (newValues[3]) {
     studentInfoForm.board_id = getBoardIdFromName(newValues[3])
   }
-
   // Update irregular_year when board_year changes
   if (newValues[4]) {
     studentInfoForm.irregular_year = newValues[4]
   }
-}, { deep: true })// File refs for attachments
+}, { deep: true })
 const studentPhotoFile = ref(null)
 const birthCertificateFile = ref(null)
 const marksheetFile = ref(null)
@@ -327,7 +330,8 @@ const getBoardIdFromName = (boardName) => {
         <PersonalInfo
           v-if="currentStep === 1"
           :marhalaName="marhalaName"
-          v-model="studentInfoForm"
+          :modelValue="studentInfoForm"
+          @update:modelValue="updateStudentInfo"
           @next="gotoStep(2)"
         />
 
@@ -335,7 +339,8 @@ const getBoardIdFromName = (boardName) => {
           v-if="currentStep === 2"
           :form="studentInfoForm"
           :boardOptions="boardOptions"
-          v-model="studentInfoForm"
+          :modelValue="studentInfoForm"
+          @update:modelValue="updateStudentInfo"
           @prev="gotoStep(1)"
           @next="gotoStep(3)"
         />
@@ -344,6 +349,8 @@ const getBoardIdFromName = (boardName) => {
           v-if="currentStep === 3"
           :form="studentInfoForm"
           :boardOptions="boardOptions"
+          :modelValue="studentInfoForm"
+          @update:modelValue="updateStudentInfo"
           @prev="gotoStep(2)"
           @submit="submitStudentInfo"
           @update-files="updateAttachments"
