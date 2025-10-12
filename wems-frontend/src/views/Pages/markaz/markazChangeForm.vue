@@ -1,50 +1,9 @@
-<script setup lang="ts">
+<script setup>
 import { ref, onMounted, computed, watch } from "vue";
 import AdminLayout from '@/components/layout/AdminLayout.vue';
 
-// Type definitions
-interface Madrasha {
-  id: number;
-  name: string;
-  ElhaqNo: string;
-}
-
-interface Centers {
-  darsiyat?: string;
-  hifz?: string;
-  kirat?: string;
-}
-
-interface SearchResults {
-  darsiyat: Madrasha[];
-  hifz: Madrasha[];
-  kirat: Madrasha[];
-  selectedDarsiyat: Madrasha | null;
-  selectedHifz: Madrasha | null;
-  selectedKirat: Madrasha | null;
-}
-
-interface Files {
-  darsiyat: { noc: File | null; consent: File | null };
-  hifz: { noc: File | null; consent: File | null };
-  kirat: { noc: File | null; consent: File | null };
-}
-
-interface Form {
-  exam_id: number | null;
-  exam_name: string;
-}
-
-interface MarkazForm {
-  markaz_type: string;
-  asking_madrasha: string;
-  markaz_id: string;
-  onapotti_potro: File | null;
-  shommoti_potro: File | null;
-}
-
 // Fake data
-const fakeMadrashas: Madrasha[] = [
+const fakeMadrashas = [
   { id: 1, name: "জামিয়া আরাবিয়া দারুল উলুম ঢাকা", ElhaqNo: "১০০১" },
   { id: 2, name: "জামিয়া কুরআনিয়া লালবাগ ঢাকা", ElhaqNo: "১০০২" },
   { id: 3, name: "মাদরাসা-এ আলিয়া ঢাকা", ElhaqNo: "১০০৩" },
@@ -57,20 +16,18 @@ const fakeMadrashas: Madrasha[] = [
   { id: 10, name: "দারুল উলুম দেওবন্দ ঢাকা", ElhaqNo: "১০১০" }
 ];
 
-const fakeCenters: Centers = {
-  // দারসিয়াত: "জামিয়া আরাবিয়া দারুল উলুম ঢাকা",
-  // hifz: "জামিয়া কুরআনিয়া লালবাগ ঢাকা"
-  // kirat field intentionally left empty to show different states
+const fakeCenters = {
+  // Example: darsiyat: "জামিয়া আরাবিয়া দারুল উলুম ঢাকা"
 };
 
 // Sidebar state
-const centers = ref<Centers>(fakeCenters);
-const error = ref<string | null>(null);
-const selectedType = ref<string>('');
-const searchDarsiyat = ref<string>('');
-const searchHifz = ref<string>('');
-const searchKirat = ref<string>('');
-const searchResults = ref<SearchResults>({
+const centers = ref(fakeCenters);
+const error = ref(null);
+const selectedType = ref('');
+const searchDarsiyat = ref('');
+const searchHifz = ref('');
+const searchKirat = ref('');
+const searchResults = ref({
   darsiyat: [],
   hifz: [],
   kirat: [],
@@ -78,25 +35,25 @@ const searchResults = ref<SearchResults>({
   selectedHifz: null,
   selectedKirat: null
 });
-const files = ref<Files>({
+const files = ref({
   darsiyat: { noc: null, consent: null },
   hifz: { noc: null, consent: null },
   kirat: { noc: null, consent: null }
 });
 
 // Modal state
-const showModal = ref<boolean>(false);
-const modalType = ref<string>('');
-const currentCenter = ref<string>('');
-const modalSearch = ref<string>('');
-const modalSearchResults = ref<Madrasha[]>([]);
-const modalFiles = ref<{ noc: File | null; consent: File | null }>({ noc: null, consent: null });
-const selectedModalCenter = ref<string>('');
-const selectedModalCenterData = ref<Madrasha | null>(null);
+const showModal = ref(false);
+const modalType = ref('');
+const currentCenter = ref('');
+const modalSearch = ref('');
+const modalSearchResults = ref([]);
+const modalFiles = ref({ noc: null, consent: null });
+const selectedModalCenter = ref('');
+const selectedModalCenterData = ref(null);
 
 // Computed property for modal title
-const modalTitle = computed<string>(() => {
-  const typeMap: Record<string, string> = {
+const modalTitle = computed(() => {
+  const typeMap = {
     'darsiyat': 'দারসিয়াত',
     'hifz': 'হিফজ',
     'kirat': 'কিরাত'
@@ -104,21 +61,20 @@ const modalTitle = computed<string>(() => {
   return `${typeMap[modalType.value]} মারকাজ পরিবর্তন`;
 });
 
-const fetchCenters = async (): Promise<void> => {
+// Fetch centers
+const fetchCenters = async () => {
   try {
-    // Simulate API call with fake data
-    await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 500));
     centers.value = { ...fakeCenters };
     error.value = null;
-    console.log('Centers fetched:', centers.value);
   } catch (err) {
     console.error('Error fetching centers:', err);
-    error.value = (err as Error).message;
+    error.value = err.message;
   }
 };
 
-// Open modal function
-function openModal(type: string, center?: string): void {
+// Open modal
+function openModal(type, center) {
   modalType.value = type;
   currentCenter.value = center || '';
   showModal.value = true;
@@ -129,32 +85,29 @@ function openModal(type: string, center?: string): void {
   selectedModalCenterData.value = null;
 }
 
-// Close modal function
-function closeModal(): void {
+// Close modal
+function closeModal() {
   showModal.value = false;
 }
 
 // Handle file changes in the main form
-function handleFileChange(event: Event, type: keyof Files, fileType: 'noc' | 'consent'): void {
-  const target = event.target as HTMLInputElement;
-  const file = target.files?.[0];
+function handleFileChange(event, type, fileType) {
+  const file = event.target.files?.[0];
   if (file) {
     files.value[type][fileType] = file;
   }
 }
 
-// Handle file changes in the modal
-function handleModalFileChange(event: Event, fileType: 'noc' | 'consent'): void {
-  const target = event.target as HTMLInputElement;
-  const file = target.files?.[0];
+// Handle file changes in modal
+function handleModalFileChange(event, fileType) {
+  const file = event.target.files?.[0];
   if (file) {
     modalFiles.value[fileType] = file;
   }
 }
 
-// Select center from search results
-function selectCenter(type: keyof SearchResults, center: Madrasha): void {
-  console.log("Selected center:", center);
+// Select center
+function selectCenter(type, center) {
   if (type === 'darsiyat') {
     searchDarsiyat.value = center.name;
     searchResults.value.selectedDarsiyat = center;
@@ -170,111 +123,89 @@ function selectCenter(type: keyof SearchResults, center: Madrasha): void {
   }
 }
 
-const madrashas = ref<Madrasha[]>([]);
-const form = ref<Form>({
+const madrashas = ref([]);
+const form = ref({
   exam_id: null,
   exam_name: ''
 });
 
-// Simulate toaster functionality
+// Toaster simulation
 const toaster = {
-  error: (message: string) => alert(`Error: ${message}`),
-  success: (message: string) => alert(`Success: ${message}`),
-  info: (message: string) => alert(`Info: ${message}`)
+  error: (msg) => alert(`Error: ${msg}`),
+  success: (msg) => alert(`Success: ${msg}`),
+  info: (msg) => alert(`Info: ${msg}`)
 };
 
-// Simulate form functionality
-const markazForm: MarkazForm & {
-  post: (url: string, options: any) => void;
-} = {
+// Form data
+const markazForm = {
   markaz_type: '',
   asking_madrasha: '',
   markaz_id: '',
   onapotti_potro: null,
   shommoti_potro: null,
-  post: (url: string, options: any) => {
+  post: (url, options) => {
     console.log('Submitting form to:', url);
     console.log('Form data:', markazForm);
-
-    // Simulate successful submission
     setTimeout(() => {
       options.onSuccess?.({ data: { message: 'আপনার মারকাজ পরিবর্তনের আবেদন সফলভাবে জমা হয়েছে' } });
     }, 1000);
   }
 };
 
-onMounted(async (): Promise<void> => {
+onMounted(async () => {
   try {
-    // Simulate API calls with fake data
     await new Promise(resolve => setTimeout(resolve, 300));
     madrashas.value = fakeMadrashas;
-
-    // Simulate exam data
     form.value.exam_id = 1;
     form.value.exam_name = 'আলিম পরীক্ষা ২০২৫';
-
     await fetchCenters();
   } catch (error) {
     console.error('Error fetching data:', error);
   }
 });
 
-// Search function for main form
-const searchMadrashas = async (query: string, type: keyof SearchResults): Promise<void> => {
+// Search Madrashas
+const searchMadrashas = async (query, type) => {
   if (!query || query.length < 2) {
     searchResults.value[type] = [];
     return;
   }
 
-  const filteredMadrashas = madrashas.value.filter((madrasha: Madrasha) => {
-    const name = (madrasha.name || '').toLowerCase();
-    const elhaqNo = (madrasha.ElhaqNo || '').toString().toLowerCase();
-    const searchQuery = query.toLowerCase().trim();
-
-    // Handle all types of Elhaq number formats
-    const normalizedElhaqNo = elhaqNo.replace(/[`']/g, '').replace(/\s+/g, '');
-    const normalizedSearchQuery = searchQuery.replace(/[`']/g, '').replace(/\s+/g, '');
-
-    // Check if search query matches any part of the Elhaq number
-    if (normalizedElhaqNo.includes(normalizedSearchQuery)) return true;
-
-    // Check name match
-    const searchWords = searchQuery.split(' ');
-    return searchWords.every(word => name.includes(word));
+  const filtered = madrashas.value.filter(m => {
+    const name = (m.name || '').toLowerCase();
+    const elhaqNo = (m.ElhaqNo || '').toString().toLowerCase();
+    const q = query.toLowerCase().trim();
+    const normElhaq = elhaqNo.replace(/[`']/g, '').replace(/\s+/g, '');
+    const normQ = q.replace(/[`']/g, '').replace(/\s+/g, '');
+    if (normElhaq.includes(normQ)) return true;
+    return q.split(' ').every(w => name.includes(w));
   });
 
-  searchResults.value[type] = filteredMadrashas;
+  searchResults.value[type] = filtered;
 };
 
-// Search function for modal
-const searchModalMadrashas = async (query: string): Promise<void> => {
+// Search Modal Madrashas
+const searchModalMadrashas = async (query) => {
   if (!query || query.length < 2) {
     modalSearchResults.value = [];
     return;
   }
 
-  const filteredMadrashas = madrashas.value.filter((madrasha: Madrasha) => {
-    const name = (madrasha.name || '').toLowerCase();
-    const elhaqNo = (madrasha.ElhaqNo || '').toString().toLowerCase();
-    const searchQuery = query.toLowerCase().trim();
-
-    // Handle all types of Elhaq number formats
-    const normalizedElhaqNo = elhaqNo.replace(/[`']/g, '').replace(/\s+/g, '');
-    const normalizedSearchQuery = searchQuery.replace(/[`']/g, '').replace(/\s+/g, '');
-
-    // Check if search query matches any part of the Elhaq number
-    if (normalizedElhaqNo.includes(normalizedSearchQuery)) return true;
-
-    // Check name match
-    const searchWords = searchQuery.split(' ');
-    return searchWords.every(word => name.includes(word));
+  const filtered = madrashas.value.filter(m => {
+    const name = (m.name || '').toLowerCase();
+    const elhaqNo = (m.ElhaqNo || '').toString().toLowerCase();
+    const q = query.toLowerCase().trim();
+    const normElhaq = elhaqNo.replace(/[`']/g, '').replace(/\s+/g, '');
+    const normQ = q.replace(/[`']/g, '').replace(/\s+/g, '');
+    if (normElhaq.includes(normQ)) return true;
+    return q.split(' ').every(w => name.includes(w));
   });
 
-  modalSearchResults.value = filteredMadrashas;
+  modalSearchResults.value = filtered;
 };
 
-// Select center in modal
-function selectModalCenter(center: Madrasha): void {
+// Select modal center
+function selectModalCenter(center) {
   selectedModalCenter.value = center.name;
   selectedModalCenterData.value = center;
   modalSearch.value = center.name;
@@ -282,15 +213,13 @@ function selectModalCenter(center: Madrasha): void {
 }
 
 // Save modal changes
-async function saveModalChanges(): Promise<void> {
+async function saveModalChanges() {
   if (selectedModalCenter.value) {
-    // ফাইল চেক করি
     if (!modalFiles.value.noc || !modalFiles.value.consent) {
       alert('দয়া করে সকল প্রয়োজনীয় ফাইল আপলোড করুন');
       return;
     }
     try {
-      // Simulate form submission
       console.log('Submitting modal form:', {
         markaz_type: modalType.value,
         asking_madrasha: selectedModalCenter.value,
@@ -298,182 +227,113 @@ async function saveModalChanges(): Promise<void> {
         onapotti_potro: modalFiles.value.noc,
         shommoti_potro: modalFiles.value.consent
       });
-
-      // Simulate success
       await new Promise(resolve => setTimeout(resolve, 1000));
       alert('আপনার মারকাজ পরিবর্তনের আবেদন সফলভাবে জমা হয়েছে');
       closeModal();
-      fetchCenters(); // রিফ্রেশ করি বর্তমান মারকাজ তথ্য
+      fetchCenters();
     } catch (error) {
       console.error(error);
-      alert('আবেদন জমা দেওয়ার সময় একটি সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।');
+      alert('আবেদন জমা দেওয়ার সময় একটি সমস্যা হয়েছে।');
     }
   } else {
     alert('দয়া করে একটি মারকাজ নির্বাচন করুন');
   }
 }
 
-// Watch for search inputs
-watch(searchDarsiyat, (val: string) => {
-  searchMadrashas(val, 'darsiyat');
-});
-watch(searchHifz, (val: string) => {
-  searchMadrashas(val, 'hifz');
-});
-watch(searchKirat, (val: string) => {
-  searchMadrashas(val, 'kirat');
-});
-watch(modalSearch, (val: string) => {
-  searchModalMadrashas(val);
-});
+// Watchers
+watch(searchDarsiyat, (val) => searchMadrashas(val, 'darsiyat'));
+watch(searchHifz, (val) => searchMadrashas(val, 'hifz'));
+watch(searchKirat, (val) => searchMadrashas(val, 'kirat'));
+watch(modalSearch, (val) => searchModalMadrashas(val));
 
-// ফাইল দেখার ফাংশন
-function viewFile(file: File | null): void {
+// File view/remove
+function viewFile(file) {
   if (file) {
-    const fileURL = URL.createObjectURL(file);
-    window.open(fileURL, '_blank');
+    const url = URL.createObjectURL(file);
+    window.open(url, '_blank');
   }
 }
 
-// ফাইল রিমুভ করার ফাংশন
-function removeFile(type: keyof Files, fileType: 'noc' | 'consent'): void {
+function removeFile(type, fileType) {
   files.value[type][fileType] = null;
 }
 
-// মোডাল ফাইল রিমুভ করার ফাংশন
-function removeModalFile(fileType: 'noc' | 'consent'): void {
+function removeModalFile(fileType) {
   modalFiles.value[fileType] = null;
 }
 
-const submitMarkazChange = (): void => {
-  // Check if user has no existing markaz
+// Submit markaz change
+const submitMarkazChange = () => {
   if (!Object.keys(centers.value).length) {
-    // Check if type is selected
     if (!selectedType.value) {
       toaster.error('দয়া করে একটি মারকাজ টাইপ নির্বাচন করুন');
       return;
     }
-    // Get selected madrasa name and ID
+
     let askingMadrasha = '';
     let selectedMadrashaId = '';
+
     if (selectedType.value === 'darsiyat') {
       askingMadrasha = searchDarsiyat.value;
-      selectedMadrashaId = searchResults.value.selectedDarsiyat?.id.toString() || '';
-    }
-    if (selectedType.value === 'hifz') {
+      selectedMadrashaId = searchResults.value.selectedDarsiyat?.id?.toString() || '';
+    } else if (selectedType.value === 'hifz') {
       askingMadrasha = searchHifz.value;
-      selectedMadrashaId = searchResults.value.selectedHifz?.id.toString() || '';
-    }
-    if (selectedType.value === 'kirat') {
+      selectedMadrashaId = searchResults.value.selectedHifz?.id?.toString() || '';
+    } else if (selectedType.value === 'kirat') {
       askingMadrasha = searchKirat.value;
-      selectedMadrashaId = searchResults.value.selectedKirat?.id.toString() || '';
+      selectedMadrashaId = searchResults.value.selectedKirat?.id?.toString() || '';
     }
-    // Check madrasa name
+
     if (!askingMadrasha) {
       toaster.error('দয়া করে একটি কাঙ্খিত মারকাজ নির্বাচন করুন');
       return;
     }
-    // Check files
-    if (!files.value[selectedType.value as keyof Files].noc || !files.value[selectedType.value as keyof Files].consent) {
+
+    if (!files.value[selectedType.value].noc || !files.value[selectedType.value].consent) {
       toaster.error('দয়া করে সকল প্রয়োজনীয় ফাইল আপলোড করুন');
       return;
     }
-    // Set form values
+
     markazForm.markaz_type = selectedType.value;
     markazForm.asking_madrasha = askingMadrasha;
     markazForm.markaz_id = selectedMadrashaId;
-    markazForm.onapotti_potro = files.value[selectedType.value as keyof Files].noc;
-    markazForm.shommoti_potro = files.value[selectedType.value as keyof Files].consent;
-    // Submit form
+    markazForm.onapotti_potro = files.value[selectedType.value].noc;
+    markazForm.shommoti_potro = files.value[selectedType.value].consent;
+
     markazForm.post('/markaz-exchange', {
-      onSuccess: (response: any) => {
-        if (response && response.data && response.data.message) {
-          toaster.success(response.data.message);
-        } else {
-          toaster.success('আপনার মারকাজ পরিবর্তনের আবেদন সফলভাবে জমা হয়েছে');
-        }
+      onSuccess: (res) => {
+        toaster.success(res.data?.message || 'আবেদন সফলভাবে জমা হয়েছে');
         resetForm();
       },
-      onError: (errors: any) => {
-        console.error(errors);
-        toaster.error('আবেদন জমা দেওয়ার সময় একটি সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।');
+      onError: (err) => {
+        console.error(err);
+        toaster.error('আবেদন জমা দেওয়ার সময় একটি সমস্যা হয়েছে।');
       },
       forceFormData: true
     });
   } else {
-    // If user already has markaz, check which type they're trying to submit for
-    let markazType = '';
-    let askingMadrasha = '';
-    let selectedMadrashaId = '';
-    if (searchDarsiyat.value && !centers.value.darsiyat) {
-      markazType = 'darsiyat';
-      askingMadrasha = searchDarsiyat.value;
-      selectedMadrashaId = searchResults.value.selectedDarsiyat?.id.toString() || '';
-    } else if (searchHifz.value && !centers.value.hifz) {
-      markazType = 'hifz';
-      askingMadrasha = searchHifz.value;
-      selectedMadrashaId = searchResults.value.selectedHifz?.id.toString() || '';
-    } else if (searchKirat.value && !centers.value.kirat) {
-      markazType = 'kirat';
-      askingMadrasha = searchKirat.value;
-      selectedMadrashaId = searchResults.value.selectedKirat?.id.toString() || '';
-    }
-    // If they're trying to add a new type of markaz
-    if (markazType && askingMadrasha) {
-      // Check files
-      if (!files.value[markazType as keyof Files].noc || !files.value[markazType as keyof Files].consent) {
-        toaster.error('দয়া করে সকল প্রয়োজনীয় ফাইল আপলোড করুন');
-        return;
-      }
-      // Set form values
-      markazForm.markaz_type = markazType;
-      markazForm.asking_madrasha = askingMadrasha;
-      markazForm.markaz_id = selectedMadrashaId;
-      markazForm.onapotti_potro = files.value[markazType as keyof Files].noc;
-      markazForm.shommoti_potro = files.value[markazType as keyof Files].consent;
-      // Submit form
-      markazForm.post('/markaz-exchange', {
-        onSuccess: (response: any) => {
-          if (response && response.data && response.data.message) {
-            toaster.success(response.data.message);
-          } else {
-            toaster.success('আপনার মারকাজ পরিবর্তনের আবেদন সফলভাবে জমা হয়েছে');
-          }
-          resetForm();
-        },
-        onError: (errors: any) => {
-          console.error(errors);
-          toaster.error('আবেদন জমা দেওয়ার সময় একটি সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।');
-        },
-        forceFormData: true
-      });
-    } else {
-      // If they're trying to change an existing markaz
-      toaster.info('বর্তমান মারকাজ পরিবর্তন করতে, উপরে "পরিবর্তন করুন" বাটনে ক্লিক করুন।');
-    }
+    toaster.info('বর্তমান মারকাজ পরিবর্তন করতে "পরিবর্তন করুন" বাটনে ক্লিক করুন।');
   }
 };
 
-// Add this function to reset the form after submission
-const resetForm = (): void => {
+// Reset form
+const resetForm = () => {
   searchDarsiyat.value = '';
   searchHifz.value = '';
   searchKirat.value = '';
   selectedType.value = '';
-  // Reset selected madrasha data
   searchResults.value.selectedDarsiyat = null;
   searchResults.value.selectedHifz = null;
   searchResults.value.selectedKirat = null;
-  // Reset files
   files.value = {
     darsiyat: { noc: null, consent: null },
     hifz: { noc: null, consent: null },
     kirat: { noc: null, consent: null }
   };
-  // Refresh centers data
   fetchCenters();
 };
 </script>
+
 
 <template>
   <AdminLayout>

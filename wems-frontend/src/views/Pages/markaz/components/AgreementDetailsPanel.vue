@@ -34,10 +34,10 @@
 </template>
 
 <script setup>
-const props = defineProps({
+defineProps({
   agreement: Object
 })
-const emit = defineEmits(['close'])
+// defineEmits(['close']) is not needed since $emit is used in the template
 
 function formatDate(dateStr) {
   if (!dateStr) return ''

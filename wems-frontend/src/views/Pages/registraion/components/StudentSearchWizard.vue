@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { ref, watch } from 'vue';
 import InputText from 'primevue/inputtext';
 import Dropdown from 'primevue/dropdown';
@@ -42,9 +42,12 @@ const applicationStatusOptions = [
 ];
 
 const resetSearch = () => {
-  Object.keys(localFilters.value).forEach(k => localFilters.value[k].value = null)
-}
+  Object.keys(localFilters.value).forEach(k => {
+    localFilters.value[k].value = null;
+  });
+};
 </script>
+
 
 <template>
   <div

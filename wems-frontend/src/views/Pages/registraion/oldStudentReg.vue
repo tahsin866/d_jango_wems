@@ -426,7 +426,7 @@ const handleFileUpload = (event, type) => {
       reader.readAsDataURL(file)
       showToast(`এনআইডি সংযুক্তি আপলোড সফল হয়েছে: ${file.name}`, 'success')
     }
-  } catch (error) {
+  } catch  {
     showToast('ফাইল আপলোডে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।', 'error')
   }
 }
@@ -452,7 +452,7 @@ const handleDivisionChange = async () => {
     if (!addressFilters.value.division) return
     districts.value = await fetchDistricts(addressFilters.value.division)
     showToast('বিভাগ নির্বাচন করা হয়েছে, জেলা লোড হয়েছে', 'success')
-  } catch (error) {
+  } catch  {
     showToast('জেলা লোড করতে সমস্যা হয়েছে', 'error')
   }
 }
@@ -463,7 +463,7 @@ const handleDistrictChange = async () => {
     if (!addressFilters.value.district) return
     thanas.value = await fetchThanas(addressFilters.value.district)
     showToast('জেলা নির্বাচন করা হয়েছে, থানা লোড হয়েছে', 'success')
-  } catch (error) {
+  } catch  {
     showToast('থানা লোড করতে সমস্যা হয়েছে', 'error')
   }
 }

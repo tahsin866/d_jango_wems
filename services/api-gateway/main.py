@@ -19,6 +19,8 @@ from routes.central_exam import router as central_exam_router
 from routes.marhalas import router as marhalas_router
 from routes.marhala import router as marhala_router
 from routes.sidebar import router as sidebar_router
+from routes.board import router as board_router
+from routes.admin_registration import router as admin_registration_router
 # from routes.students import router as students_router  # Temporarily disabled
 
 # Import utilities
@@ -119,6 +121,8 @@ app.include_router(central_exam_router)
 app.include_router(marhalas_router)
 app.include_router(marhala_router)
 app.include_router(sidebar_router)
+app.include_router(board_router)
+app.include_router(admin_registration_router)
 # app.include_router(students_router)  # Temporarily disabled - using catch-all route
 
 # Catch-all route for any unmatched API calls - forward to Django

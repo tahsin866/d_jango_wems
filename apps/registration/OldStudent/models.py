@@ -32,6 +32,8 @@ class student_basic(models.Model):
     markaz_id = models.IntegerField(blank=True, null=True)
     is_old = models.IntegerField(blank=True, null=True)
     irregular_sub = models.IntegerField(blank=True, null=True)
+    board_id = models.IntegerField(blank=True, null=True)
+    irregular_year = models.CharField(max_length=50, blank=True, null=True)
 
     class Meta:
         db_table = 'student_basic'
@@ -152,6 +154,7 @@ class student_attachment(models.Model):
     birth_attach = models.CharField(max_length=255, blank=True, null=True)
     nid_no = models.CharField(max_length=255, blank=True, null=True)
     nid_attach = models.CharField(max_length=255, blank=True, null=True)
+    marksheet = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         db_table = 'student_attachment'

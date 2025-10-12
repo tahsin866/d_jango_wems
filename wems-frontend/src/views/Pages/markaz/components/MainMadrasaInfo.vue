@@ -28,13 +28,11 @@ const props = defineProps({
   }
 })
 
-defineEmits(['file-upload', 'remove-file', 'update:form'])
+const emit = defineEmits(['file-upload', 'remove-file', 'update:form'])
 
-const showDarsiyatFields = computed(() => props.form.markaz_type === 'দরসিয়াত')
-const showHifzField = computed(() => props.form.markaz_type === 'তাহফিজুল কোরআন')
-const showKiratField = computed(() => props.form.markaz_type === 'কিরাআত')
-
-
+const showDarsiyatFields = computed(() => props.form?.markaz_type === 'দরসিয়াত')
+const showHifzField = computed(() => props.form?.markaz_type === 'তাহফিজুল কোরআন')
+const showKiratField = computed(() => props.form?.markaz_type === 'কিরাআত')
 
 function isImageFile(file) {
   if (!file) return false
@@ -60,7 +58,7 @@ function isImageFile(file) {
             <div class="relative">
               <input
                 type="number"
-                v-model="localForm.value.fazilat"
+                v-model="props.form.fazilat"
                 min="0"
                 placeholder="ছাত্র সংখ্যা লিখুন"
                 class="w-full h-12 rounded-sm border border-gray-300 px-4 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 font-medium text-gray-800 bg-white shadow-sm transition-all duration-200"
@@ -75,7 +73,7 @@ function isImageFile(file) {
             <div class="relative">
               <input
                 type="number"
-                v-model="localForm.value.sanabiya_ulya"
+                v-model="props.form.sanabiya_ulya"
                 min="0"
                 placeholder="ছাত্র সংখ্যা লিখুন"
                 class="w-full h-12 rounded-sm border border-gray-300 px-4 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 font-medium text-gray-800 bg-white shadow-sm transition-all duration-200"
@@ -90,7 +88,7 @@ function isImageFile(file) {
             <div class="relative">
               <input
                 type="number"
-                v-model="localForm.value.sanabiya"
+                v-model="props.form.sanabiya"
                 min="0"
                 placeholder="ছাত্র সংখ্যা লিখুন"
                 class="w-full h-12 rounded-sm border border-gray-300 px-4 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 font-medium text-gray-800 bg-white shadow-sm transition-all duration-200"
@@ -105,7 +103,7 @@ function isImageFile(file) {
             <div class="relative">
               <input
                 type="number"
-                v-model="localForm.value.mutawassita"
+                v-model="props.form.mutawassita"
                 min="0"
                 placeholder="ছাত্র সংখ্যা লিখুন"
                 class="w-full h-12 rounded-sm border border-gray-300 px-4 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 font-medium text-gray-800 bg-white shadow-sm transition-all duration-200"
@@ -120,7 +118,7 @@ function isImageFile(file) {
             <div class="relative">
               <input
                 type="number"
-                v-model="localForm.value.ibtedaiyyah"
+                v-model="props.form.ibtedaiyyah"
                 min="0"
                 placeholder="ছাত্র সংখ্যা লিখুন"
                 class="w-full h-12 rounded-sm border border-gray-300 px-4 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 font-medium text-gray-800 bg-white shadow-sm transition-all duration-200"
@@ -136,7 +134,7 @@ function isImageFile(file) {
           <div class="relative">
             <input
               type="number"
-              v-model="localForm.value.hifzul_quran"
+              v-model="props.form.hifzul_quran"
               min="0"
               placeholder="ছাত্র সংখ্যা লিখুন"
               class="w-full h-12 rounded-sm border border-gray-300 px-4 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 font-medium text-gray-800 bg-white shadow-sm transition-all duration-200"
@@ -151,7 +149,7 @@ function isImageFile(file) {
           <div class="relative">
             <input
               type="number"
-              v-model="localForm.value.qirat"
+              v-model="props.form.qirat"
               min="0"
               placeholder="ছাত্র সংখ্যা লিখুন"
               class="w-full h-12 rounded-sm border border-gray-300 px-4 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 font-medium text-gray-800 bg-white shadow-sm transition-all duration-200"

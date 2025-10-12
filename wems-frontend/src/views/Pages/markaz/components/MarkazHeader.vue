@@ -63,7 +63,7 @@ const props = defineProps({
   examName: String,
   searchQuery: String
 })
-const emit = defineEmits(['update:searchQuery', 'refresh', 'create'])
+defineEmits(['update:searchQuery', 'refresh', 'create'])
 
 const localQuery = ref(props.searchQuery ?? '')
 

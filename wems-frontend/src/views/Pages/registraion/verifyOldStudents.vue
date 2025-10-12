@@ -28,7 +28,7 @@
             <div class="flex flex-wrap gap-3">
               <!-- router-link for New Student -->
               <router-link
-                to="/student/old/registration/form"
+                to="/student/new/registration/form"
                 class="inline-flex items-center px-4 py-3 bg-gray-700 hover:bg-gray-800 rounded text-md font-medium text-white"
               >
                 <!-- icon -->

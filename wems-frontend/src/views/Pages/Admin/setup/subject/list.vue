@@ -376,7 +376,7 @@ const fetchData = async () => {
       marhalaTypes.value = []
       alert('ডেটা লোড করতে সমস্যা হয়েছে। দয়া করে পরে আবার চেষ্টা করুন।')
     }
-  } catch (error) {
+  } catch  {
     subjects.value = []
     marhalaTypes.value = []
     alert('ডেটা লোড করতে সমস্যা হয়েছে। দয়া করে পরে আবার চেষ্টা করুন।')

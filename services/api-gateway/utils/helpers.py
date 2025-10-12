@@ -42,7 +42,7 @@ async def proxy_request(
             "timeout": timeout_config,
             "verify": False,  # Set to True in production with proper SSL
             "follow_redirects": False,
-            "http2": True,
+            "http2": False,  # Disabled to avoid h2 package dependency
         }
 
         async with httpx.AsyncClient(**client_kwargs) as client:

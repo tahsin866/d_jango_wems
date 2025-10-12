@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import check_password as django_check_password, make_password
 class UserType(models.Model):
     name = models.CharField(max_length=50)
     description = models.CharField(max_length=255, blank=True)
@@ -35,9 +36,20 @@ class User(models.Model):
     is_superuser = models.BooleanField(default=False)
 
     # --- Password check method for authentication ---
-    from django.contrib.auth.hashers import check_password as django_check_password
     def check_password(self, raw_password):
-        return self.django_check_password(raw_password, self.password)
+        return django_check_password(raw_password, self.password)
+    
+    def set_password(self, raw_password):
+        """Hash and set the password"""
+        self.password = make_password(raw_password)
+    
+    def has_perm(self, perm, obj=None):
+        """Required for Django admin compatibility"""
+        return self.is_superuser
+    
+    def has_module_perms(self, app_label):
+        """Required for Django admin compatibility"""
+        return self.is_superuser
 
     # --- Note for user_type assignment ---
     # Always assign user_type as UserType instance, not string.

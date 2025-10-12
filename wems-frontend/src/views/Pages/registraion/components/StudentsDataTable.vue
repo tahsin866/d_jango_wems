@@ -531,19 +531,6 @@ const viewStudent = (id) => {
   router.push(`/user/registration/detail/${id}`)
 }
 
-const submitApplication = () => {
-  if (submitId.value) {
-    StudentService.submitApplication(submitId.value)
-      .then(() => {
-        toast.add({ severity: 'success', summary: 'সফল', detail: 'আবেদন সফলভাবে সাবমিট করা হয়েছে', life: 3000 })
-        emit('refresh')
-      })
-      .catch((error) => {
-        toast.add({ severity: 'error', summary: 'ত্রুটি', detail: 'আবেদন সাবমিট করতে ব্যর্থ হয়েছে', life: 3000 })
-      })
-  }
-  }
-
 const submitAllApplications = () => {
   confirmDialog.value = {
     show: true,
@@ -558,8 +545,9 @@ const submitAllApplications = () => {
           toast.add({ severity: 'success', summary: 'সফল', detail: 'সকল আবেদন সফলভাবে বোর্ডে দাখিল হয়েছে', life: 5000 })
           emit('refresh')
         })
-        .catch((error) => {
-          toast.add({ severity: 'error', summary: 'ত্রুটি', detail: 'সকল আবেদন দাখিল করতে ব্যর্থ হয়েছে', life: 5000 })
+        .catch((err) => {
+          const msg = err && err.message ? `সকল আবেদন দাখিল করতে ব্যর্থ হয়েছে: ${err.message}` : 'সকল আবেদন দাখিল করতে ব্যর্থ হয়েছে'
+          toast.add({ severity: 'error', summary: 'ত্রুটি', detail: msg, life: 5000 })
         })
 
       confirmDialog.value.show = false

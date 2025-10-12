@@ -80,7 +80,7 @@
 
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
@@ -92,47 +92,7 @@ import ConfirmDialog from '@/views/Pages/markaz/components/ConfirmDialog.vue';
 import Toast from 'primevue/toast';
 
 // Composable
-import { useAgreements, type Agreement } from '@/views/Pages/markaz/composable/useAgreements';
-
-// Stats dummy for classic cards (replace with actual if needed)
-// const stats = ref([
-//   {
-//     title: 'মোট আবেদন',
-//     value: '১৫৯',
-//     change: '+৫%',
-//     icon: 'file-alt',
-//     color: 'gray',
-//     trend: [120, 122, 130, 140, 145, 150, 159],
-//     trendUp: true
-//   },
-//   {
-//     title: 'পেন্ডিং',
-//     value: '৫২',
-//     change: '-৩%',
-//     icon: 'hourglass-half',
-//     color: 'gray',
-//     trend: [60, 58, 55, 54, 53, 52, 52],
-//     trendUp: false
-//   },
-//   {
-//     title: 'দাখিল',
-//     value: '১০৭',
-//     change: '+৮%',
-//     icon: 'check-circle',
-//     color: 'gray',
-//     trend: [80, 88, 90, 95, 100, 105, 107],
-//     trendUp: true
-//   },
-//   {
-//     title: 'বাতিল',
-//     value: '০',
-//     change: '০%',
-//     icon: 'times-circle',
-//     color: 'gray',
-//     trend: [0,0,0,0,0,0,0],
-//     trendUp: false
-//   }
-// ]);
+import { useAgreements } from '@/views/Pages/markaz/composable/useAgreements';
 
 // Initialize composable
 const {
@@ -150,11 +110,11 @@ const toast = useToast();
 
 // Local reactive state
 const searchQuery = ref('');
-const selectedAgreement = ref<Agreement | null>(null);
+const selectedAgreement = ref(null);
 const showDeleteModal = ref(false);
 const showSubmitModal = ref(false);
-const pendingDeleteId = ref<number | null>(null);
-const pendingSubmitId = ref<number | null>(null);
+const pendingDeleteId = ref(null);
+const pendingSubmitId = ref(null);
 
 // Computed properties
 const filteredAgreements = computed(() => {
@@ -189,18 +149,18 @@ async function handleRefresh() {
   }
 }
 
-function onView(agreement: Agreement) {
+function onView(agreement) {
   selectedAgreement.value = agreement;
 }
 
-function onEdit(agreement: Agreement) {
+function onEdit(agreement) {
   router.push({
     name: 'MarkazEdit',
     params: { id: agreement.id.toString() }
   });
 }
 
-function onRequestDelete(agreement: Agreement) {
+function onRequestDelete(agreement) {
   pendingDeleteId.value = agreement.id;
   showDeleteModal.value = true;
 }
@@ -234,7 +194,7 @@ function confirmDelete() {
   pendingDeleteId.value = null;
 }
 
-function onRequestSubmit(agreement: Agreement) {
+function onRequestSubmit(agreement) {
   pendingSubmitId.value = agreement.id;
   showSubmitModal.value = true;
 }
@@ -276,6 +236,7 @@ onMounted(async () => {
   await fetchAgreements();
 });
 </script>
+
 
 <style scoped>
 /* Classic AdminLTE styling */

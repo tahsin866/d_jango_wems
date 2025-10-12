@@ -204,31 +204,28 @@
     </div>
 </template>
 
-<script setup lang="ts">
-// TypeScript SFC, prepared for editor / Vite / Volar type checking
-import { ref } from 'vue';
-import { useRouter, RouterLink } from 'vue-router';
-
+<script setup>
 /**
- * Application item type
+ * -------------------------------------------
+ * 🕌 Markaz Application List Logic (Vue 3 + JS)
+ * -------------------------------------------
  */
-type ApplicationItem = {
-  id: number;
-  applicationNo: string;
-  currentLevel: string;
-  currentMadrasa: string;
-  date: string; // ISO or YYYY-MM-DD
-  joiningDate: string; // ISO or YYYY-MM-DD
-  status: 'active' | 'inactive' | 'pending' | string;
-};
 
-// Sample data (replace with API fetch)
-const items = ref<ApplicationItem[]>([
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+/* ==============================
+   📦 Reactive States
+   ============================== */
+const router = useRouter()
+
+// Applications list (later can be fetched from API)
+const items = ref([
   {
     id: 1,
     applicationNo: 'APP001',
     currentLevel: 'স্তর ১',
-    currentMadrasa: 'মাদরাসা নাম ১',
+    currentMadrasa: 'জামিয়া আরাবিয়া দারুল উলুম ঢাকা',
     date: '2024-01-15',
     joiningDate: '2024-02-01',
     status: 'active',
@@ -237,112 +234,96 @@ const items = ref<ApplicationItem[]>([
     id: 2,
     applicationNo: 'APP002',
     currentLevel: 'স্তর ২',
-    currentMadrasa: 'মাদরাসা নাম ২',
+    currentMadrasa: 'জামিয়া কুরআনিয়া লালবাগ ঢাকা',
     date: '2024-03-10',
     joiningDate: '2024-04-01',
     status: 'pending',
   },
-]);
+])
 
-const router = useRouter();
+// Currently selected application
+const selectedItem = ref(null)
 
-// selected item (replaces modal)
-const selectedItem = ref<ApplicationItem | null>(null);
+/* ==============================
+   ⚙️ Core Functions
+   ============================== */
 
-/**
- * Open details panel
- */
-function viewItem(item: ApplicationItem) {
-  selectedItem.value = item;
+// View selected item
+function viewItem(item) {
+  selectedItem.value = item
 }
 
-/**
- * Navigate to update / edit page
- */
-function updateItem(item: ApplicationItem | null) {
-  if (!item) return;
-  router.push({ path: `/markaz/${item.id}/edit` }).catch(() => {});
+// Navigate to edit page
+function updateItem(item) {
+  if (!item) return
+  router.push({ path: `/markaz/${item.id}/edit` }).catch(() => {})
 }
 
-/**
- * Confirm and delete item
- */
-async function deleteItem(item: ApplicationItem) {
-  const confirmed = window.confirm(`আপনি "${item.applicationNo}" মুছে ফেলতে চান?`);
-  if (!confirmed) return;
+// Delete item (with confirmation)
+async function deleteItem(item) {
+  const confirmed = window.confirm(`আপনি "${item.applicationNo}" মুছে ফেলতে চান?`)
+  if (!confirmed) return
 
-  // simulate API call and remove locally on success
-  const idx = items.value.findIndex((i) => i.id === item.id);
+  const idx = items.value.findIndex((i) => i.id === item.id)
   if (idx !== -1) {
-    items.value.splice(idx, 1);
-    // if that was the selected item, clear panel
-    if (selectedItem.value?.id === item.id) selectedItem.value = null;
+    items.value.splice(idx, 1)
+    if (selectedItem.value?.id === item.id) selectedItem.value = null
   }
 }
 
-/**
- * For actions inside the inline details panel
- */
+// Close details panel
 function closeDetails() {
-  selectedItem.value = null;
+  selectedItem.value = null
 }
 
-/**
- * Prompted delete from panel
- */
-function confirmDelete(item: ApplicationItem | null) {
-  if (!item) return;
-  deleteItem(item);
+// Delete from inside panel
+function confirmDelete(item) {
+  if (!item) return
+  deleteItem(item)
 }
 
-/**
- * Create new item (example navigation)
- */
+// Create new application
 function createNew() {
-  router.push({ path: '/markazApply' }).catch(() => {});
+  router.push({ path: '/markazApply' }).catch(() => {})
 }
 
-/**
- * Utility: format date safely (YYYY-MM-DD -> readable)
- */
-function formatDate(value: string | undefined) {
-  if (!value) return '—';
+/* ==============================
+   🧭 Utility Functions
+   ============================== */
+
+// Format date in Bangla locale
+function formatDate(value) {
+  if (!value) return '—'
   try {
-    const d = new Date(value);
-    if (Number.isNaN(d.getTime())) return value;
-    return d.toLocaleDateString('bn-BD', { year: 'numeric', month: 'short', day: 'numeric' });
+    const date = new Date(value)
+    if (Number.isNaN(date.getTime())) return value
+    return date.toLocaleDateString('bn-BD', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    })
   } catch {
-    return value;
+    return value
   }
 }
 
-/**
- * Return human-friendly status text
- */
-function humanStatus(status: string) {
+// Convert status into Bangla text
+function humanStatus(status) {
   switch (status) {
-    case 'active':
-      return 'সক্রিয়';
-    case 'inactive':
-      return 'নিষ্ক্রিয়';
-    case 'pending':
-      return 'মুলতুবি';
-    default:
-      return status;
+    case 'active': return 'সক্রিয়'
+    case 'inactive': return 'নিষ্ক্রিয়'
+    case 'pending': return 'মুলতুবি'
+    default: return status
   }
 }
 
-/**
- * Badge classes (tailwind) with classic design
- */
-function statusBadgeClass(status: string) {
-  if (status === 'active') {
-    return 'bg-green-100 text-green-800 border border-green-300';
+// Dynamic badge class
+function statusBadgeClass(status) {
+  const classes = {
+    active: 'bg-green-100 text-green-800 border border-green-300',
+    inactive: 'bg-red-100 text-red-800 border border-red-300',
+    pending: 'bg-yellow-100 text-yellow-800 border border-yellow-300',
   }
-  if (status === 'inactive') {
-    return 'bg-red-100 text-red-800 border border-red-300';
-  }
-  // pending / other
-  return 'bg-yellow-100 text-yellow-800 border border-yellow-300';
+  return classes[status] || 'bg-gray-100 text-gray-800 border border-gray-300'
 }
 </script>

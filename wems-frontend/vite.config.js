@@ -27,12 +27,12 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: process.env.VITE_API_BASE_URL || 'http://host.docker.internal:8000',
+        target: process.env.VITE_API_BASE_URL || 'http://host.docker.internal:8080',
         changeOrigin: true,
         secure: false,
       },
       '/auth': {
-        target: process.env.VITE_API_BASE_URL || 'http://host.docker.internal:8000',
+        target: process.env.VITE_API_BASE_URL || 'http://host.docker.internal:8080',
         changeOrigin: true,
         secure: false,
       }

@@ -24,9 +24,9 @@
   </div>
 </template>
 
-<script setup lang="ts">
-const props = defineProps<{ stats: Record<string, number> }>();
-const labelMap: Record<string, string> = {
+<script setup>
+const props = defineProps(['stats']);
+const labelMap = {
   total: 'মোট আবেদন',
   pending: 'খসড়া',
   submitted: 'দাখিলকৃত',

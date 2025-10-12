@@ -190,6 +190,10 @@ const routes = [
   { path: '/talim/courses', redirect: '/admin/talim/courses' },
 
   // User Routes (User Layout)
+
+
+
+
   {
     path: '/user',
     component: () => import('@/components/layout/AdminLayout.vue'),
@@ -220,6 +224,9 @@ const routes = [
       { path: 'student/old/list', name: 'OldStudentList', component: () => import('@/views/Pages/registraion/oldStudentList.vue'), meta: { title: 'Old Student List', requiresAuth: true, role: 'user' }, },
       { path: 'student/old/verify/:marhala_id', name: 'VerifyOldStudents', component: () => import('@/views/Pages/registraion/verifyOldStudents.vue'), meta: { title: 'পুরাতন ছাত্রদের তথ্য যাচাই', requiresAuth: true, role: 'user' }, },
       { path: 'student/old/registration/form', name: 'OldStudentReg', component: () => import('@/views/Pages/registraion/oldStudentReg.vue'), meta: { title: 'Old Student Registration', requiresAuth: true, role: 'user' }, },
+      { path: 'student/new/registration/form', name: 'NewStudentReg', component: () => import('@/views/Pages/registraion/NewStudents/ResgistrationForms.vue'), meta: { title: 'নতুন ছাত্র নিবন্ধন', requiresAuth: true, role: 'user' }, },
+
+
       { path: 'registration/list', name: 'RegistrationList', component: () => import('@/views/Pages/registraion/registrationTable.vue'), meta: { title: 'registrationTable', requiresAuth: true, role: 'user' }, },
       { path: 'registration/table', name: 'RegistrationTable', component: () => import('@/views/Pages/registraion/registrationTable.vue'), meta: { title: 'Registration Table', requiresAuth: true, role: 'user' }, },
       { path: 'registration/detail/:id', name: 'RegistrationDetail', component: () => import('@/views/Pages/registraion/OldStudentsDestailes.vue'), meta: { title: 'Registration Detail', requiresAuth: true, role: 'user' }, },
@@ -248,6 +255,8 @@ const routes = [
   { path: '/oldStudentList', redirect: '/user/student/old/list' },
   { path: '/student/old/verify/:marhala_id', redirect: to => `/user/student/old/verify/${to.params.marhala_id}` },
   { path: '/student/old/registration/form', redirect: '/user/student/old/registration/form' },
+  { path: '/student/new/registration/form', redirect: '/user/student/new/registration/form' },
+
   { path: '/registraionCard', redirect: '/user/registration/card' },
   { path: '/registrationTable', redirect: '/user/registration/table' },
   { path: '/restore', redirect: '/user/restore' },
