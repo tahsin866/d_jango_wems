@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'apps.registration.overview',  # Registration Overview app
     'apps.registration.OldStudent',  # OldStudent app for unmanaged models
     'apps.registration.StudentList',  # Student List app for student_basic table
+    'apps.registration.Nestudents',  # New student registration app
     'apps.registration.board.apps.BoardConfig',  # Board app for board management
     'apps.admin.madrasha.apps.MadrashaConfig',  # Madrasha app for Division/District/Thana models
     'apps.admin.department.apps.DepartmentConfig',  # Department management app
@@ -282,6 +283,9 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+    # Custom headers for student registration logic
+    'x-marhala-id',
+    'x-header-value',
 ]
 
 # CSRF settings for frontend integration

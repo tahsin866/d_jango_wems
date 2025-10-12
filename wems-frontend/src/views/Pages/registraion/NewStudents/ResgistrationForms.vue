@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, reactive,watch } from 'vue'
+import { ref, onMounted, reactive, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { getCurrentUserId } from '@/stores/userProfile'
 
@@ -66,8 +66,10 @@ const studentInfoForm = reactive({
   birth_no: '',
   nid_no: '',
 
-  // IDs
+  // IDs - these will be auto-detected by backend
   marhala_id: '',
+  cid: '',
+  srtype: '',
   madrasha_id: '',
   markaz_id: '',
   exam_id: '',
@@ -102,16 +104,19 @@ const updateStudentInfo = (updatedFields) => {
 }
 
 // Watch for address and board changes in studentInfoForm (after initialization)
-watch(() => [studentInfoForm.division_id, studentInfoForm.district_id, studentInfoForm.thana_id, studentInfoForm.board_name, studentInfoForm.board_year], (newValues) => {
+// প্যারেন্ট কম্পোনেন্টের জন্য আপডেট
+// Watch for address and board changes in studentInfoForm (after initialization)
+watch(() => [studentInfoForm.division_id, studentInfoForm.district_id, studentInfoForm.thana_id, studentInfoForm.board_name, studentInfoForm.board_year, studentInfoForm.board_id], (newValues) => {
   console.log('📍 Parent received address/board data:', {
     division_id: newValues[0],
     district_id: newValues[1],
     thana_id: newValues[2],
     board_name: newValues[3],
-    board_year: newValues[4]
+    board_year: newValues[4],
+    board_id: newValues[5]
   })
   // Update board_id when board_name changes
-  if (newValues[3]) {
+  if (newValues[3] && !newValues[5]) {
     studentInfoForm.board_id = getBoardIdFromName(newValues[3])
   }
   // Update irregular_year when board_year changes
@@ -119,6 +124,9 @@ watch(() => [studentInfoForm.division_id, studentInfoForm.district_id, studentIn
     studentInfoForm.irregular_year = newValues[4]
   }
 }, { deep: true })
+
+
+
 const studentPhotoFile = ref(null)
 const birthCertificateFile = ref(null)
 const marksheetFile = ref(null)
@@ -147,15 +155,24 @@ const loadBoardOptions = async () => {
 }
 
 onMounted(async () => {
-  const marhalaId = route.params.marhalaId
+  const marhalaId = route.params.marhala_id || route.params.marhalaId
   currentMarhalaId.value = marhalaId
+  console.log('🔥 onMounted called with route.params:', route.params)
+  console.log('🔥 marhalaId:', marhalaId)
+
+  // Set marhala_id in form (cid will be auto-detected by backend)
+  studentInfoForm.marhala_id = marhalaId
+  console.log('🔥 marhala_id set to:', studentInfoForm.marhala_id)
+
+  // srtype will be auto-detected by backend from user session
+  // studentInfoForm.srtype = route.params.srtype || '' // No longer needed
 
   try {
     // Fetch marhala info
     const marhalaResponse = await axios.get(`/api/student-registration/${marhalaId}`)
     examName.value = marhalaResponse.data.examName
     marhalaName.value = marhalaResponse.data.marhalaName
-    studentInfoForm.marhala_id = marhalaId
+    // Optionally update form with more info if needed
 
     // Fetch board options
     await loadBoardOptions()
@@ -163,9 +180,6 @@ onMounted(async () => {
     console.error("Error fetching data:", error)
   }
 })
-
-// Load board options from API
-
 
 // Step navigation
 const gotoStep = (step) => {
@@ -211,14 +225,21 @@ const submitStudentInfo = async () => {
     // Board info (using board_id and irregular_year from model)
     formData.append('board_id', studentInfoForm.board_id || getBoardIdFromName(studentInfoForm.board_name) || '')
     formData.append('irregular_year', studentInfoForm.irregular_year || studentInfoForm.board_year || '')
+    formData.append('board_name', studentInfoForm.board_name || '') // Add board_name for backend lookup
 
-    // IDs - marhala_id from route, madrasha_id and markaz_id will be auto-detected by backend
-    formData.append('marhala_id', currentMarhalaId.value || '')
+    // Debug board data being sent
+    console.log('🔍 Board data being sent to backend:')
+    console.log('  board_name:', studentInfoForm.board_name)
+    console.log('  board_id:', studentInfoForm.board_id)
+    console.log('  getBoardIdFromName result:', getBoardIdFromName(studentInfoForm.board_name))
+
+    // IDs - marhala_id from route/context, others will be auto-detected by backend
+    formData.append('marhala_id', studentInfoForm.marhala_id || currentMarhalaId.value || '')
+    // No need to send cid, srtype, madrasha_id, markaz_id, exam_id as they will be auto-detected
 
     // Get actual user_id from session like OldStudent
     const currentUserId = getCurrentUserId()
     formData.append('user_id', currentUserId || '1') // Use actual user session or fallback to 1
-    // Remove madrasha_id and markaz_id - they will be auto-detected from user session
 
     // Address (using IDs from AddressInfoStep)
     console.log('Address fields to submit:')
@@ -253,14 +274,33 @@ const submitStudentInfo = async () => {
       console.log(`FormData ${key}:`, value)
     }
 
+    // Prepare custom headers for special logic
+    const customHeaders = {
+      'Content-Type': 'multipart/form-data'
+    }
+
+    // Add special headers for the required logic
+    // 1. marhala_id -> Send from header (backend will use this to determine cid)
+    if (currentMarhalaId.value) {
+      customHeaders['X-Marhala-ID'] = currentMarhalaId.value
+      console.log(`🔥 Adding header X-Marhala-ID: ${currentMarhalaId.value}`)
+    }
+
     // Submit to new student registration API
     const response = await axios.post('/api/admin/registration/newstudent/register/', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+      headers: customHeaders
     })
 
     console.log('Registration response:', response.data)
+
+    // Display debugging information from backend
+    if (response.data.header_marhala_id || response.data.marhala_cid || response.data.header_srtype) {
+      console.log('🔥 Special logic applied by backend:')
+      console.log('  marhala_id from header:', response.data.header_marhala_id)
+      console.log('  cid from marhala_id logic:', response.data.marhala_cid)
+      console.log('  srtype from user madrasha:', response.data.header_srtype)
+      console.log('  board_id from table:', response.data.table_board_id)
+    }
 
     // Success message
     showToastMessage(`ছাত্রের তথ্য সফলভাবে সংরক্ষণ করা হয়েছে! রেজিস্ট্রেশন নং: ${response.data.reg_no}`, 'success')
@@ -277,9 +317,41 @@ const submitStudentInfo = async () => {
 
 // Helper function to get board_id from board_name
 const getBoardIdFromName = (boardName) => {
-  if (!boardName || !boardOptions.value) return null
-  const board = boardOptions.value.find(b => b.name === boardName || b.value === boardName)
-  return board ? board.id : null
+  console.log('🔍 getBoardIdFromName called with:', boardName)
+  console.log('🔍 Available boardOptions:', boardOptions.value)
+
+  if (!boardName || !boardOptions.value) {
+    console.log('⚠️ No boardName or boardOptions available')
+    return null
+  }
+
+  // Try to find board by value first (since that's what's being used in the select)
+  let board = boardOptions.value.find(b => b.value === boardName)
+  if (board) {
+    console.log('✅ Found board by value:', board)
+    return board.id
+  }
+
+  // Try to find board by name
+  board = boardOptions.value.find(b => b.name === boardName)
+  if (board) {
+    console.log('✅ Found board by name:', board)
+    return board.id
+  }
+
+  // Try to find board by exact match in any field
+  board = boardOptions.value.find(b =>
+    b.name === boardName ||
+    b.value === boardName ||
+    b.board_name === boardName
+  )
+  if (board) {
+    console.log('✅ Found board by any field:', board)
+    return board.id
+  }
+
+  console.log('❌ No board found for boardName:', boardName)
+  return null
 }
 </script>
 

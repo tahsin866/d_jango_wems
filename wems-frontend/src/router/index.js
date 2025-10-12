@@ -225,6 +225,16 @@ const routes = [
       { path: 'student/old/verify/:marhala_id', name: 'VerifyOldStudents', component: () => import('@/views/Pages/registraion/verifyOldStudents.vue'), meta: { title: 'পুরাতন ছাত্রদের তথ্য যাচাই', requiresAuth: true, role: 'user' }, },
       { path: 'student/old/registration/form', name: 'OldStudentReg', component: () => import('@/views/Pages/registraion/oldStudentReg.vue'), meta: { title: 'Old Student Registration', requiresAuth: true, role: 'user' }, },
       { path: 'student/new/registration/form/:marhala_id', name: 'NewStudentReg', component: () => import('@/views/Pages/registraion/NewStudents/ResgistrationForms.vue'), meta: { title: 'নতুন ছাত্র নিবন্ধন', requiresAuth: true, role: 'user' }, },
+        // --- DEBUG: Log marhala_id for testing ---
+        { path: 'student/new/registration/form/:marhala_id',
+          name: 'NewStudentRegDebug',
+          component: () => import('@/views/Pages/registraion/NewStudents/ResgistrationForms.vue'),
+          meta: { title: 'নতুন ছাত্র নিবন্ধন (Debug)', requiresAuth: true, role: 'user' },
+          beforeEnter: (to, from, next) => {
+            console.log('DEBUG: marhala_id from route params:', to.params.marhala_id);
+            next();
+          }
+        },
 
 
       { path: 'registration/list', name: 'RegistrationList', component: () => import('@/views/Pages/registraion/registrationTable.vue'), meta: { title: 'registrationTable', requiresAuth: true, role: 'user' }, },
@@ -254,7 +264,7 @@ const routes = [
   { path: '/registration/list', redirect: '/user/registration/list' },
   { path: '/oldStudentList', redirect: '/user/student/old/list' },
   { path: '/student/old/verify/:marhala_id', redirect: to => `/user/student/old/verify/${to.params.marhala_id}` },
-  { path: '/student/old/registration/form', redirect: to => `/user/student/old/registration/form/${to.params.marhala_id}` },
+  { path: '/student/old/registration/form', redirect: '/user/student/old/registration/form/' },
   { path: '/student/new/registration/form/:marhala_id', redirect: to => `/user/student/new/registration/form/${to.params.marhala_id}` },
 
   { path: '/registraionCard', redirect: '/user/registration/card' },

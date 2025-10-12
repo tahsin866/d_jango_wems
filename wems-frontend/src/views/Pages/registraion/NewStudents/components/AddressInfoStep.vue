@@ -33,12 +33,24 @@ const availableBoardOptions = computed(() => {
 // Local reactive copies for v-model
 const localForm = ref({
   board_name: '',
-  board_year: ''
+  board_year: '',
+  board_id: '' // Added board_id to local form
 })
 
 // Watch for changes and emit updates
 watch(localForm, (newVal) => {
   const updatedData = { ...props.modelValue, ...newVal }
+
+  // Also get board_id from the selected board if not already set
+  if (newVal.board_name && !newVal.board_id) {
+    const selectedBoard = availableBoardOptions.value.find(b => b.value === newVal.board_name || b.name === newVal.board_name)
+    if (selectedBoard) {
+      updatedData.board_id = selectedBoard.id
+      localForm.value.board_id = selectedBoard.id // Update local form as well
+      console.log('Board ID found:', selectedBoard.id, 'for board:', newVal.board_name)
+    }
+  }
+
   console.log('Board info updated:', updatedData)
   emit('update:modelValue', updatedData)
 }, { deep: true })
@@ -48,6 +60,7 @@ watch(() => props.modelValue, (newVal) => {
   if (newVal) {
     localForm.value.board_name = newVal.board_name || ''
     localForm.value.board_year = newVal.board_year || ''
+    localForm.value.board_id = newVal.board_id || '' // Also sync board_id
   }
 }, { immediate: true })
 
@@ -79,7 +92,6 @@ const years = [
   { label: '২০১২', value: '2012' },
   { label: '২০১১', value: '2011' }
 ]
-
 
 const isNonBefaqBoard = ref(false)
 watch(() => localForm.value.board_name, (val) => {
@@ -184,6 +196,17 @@ watch(addressFilters, () => {
   emit('update:modelValue', updatedForm)
 }, { deep: true })
 
+// Function to handle board selection
+const handleBoardChange = () => {
+  const selectedBoard = availableBoardOptions.value.find(b => b.value === localForm.value.board_name || b.name === localForm.value.board_name)
+  if (selectedBoard) {
+    localForm.value.board_id = selectedBoard.id
+    console.log('Board selected:', selectedBoard.name, 'ID:', selectedBoard.id)
+  } else {
+    localForm.value.board_id = ''
+    console.log('No board found for:', localForm.value.board_name)
+  }
+}
 </script>
 
 <template>
@@ -206,6 +229,7 @@ watch(addressFilters, () => {
             </div> -->
             <select
               v-model="localForm.board_name"
+              @change="handleBoardChange"
               class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50"
             >
               <option value="">বোর্ড নির্বাচন করুন</option>
@@ -213,6 +237,10 @@ watch(addressFilters, () => {
                 {{ board.name }}
               </option>
             </select>
+            <!-- Debug: Show selected board ID -->
+            <div v-if="localForm.board_id" class="text-xs text-gray-500 mt-1">
+              বোর্ড আইডি: {{ localForm.board_id }}
+            </div>
           </div>
         </div>
         <!-- Non Befaq Board হলে বছর ফিল্ড দেখাও -->
