@@ -7,24 +7,23 @@
           :class="fadeIn ? 'opacity-100' : 'opacity-0'"
         >
           <div class="p-6 md:p-8 flex flex-col md:flex-row justify-between items-center">
-            <div class="flex items-center mb-4 md:mb-0">
-              <div class="p-3 bg-gray-100 rounded-sm mr-4">
-                <svg class="w-10 h-10 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 14l9-5-9-5-9 5 9 5z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-                </svg>
-              </div>
-              <div>
-                <h1 class="text-2xl md:text-3xl font-bold text-gray-900">
-                  মারহালার নাম:
-                  <span v-if="marhalaName">{{ marhalaName }}</span>
-                  <span v-else class="text-red-500">মারহালা নাম পাওয়া যায়নি</span>
-                </h1>
-                <p class="text-gray-600 text-lg md:text-base">পুরাতন শিক্ষার্থী নিবন্ধন সিস্টেম</p>
-                <p class="text-gray-500 text-lg mt-1">{{ getCurrentDate() }} • {{ currentUser }}</p>
-              </div>
-            </div>
-
+       <div class="flex items-center mb-4 md:mb-0">
+  <div class="p-3 bg-gray-100 rounded-sm mr-4">
+    <svg class="w-10 h-10 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 14l9-5-9-5-9 5 9 5z" />
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+    </svg>
+  </div>
+  <div>
+    <h1 class="text-2xl md:text-3xl font-bold text-gray-900">
+      মারহালার নাম:
+      <span v-if="displayMarhalaName">{{ displayMarhalaName }}</span>
+      <span v-else class="text-red-500">মারহালা নাম পাওয়া যায়নি</span>
+    </h1>
+    <p class="text-gray-600 text-lg md:text-base">পুরাতন শিক্ষার্থী নিবন্ধন সিস্টেম</p>
+    <p class="text-gray-500 text-lg mt-1">{{ getCurrentDate() }} • {{ currentUser }}</p>
+  </div>
+</div>
             <div class="flex flex-wrap gap-3">
               <!-- router-link for New Student -->
               <router-link
@@ -374,15 +373,42 @@ import axios from 'axios'
 const marhalaName = ref('মারহালা নাম')
 const route = useRoute()
 
+// মারহালা আইডি থেকে মারহালা নাম ম্যাপিং
+const getMarhalaNameById = (marhalaId) => {
+  const marhalaNames = {
+    9: 'ফযিলত',
+    10: 'সানাবিয়া',
+    11: 'সানাবিয়া উলইয়া',
+    12: 'মুতাওয়াসসিতা',
+    14: 'ইবতেদাইয়্যাহ',
+    15: 'হিফজুল কোরাআন',
+    16: 'ক্বিরাআত'
+  }
+
+  return marhalaNames[marhalaId] || 'মারহালা'
+}
+
+// কম্পিউটেড প্রপার্টি যা মারহালা নাম নির্ধারণ করবে
+const displayMarhalaName = computed(() => {
+  // যদি API থেকে মারহালা নাম পাওয়া যায়, তাহলে সেটা ব্যবহার করুন
+  if (marhalaName.value && marhalaName.value !== 'মারহালা নাম') {
+    return marhalaName.value
+  }
+
+  // অন্যথায় মারহালা আইডি থেকে নাম নির্ধারণ করুন
+  return getMarhalaNameById(currentMarhalaId.value)
+})
+
 onMounted(async () => {
   const marhalaId = Array.isArray(route.params.marhala_id) ? route.params.marhala_id[0] : route.params.marhala_id || '2'
   currentMarhalaId.value = marhalaId
 
   try {
     const res = await axios.get(`/api/marhalas/${marhalaId}/`)
-    marhalaName.value = res.data.name_bn || 'মারহালা'
+    marhalaName.value = res.data.name_bn || getMarhalaNameById(marhalaId)
   } catch {
-    marhalaName.value = 'মারহালা'
+    // API থেকে না পেলে ম্যাপিং থেকে নাম নিন
+    marhalaName.value = getMarhalaNameById(marhalaId)
   }
 
   try {
