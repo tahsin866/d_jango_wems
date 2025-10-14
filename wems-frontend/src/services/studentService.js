@@ -5,7 +5,7 @@ import axios from 'axios'
 
 // API Configuration
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
-const STUDENTS_API_URL = `${API_BASE_URL}/api/registration/students/`
+const STUDENTS_API_URL = `${API_BASE_URL}/api/registration/`
 
 // Configure axios instance
 const apiClient = axios.create({

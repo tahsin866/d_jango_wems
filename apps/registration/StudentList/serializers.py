@@ -16,6 +16,11 @@ class StudentBasicSerializer(serializers.ModelSerializer):
     current_madrasha = serializers.CharField(source='madrasha_name', read_only=True)
     current_markaz = serializers.CharField(source='markaz_name', read_only=True)
     exam_name_Bn = serializers.CharField(source='exam_name', read_only=True)
+
+    # Address mapping fields
+    division_name = serializers.CharField(read_only=True)
+    district_name = serializers.CharField(read_only=True)
+    thana_name = serializers.CharField(read_only=True)
     
     # Computed fields for frontend compatibility
     payment_status = serializers.CharField(read_only=True)
@@ -36,6 +41,9 @@ class StudentBasicSerializer(serializers.ModelSerializer):
             'current_markaz',
             'exam_name_Bn',
             'current_class',
+            'division_name',
+            'district_name',
+            'thana_name',
             'Date_of_birth',
             'student_type',
             'payment_status',
@@ -86,6 +94,9 @@ class StudentBasicListSerializer(serializers.ModelSerializer):
     exam_name_Bn = serializers.CharField(source='exam_name', read_only=True)
     payment_status = serializers.CharField(read_only=True)
     is_paid = serializers.BooleanField(read_only=True)
+    division_name = serializers.CharField(read_only=True)
+    district_name = serializers.CharField(read_only=True)
+    thana_name = serializers.CharField(read_only=True)
 
     class Meta:
         model = StudentBasic
@@ -102,7 +113,10 @@ class StudentBasicListSerializer(serializers.ModelSerializer):
             'student_type',
             'payment_status',
             'is_paid',
-            'status'
+            'status',
+            'division_name',
+            'district_name',
+            'thana_name'
         ]
 
 

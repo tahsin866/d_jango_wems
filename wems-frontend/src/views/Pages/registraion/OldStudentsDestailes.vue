@@ -451,46 +451,89 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <!-- Address Information -->
                       <div>
-                        <Fieldset legend="ঠিকানা">
-                          <div class="mt-2 space-y-2">
-                            <div>
-                              <label class="text-md font-semibold text-gray-600">বিভাগ:</label>
-                              <div class="flex items-center gap-2 mt-1">
-                                <span v-if="!editingFields.division" class="text-md text-gray-900">{{ studentAddressData.division || 'N/A' }}</span>
-                                <InputText
-                                  v-else
-                                  v-model="studentAddressData.division"
-                                  type="text"
-                                  class="text-md"
-                                />
-                                <Button @click="toggleEdit('division')" icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm" />
+                        <Fieldset legend="ঠিকানা" :pt="{
+                          legend: { className: 'text-xl font-bold text-white bg-gradient-to-r from-gray-700 to-gray-600 px-6 py-4 rounded-t' },
+                          content: { className: 'p-6 bg-gray-50 overflow-visible' }
+                        }">
+                          <template #legend>
+                            <div class="flex gap-4 items-center">
+                              <div class="p-2 rounded-sm bg-white bg-opacity-20 backdrop-blur-sm">
+                                <i class="text-2xl text-white fa-home"></i>
                               </div>
+                              <span class="text-white text-xl font-bold tracking-wide">ঠিকানা</span>
                             </div>
+                          </template>
+
+                          <div class="grid grid-cols-1 gap-6 overflow-visible">
+                            <!-- বিভাগ -->
                             <div>
-                              <label class="text-md font-semibold text-gray-600">জেলা:</label>
-                              <div class="flex items-center gap-2 mt-1">
-                                <span v-if="!editingFields.district" class="text-md text-gray-900">{{ studentAddressData.district || 'N/A' }}</span>
-                                <InputText
-                                  v-else
-                                  v-model="studentAddressData.district"
-                                  type="text"
-                                  class="text-md"
-                                />
-                                <Button @click="toggleEdit('district')" icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm" />
-                              </div>
+                              <label for="division" class="block text-base font-medium text-gray-700 mb-2">বিভাগ</label>
+                              <Dropdown
+                                id="division"
+                                v-model="localAddress.division"
+                                :options="divisions"
+                                optionLabel="Division"
+                                optionValue="id"
+                                placeholder="সকল বিভাগ"
+                                :disabled="addressLoading.divisions"
+                                :loading="addressLoading.divisions"
+                                class="w-full"
+                                :pt="{
+                                  root: { class: 'w-full' },
+                                  input: { class: 'w-full bg-gray-50 border-gray-300' },
+                                  list: { class: 'z-50' }
+                                }"
+                                @change="onDivisionChange"
+                              />
+                              <small v-if="addressLoading.divisions" class="text-md text-gray-500 block mt-1">Loading divisions...</small>
                             </div>
+
+                            <!-- জেলা -->
                             <div>
-                              <label class="text-md font-semibold text-gray-600">থানা:</label>
-                              <div class="flex items-center gap-2 mt-1">
-                                <span v-if="!editingFields.thana" class="text-md text-gray-900">{{ studentAddressData.thana || 'N/A' }}</span>
-                                <InputText
-                                  v-else
-                                  v-model="studentAddressData.thana"
-                                  type="text"
-                                  class="text-md"
-                                />
-                                <Button @click="toggleEdit('thana')" icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm" />
-                              </div>
+                              <label for="district" class="block text-base font-medium text-gray-700 mb-2">জেলা</label>
+                              <Dropdown
+                                id="district"
+                                v-model="localAddress.district"
+                                :options="districts"
+                                optionLabel="District"
+                                optionValue="DesID"
+                                placeholder="সকল জেলা"
+                                :disabled="addressLoading.districts || (!localAddress.division && divisions.length > 0)"
+                                :loading="addressLoading.districts"
+                                class="w-full"
+                                :pt="{
+                                  root: { class: 'w-full' },
+                                  input: { class: 'w-full bg-gray-50 border-gray-300' },
+                                  list: { class: 'z-50' }
+                                }"
+                                @change="onDistrictChange"
+                              />
+                              <small v-if="addressLoading.districts" class="text-md text-gray-500 block mt-1">Loading districts...</small>
+                              <small v-else-if="!localAddress.division && divisions.length > 0" class="text-md text-gray-500 block mt-1">বিভাগ নির্বাচন করুন</small>
+                            </div>
+
+                            <!-- থানা/উপজিলা -->
+                            <div>
+                              <label for="thana" class="block text-base font-medium text-gray-700 mb-2">থানা/উপজিলা</label>
+                              <Dropdown
+                                id="thana"
+                                v-model="localAddress.Thana"
+                                :options="thanas"
+                                optionLabel="Thana"
+                                optionValue="Thana_ID"
+                                placeholder="সকল থানা"
+                                :disabled="addressLoading.thanas || (!localAddress.district && districts.length > 0)"
+                                :loading="addressLoading.thanas"
+                                class="w-full"
+                                :pt="{
+                                  root: { class: 'w-full' },
+                                  input: { class: 'w-full bg-gray-50 border-gray-300' },
+                                  list: { class: 'z-50' }
+                                }"
+                                @change="onThanaChange"
+                              />
+                              <small v-if="addressLoading.thanas" class="text-md text-gray-500 block mt-1">Loading thanas...</small>
+                              <small v-else-if="!localAddress.district && districts.length > 0" class="text-md text-gray-500 block mt-1">জেলা নির্বাচন করুন</small>
                             </div>
                           </div>
                         </Fieldset>
@@ -652,6 +695,23 @@ const studentAddressData = reactive({})
 // Editing state - track which fields are being edited
 const editingFields = reactive({})
 const editingAddressFields = reactive({})
+
+// Address Data
+const divisions = ref([])
+const districts = ref([])
+const thanas = ref([])
+
+const localAddress = reactive({
+  division: '',
+  district: '',
+  Thana: ''
+})
+
+const addressLoading = computed(() => ({
+  divisions: false,
+  districts: false,
+  thanas: false
+}))
 
 // Store original values for cancel functionality
 const originalValues = reactive({})
@@ -873,6 +933,98 @@ const deleteRecord = () => {
   }
 }
 
+// Address API functions
+const fetchDivisions = async () => {
+  try {
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+    const response = await fetch(`${API_BASE_URL}/api/admin/madrasha/divisions/`)
+    if (!response.ok) return []
+    const data = await response.json()
+    return (data.results || []).map(item => ({ id: String(item.did), Division: item.division }))
+  } catch (error) {
+    console.error('Error fetching divisions:', error)
+    return []
+  }
+}
+
+const fetchDistricts = async (divisionId) => {
+  try {
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+    const url = divisionId ? `${API_BASE_URL}/api/admin/madrasha/districts/?did=${divisionId}` : `${API_BASE_URL}/api/admin/madrasha/districts/`
+    const response = await fetch(url)
+    if (!response.ok) return []
+    const data = await response.json()
+    return (data.results || []).map(item => ({ DesID: String(item.desid), District: item.district }))
+  } catch (error) {
+    console.error('Error fetching districts:', error)
+    return []
+  }
+}
+
+const fetchThanas = async (districtId) => {
+  try {
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+    const url = districtId ? `${API_BASE_URL}/api/admin/madrasha/thanas/?district_id=${districtId}` : `${API_BASE_URL}/api/admin/madrasha/thanas/`
+    const response = await fetch(url)
+    if (!response.ok) return []
+    const data = await response.json()
+    return (data.results || []).map(item => ({ Thana_ID: String(item.thana_id), Thana: item.thana }))
+  } catch (error) {
+    console.error('Error fetching thanas:', error)
+    return []
+  }
+}
+
+// Address event handlers
+const handleDivisionChange = async () => {
+  try {
+    localAddress.district = ''
+    localAddress.Thana = ''
+    districts.value = []
+    thanas.value = []
+    if (!localAddress.division) return
+    districts.value = await fetchDistricts(localAddress.division)
+    // Update address data
+    studentAddressData.division = localAddress.division
+    studentAddressData.district = ''
+    studentAddressData.thana = ''
+  } catch (error) {
+    console.error('Error loading districts:', error)
+  }
+}
+
+const handleDistrictChange = async () => {
+  try {
+    localAddress.Thana = ''
+    thanas.value = []
+    if (!localAddress.district) return
+    thanas.value = await fetchThanas(localAddress.district)
+    // Update address data
+    studentAddressData.district = localAddress.district
+    studentAddressData.thana = ''
+  } catch (error) {
+    console.error('Error loading thanas:', error)
+  }
+}
+
+const handleThanaChange = () => {
+  // Update address data
+  studentAddressData.thana = localAddress.Thana
+}
+
+// Address dropdown change handlers
+const onDivisionChange = (event) => {
+  handleDivisionChange()
+}
+
+const onDistrictChange = (event) => {
+  handleDistrictChange()
+}
+
+const onThanaChange = (event) => {
+  handleThanaChange()
+}
+
 // Fetch combined student data from API
 const fetchStudentData = async (studentId) => {
   try {
@@ -939,6 +1091,11 @@ const fetchStudentData = async (studentId) => {
       nid_no: data.nid_no,
       nid_photo: data.nid_photo
     })
+
+    // Initialize local address state with current address data
+    localAddress.division = data.division || ''
+    localAddress.district = data.district || ''
+    localAddress.Thana = data.thana || ''
   } catch (err) {
     console.error('Error fetching student data:', err)
     error.value = err.message || 'Failed to fetch student data'
@@ -948,13 +1105,42 @@ const fetchStudentData = async (studentId) => {
 }
 
 // Lifecycle hook
-onMounted(() => {
+onMounted(async () => {
   const studentId = route.params.id
   if (studentId) {
-    fetchStudentData(studentId)
+    await fetchStudentData(studentId)
+
+    // Load divisions data for address dropdowns
+    divisions.value = await fetchDivisions()
+
+    // If student has division selected, load corresponding districts
+    if (localAddress.division) {
+      districts.value = await fetchDistricts(localAddress.division)
+    }
+
+    // If student has district selected, load corresponding thanas
+    if (localAddress.district) {
+      thanas.value = await fetchThanas(localAddress.district)
+    }
   } else {
     error.value = 'No student ID provided'
     loading.value = false
   }
 })
 </script>
+
+<style scoped>
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+}
+
+/* Ensure proper z-index for dropdown visibility */
+:deep(.p-dropdown-list) {
+  z-index: 1000 !important;
+}
+
+/* Container overflow fixes for dropdown visibility */
+.overflow-visible {
+  overflow: visible !important;
+}
+</style>
