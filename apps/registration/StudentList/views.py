@@ -14,13 +14,9 @@ from .service import (
     delete_student,
     get_student_statistics,
     bulk_update_students,
-<<<<<<< HEAD
     get_student_detail_combined,
     update_student_field,
     update_student_address_field
-=======
-    get_student_detail_combined
->>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
 )
 
 
