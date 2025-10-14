@@ -397,8 +397,7 @@ def clear_student_detail_cache(student_id):
     r = get_redis_connection()
     if r:
         try:
-<<<<<<< HEAD
-            # Clear both regular and combined detail caches
+          # Clear both regular and combined detail caches
             cache_keys = [
                 f"student_detail_{student_id}_None",
                 f"student_detail_combined_{student_id}_None"
@@ -412,11 +411,6 @@ def clear_student_detail_cache(student_id):
             all_keys = r.keys(f"*student_detail*{student_id}*")
             if all_keys:
                 r.delete(*all_keys)
-
-=======
-            cache_key = f"student_detail_{student_id}"
-            r.delete(cache_key)
->>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
         except Exception as e:
             print(f"Redis cache clear error: {e}")
 
@@ -541,8 +535,7 @@ def get_student_detail_combined(student_id, user_id=None):
 
         return result
 
-    except StudentBasic.DoesNotExist:
-<<<<<<< HEAD
+      except StudentBasic.DoesNotExist:
         return None
 
 
@@ -634,6 +627,3 @@ def update_student_address_field(student_id, field_name, field_value, user_id=No
     except Exception as e:
         print(f"Error updating address field: {e}")
         return False, str(e)
-=======
-        return None
->>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
