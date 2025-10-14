@@ -56,10 +56,7 @@ INSTALLED_APPS = [
     'apps.registration.board.apps.BoardConfig',  # Board app for board management
     'apps.admin.madrasha.apps.MadrashaConfig',  # Madrasha app for Division/District/Thana models
     'apps.admin.department.apps.DepartmentConfig',  # Department management app
-<<<<<<< HEAD
     'apps.address',  # Address app for division, district, thana mapping
-=======
->>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
 ]
 
 MIDDLEWARE = [
