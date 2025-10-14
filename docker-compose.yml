@@ -1,0 +1,303 @@
+# WEMS Application Docker Compose - Complete Microservices Setup
+# Run: docker-compose up -d
+# Access:
+#   - Frontend: http://wifaqerp.com:5173 (add wifaqerp.com to hosts file)
+#   - Django API: http://localhost:8000
+#   - API Gateway: http://localhost:8080
+#   - Redis: localhost:6379
+#   - Note: Uses host PostgreSQL 17 installation on localhost:5432
+#   - For Windows: Add "127.0.0.1 wifaqerp.com" to C:\Windows\System32\drivers\etc\hosts
+
+services:
+  # Redis Cache & Session Store (same as original)
+  wems-redis:
+    image: redis:7-alpine
+    container_name: wems-redis-unified-fixed
+    ports:
+      - "6379:6379"
+    networks:
+      - wems-network
+    restart: unless-stopped
+
+  # Main Django Application (using host PostgreSQL like original)
+  wems-django:
+    image: wems-django:with-all-deps
+    container_name: wems-django-unified-fixed
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=1
+      - DATABASE_URL=postgresql://postgres:12345678@host.docker.internal:5432/wifaq
+      - REDIS_URL=redis://wems-redis:6379/0
+      - ALLOWED_HOSTS=localhost,127.0.0.1,wems-django
+    volumes:
+      - .:/app
+      - ./media:/app/media
+      - ./config/media:/app/config/media
+      - ./nid_photos:/app/nid_photos
+      - ./user_photos:/app/user_photos
+    depends_on:
+      - wems-redis
+    networks:
+      - wems-network
+    restart: unless-stopped
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # API Gateway (FastAPI) - Inline Dockerfile
+  wems-api-gateway:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM python:3.11-slim
+        WORKDIR /app
+        RUN apt-get update && apt-get install -y gcc postgresql-client && rm -rf /var/lib/apt/lists/*
+        RUN pip install --no-cache-dir fastapi==0.104.1 uvicorn[standard]==0.24.0 httpx==0.25.2 python-dotenv==1.0.0
+        COPY ./services/api-gateway/ .
+        EXPOSE 8080
+        CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
+    container_name: wems-api-gateway-unified-fixed
+    ports:
+      - "8080:8080"
+    environment:
+      - DJANGO_SERVICE_URL=http://wems-django:8000
+      - AUTH_SERVICE_URL=http://wems-django:8000
+      - ACCOUNTS_SERVICE_URL=http://wems-django:8000
+      - TALEEM_SERVICE_URL=http://localhost:8003
+      - SANAD_SERVICE_URL=http://localhost:8004
+      - REGISTRATION_SERVICE_URL=http://localhost:8005
+      - TRAINING_SERVICE_URL=http://localhost:8006
+      - PUBLICATION_SERVICE_URL=http://localhost:8007
+    depends_on:
+      - wems-django
+    networks:
+      - wems-network
+    restart: unless-stopped
+
+  # Accounts Service (FastAPI) - Inline Dockerfile
+  wems-accounts-service:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM python:3.11-slim
+        WORKDIR /app
+        RUN apt-get update && apt-get install -y gcc postgresql-client && rm -rf /var/lib/apt/lists/*
+        RUN pip install --no-cache-dir fastapi==0.104.1 uvicorn[standard]==0.24.0 pydantic[email]==2.5.0 httpx==0.25.2 python-multipart==0.0.6 python-dotenv==1.0.0 asyncpg==0.29.0 sqlalchemy[asyncio]==2.0.23 alembic==1.13.0 psycopg2-binary==2.9.9
+        COPY ./services/accounts-service/ .
+        RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+        USER appuser
+        EXPOSE 8001
+        CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
+    container_name: wems-accounts-service-unified-fixed
+    ports:
+      - "8001:8001"
+    environment:
+      - DATABASE_URL=postgresql://postgres:12345678@host.docker.internal:5432/wifaq
+      - AUTH_SERVICE_URL=http://wems-django:8000
+      - SERVICE_TOKEN=accounts-service-token
+      - REDIS_URL=redis://wems-redis:6379/1
+    depends_on:
+      - wems-redis
+      - wems-django
+    networks:
+      - wems-network
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # Publication Service (FastAPI) - Inline Dockerfile
+  wems-publication-service:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM python:3.11-slim
+        WORKDIR /app
+        RUN apt-get update && apt-get install -y gcc postgresql-client && rm -rf /var/lib/apt/lists/*
+        RUN pip install --no-cache-dir fastapi==0.104.1 uvicorn[standard]==0.24.0 pydantic[email]==2.5.0 httpx==0.25.2 python-multipart==0.0.6 python-dotenv==1.0.0 asyncpg==0.29.0 sqlalchemy[asyncio]==2.0.23 alembic==1.13.0 psycopg2-binary==2.9.9
+        COPY ./services/publication-service/ .
+        RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+        USER appuser
+        EXPOSE 8002
+        CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8002"]
+    container_name: wems-publication-service-unified-fixed
+    ports:
+      - "8002:8002"
+    environment:
+      - DATABASE_URL=postgresql://postgres:12345678@host.docker.internal:5432/wifaq
+      - AUTH_SERVICE_URL=http://wems-django:8000
+      - SERVICE_TOKEN=publication-service-token
+      - REDIS_URL=redis://wems-redis:6379/2
+    depends_on:
+      - wems-redis
+      - wems-django
+    networks:
+      - wems-network
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # Registration Service (FastAPI) - Inline Dockerfile
+  wems-registration-service:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM python:3.11-slim
+        WORKDIR /app
+        RUN apt-get update && apt-get install -y gcc postgresql-client && rm -rf /var/lib/apt/lists/*
+        RUN pip install --no-cache-dir fastapi==0.104.1 uvicorn[standard]==0.24.0 pydantic[email]==2.5.0 httpx==0.25.2 python-multipart==0.0.6 python-dotenv==1.0.0 asyncpg==0.29.0 sqlalchemy[asyncio]==2.0.23 alembic==1.13.0 psycopg2-binary==2.9.9
+        COPY ./services/registration-service/ .
+        RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+        USER appuser
+        EXPOSE 8003
+        CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8003"]
+    container_name: wems-registration-service-unified-fixed
+    ports:
+      - "8003:8003"
+    environment:
+      - DATABASE_URL=postgresql://postgres:12345678@host.docker.internal:5432/wifaq
+      - AUTH_SERVICE_URL=http://wems-django:8000
+      - SERVICE_TOKEN=registration-service-token
+      - REDIS_URL=redis://wems-redis:6379/3
+    depends_on:
+      - wems-redis
+      - wems-django
+    networks:
+      - wems-network
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # Sanad Service (FastAPI) - Inline Dockerfile
+  wems-sanad-service:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM python:3.11-slim
+        WORKDIR /app
+        RUN apt-get update && apt-get install -y gcc postgresql-client && rm -rf /var/lib/apt/lists/*
+        RUN pip install --no-cache-dir fastapi==0.104.1 uvicorn[standard]==0.24.0 pydantic[email]==2.5.0 httpx==0.25.2 python-multipart==0.0.6 python-dotenv==1.0.0 asyncpg==0.29.0 sqlalchemy[asyncio]==2.0.23 alembic==1.13.0 psycopg2-binary==2.9.9 reportlab==4.0.7 weasyprint==60.2 jinja2==3.1.2
+        RUN mkdir -p /app/certificates /app/templates
+        COPY ./services/sanad-service/ .
+        RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+        USER appuser
+        EXPOSE 8004
+        CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8004"]
+    container_name: wems-sanad-service-unified-fixed
+    ports:
+      - "8004:8004"
+    environment:
+      - DATABASE_URL=postgresql://postgres:12345678@host.docker.internal:5432/wifaq
+      - AUTH_SERVICE_URL=http://wems-django:8000
+      - SERVICE_TOKEN=sanad-service-token
+      - REDIS_URL=redis://wems-redis:6379/4
+    depends_on:
+      - wems-redis
+      - wems-django
+    networks:
+      - wems-network
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # Taleem Service (FastAPI) - Inline Dockerfile
+  wems-taleem-service:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM python:3.11-slim
+        WORKDIR /app
+        RUN apt-get update && apt-get install -y gcc postgresql-client && rm -rf /var/lib/apt/lists/*
+        RUN pip install --no-cache-dir fastapi==0.104.1 uvicorn[standard]==0.24.0 pydantic[email]==2.5.0 httpx==0.25.2 python-multipart==0.0.6 python-dotenv==1.0.0 asyncpg==0.29.0 sqlalchemy[asyncio]==2.0.23 alembic==1.13.0 psycopg2-binary==2.9.9
+        COPY ./services/taleem-service/ .
+        RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+        USER appuser
+        EXPOSE 8005
+        CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8005"]
+    container_name: wems-taleem-service-unified-fixed
+    ports:
+      - "8005:8005"
+    environment:
+      - DATABASE_URL=postgresql://postgres:12345678@host.docker.internal:5432/wifaq
+      - AUTH_SERVICE_URL=http://wems-django:8000
+      - SERVICE_TOKEN=taleem-service-token
+      - REDIS_URL=redis://wems-redis:6379/5
+    depends_on:
+      - wems-redis
+      - wems-django
+    networks:
+      - wems-network
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # Training Service (FastAPI) - Inline Dockerfile
+  wems-training-service:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM python:3.11-slim
+        WORKDIR /app
+        RUN apt-get update && apt-get install -y gcc postgresql-client && rm -rf /var/lib/apt/lists/*
+        RUN pip install --no-cache-dir fastapi==0.104.1 uvicorn[standard]==0.24.0 pydantic[email]==2.5.0 httpx==0.25.2 python-multipart==0.0.6 python-dotenv==1.0.0 asyncpg==0.29.0 sqlalchemy[asyncio]==2.0.23 alembic==1.13.0 psycopg2-binary==2.9.9 reportlab==4.0.7 weasyprint==60.2 jinja2==3.1.2
+        RUN mkdir -p /app/uploads
+        COPY ./services/training-service/ .
+        RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+        USER appuser
+        EXPOSE 8006
+        CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8006"]
+    container_name: wems-training-service-unified-fixed
+    ports:
+      - "8006:8006"
+    environment:
+      - DATABASE_URL=postgresql://postgres:12345678@host.docker.internal:5432/wifaq
+      - AUTH_SERVICE_URL=http://wems-django:8000
+      - SERVICE_TOKEN=training-service-token
+      - REDIS_URL=redis://wems-redis:6379/6
+    depends_on:
+      - wems-redis
+      - wems-django
+    networks:
+      - wems-network
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # Frontend Application (Vue.js with Vite) - Inline Dockerfile
+  wems-frontend:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM node:18-alpine
+        WORKDIR /app
+        COPY ./wems-frontend/package*.json ./
+        RUN npm ci
+        COPY ./wems-frontend/ .
+        EXPOSE 5173
+        CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+    container_name: wems-frontend-unified-fixed
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./wems-frontend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_API_BASE_URL=http://localhost:8000
+      - VITE_AES_KEY=YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=
+    networks:
+      - wems-network
+    depends_on:
+      - wems-django
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+networks:
+  wems-network:
+    driver: bridge
+    name: wems-network
+
+# Note: Using host PostgreSQL 17 installation
+# Database connection: postgresql://postgres:12345678@host.docker.internal:5432/wifaq
+# All database tables and user data already exist in your host database
