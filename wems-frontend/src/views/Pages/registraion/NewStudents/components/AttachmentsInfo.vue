@@ -105,7 +105,11 @@ const emitUpdateFiles = () => {
       </div>
       <div class="flex justify-between mt-6">
 
+<<<<<<< HEAD
         <Button icon="pi pi-save" label="সংরক্ষণ করুন" class="inline-flex items-center px-4 py-3 bg-gray-800 border border-transparent rounded-sm font-semibold text-lg text-white" @click="emit('submit')" />
+=======
+        <Button icon="pi pi-save" label="সংরক্ষণ করুন" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white" @click="emit('submit')" />
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
       </div>
     </div>
   </div>

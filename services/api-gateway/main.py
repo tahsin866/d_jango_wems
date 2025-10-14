@@ -21,7 +21,10 @@ from routes.marhala import router as marhala_router
 from routes.sidebar import router as sidebar_router
 from routes.board import router as board_router
 from routes.admin_registration import router as admin_registration_router
+<<<<<<< HEAD
 from routes.registration import router as registration_router
+=======
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
 # from routes.students import router as students_router  # Temporarily disabled
 
 # Import utilities
@@ -124,7 +127,10 @@ app.include_router(marhala_router)
 app.include_router(sidebar_router)
 app.include_router(board_router)
 app.include_router(admin_registration_router)
+<<<<<<< HEAD
 app.include_router(registration_router)
+=======
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
 # app.include_router(students_router)  # Temporarily disabled - using catch-all route
 
 # Catch-all route for any unmatched API calls - forward to Django

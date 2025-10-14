@@ -1,5 +1,9 @@
 <template>
+<<<<<<< HEAD
 <div
+=======
+  <div
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
     style="font-family: 'SolaimanLipi', sans-serif;"
     class="students-data-table bg-white rounded-sm shadow-md border border-gray-200">
     <!-- Clean toolbar with actions and search -->
@@ -99,6 +103,7 @@
       <div class="overflow-hidden">
         <DataTable
           v-model:expandedRows="expandedRows"
+<<<<<<< HEAD
           v-model:filters="tableFilters"
           :value="displayStudents"
           dataKey="id"
@@ -119,6 +124,43 @@
           :globalFilterFields="['name_bn', 'father_name_bn', 'current_madrasha']"
           :pt="{
             table: { style: 'min-width: 60rem' }
+=======
+          v-model:editingRows="editingRows"
+          v-model:filters="tableFilters"
+          :value="displayStudents"
+          dataKey="id"
+          editMode="row"
+          @rowExpand="onRowExpand"
+          @rowCollapse="onRowCollapse"
+          @row-edit-save="onRowEditSave"
+          tableStyle="min-width: 60rem"
+          :scrollable="true"
+          scrollHeight="calc(100vh - 400px)"
+          :paginator="!useScrollMode"
+          :rows="rowsPerPage"
+          :rowsPerPageOptions="[10, 25, 50, 100]"
+          :paginatorTemplate="'FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown'"
+          :currentPageReportTemplate="`মোট {totalRecords} টি রেকর্ডের মধ্যে {first} থেকে {last} দেখানো হচ্ছে`"
+          :pageLinkSize="10"
+          filterDisplay="menu"
+          :globalFilterFields="['name_bn', 'father_name_bn', 'current_madrasha']"
+          :pt="{
+            table: { style: 'min-width: 60rem' },
+            column: {
+              bodycell: ({ state }) => ({
+                style:  state['d_editing']&&'padding-top: 0.75rem; padding-bottom: 0.75rem'
+              })
+            },
+            rowEditorInitButton: {
+              class: 'w-8 h-8 rounded-md text-white bg-blue-500 border-0 mr-1'
+            },
+            rowEditorSaveButton: {
+              class: 'w-8 h-8 rounded-md text-white bg-green-500 border-0 mr-1'
+            },
+            rowEditorCancelButton: {
+              class: 'w-8 h-8 rounded-md text-white bg-red-500 border-0'
+            }
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
           }"
         >
 
@@ -136,17 +178,56 @@
               </div>
             </template>
           </Column>
+<<<<<<< HEAD
           <Column field="name_bn" header="নাম" sortable />
           <Column field="father_name_bn" header="পিতার নাম" sortable />
           <Column field="current_madrasha" header="মাদরাসার নাম" sortable />
           <Column field="exam_name_Bn" header="পরীক্ষার নাম" sortable />
           <Column field="current_class" header="মারহালা" sortable filterField="current_class" :showFilterMenu="false">
+=======
+          <Column field="name_bn" header="নাম" sortable>
+            <template #editor="{ data, field }">
+              <InputText v-model="data[field]" fluid />
+            </template>
+          </Column>
+          <Column field="father_name_bn" header="পিতার নাম" sortable>
+            <template #editor="{ data, field }">
+              <InputText v-model="data[field]" fluid />
+            </template>
+          </Column>
+          <Column field="current_madrasha" header="মাদরাসার নাম" sortable>
+            <template #editor="{ data, field }">
+              <InputText v-model="data[field]" fluid />
+            </template>
+          </Column>
+          <Column field="exam_name_Bn" header="পরীক্ষার নাম" sortable>
+            <template #editor="{ data, field }">
+              <InputText v-model="data[field]" fluid />
+            </template>
+          </Column>
+          <Column field="current_class" header="মারহালা" sortable filterField="current_class" :showFilterMenu="false">
+            <template #editor="{ data, field }">
+              <InputText v-model="data[field]" fluid />
+            </template>
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
             <template #filter="{ filterModel, filterCallback }">
               <Select v-model="filterModel.value" @change="filterCallback()" :options="classOptions" optionLabel="label" optionValue="value" placeholder="মারহালা নির্বাচন করুন" style="min-width: 12rem" :showClear="true" />
             </template>
           </Column>
+<<<<<<< HEAD
           <Column field="Date_of_birth" header="জন্ম-তারিখ" sortable />
           <Column field="student_type" header="পরীক্ষার্থীর ধরন" sortable filterField="student_type" :showFilterMenu="false">
+=======
+          <Column field="Date_of_birth" header="জন্ম-তারিখ" sortable>
+            <template #editor="{ data, field }">
+              <InputText v-model="data[field]" fluid />
+            </template>
+          </Column>
+          <Column field="student_type" header="পরীক্ষার্থীর ধরন" sortable filterField="student_type" :showFilterMenu="false">
+            <template #editor="{ data, field }">
+              <Select v-model="data[field]" :options="studentTypes" optionLabel="label" optionValue="value" placeholder="ধরন নির্বাচন করুন" fluid />
+            </template>
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
             <template #filter="{ filterModel, filterCallback }">
               <Select v-model="filterModel.value" @change="filterCallback()" :options="studentTypes" optionLabel="label" optionValue="value" placeholder="ধরন নির্বাচন করুন" style="min-width: 12rem" :showClear="true" />
             </template>
@@ -167,6 +248,16 @@
             </template>
           </Column>
           <Column field="status" header="আবেদন অবস্থা" filterField="status" :showFilterMenu="false">
+<<<<<<< HEAD
+=======
+            <template #editor="{ data, field }">
+              <Select v-model="data[field]" :options="statuses" optionLabel="label" optionValue="value" placeholder="স্ট্যাটাস নির্বাচন করুন" fluid>
+                <template #option="slotProps">
+                  <Tag :value="slotProps.option.label" :severity="getStatusSeverity(slotProps.option.value)" />
+                </template>
+              </Select>
+            </template>
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
             <template #body="slotProps">
               <Tag
                 :value="getStatusInBangla(slotProps.data.status)"
@@ -181,6 +272,10 @@
               </Select>
             </template>
           </Column>
+<<<<<<< HEAD
+=======
+          <Column :rowEditor="true" style="width: 10%; min-width: 8rem" bodyStyle="text-align:center"></Column>
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
           <Column header="করনীয়">
             <template #body="slotProps">
               <SplitButton
@@ -198,6 +293,7 @@
             <div class="p-4">
               <h5 class="text-lg font-semibold mb-4">সাম্প্রতিক কার্যক্রম - {{ slotProps.data.name_bn }}</h5>
               <DataTable
+<<<<<<< HEAD
                 :value="slotProps.data.activities || []"
                 dataKey="id"
                 :pt="{
@@ -207,6 +303,49 @@
                 <Column field="date" header="তারিখ" sortable />
                 <Column field="activity" header="কার্যক্রম" sortable />
                 <Column field="status" header="অবস্থা" sortable>
+=======
+                v-model:editingRows="editingActivityRows"
+                :value="slotProps.data.activities || []"
+                editMode="row"
+                @row-edit-save="(event) => onActivityRowEditSave(event, slotProps.data.id)"
+                dataKey="id"
+                :pt="{
+                  table: { style: 'min-width: 40rem' },
+                  column: {
+                    bodycell: ({ state }) => ({
+                      style:  state['d_editing']&&'padding-top: 0.75rem; padding-bottom: 0.75rem'
+                    })
+                  },
+                  rowEditorInitButton: {
+                    class: 'w-8 h-8 rounded-md text-white bg-blue-500 border-0 mr-1'
+                  },
+                  rowEditorSaveButton: {
+                    class: 'w-8 h-8 rounded-md text-white bg-green-500 border-0 mr-1'
+                  },
+                  rowEditorCancelButton: {
+                    class: 'w-8 h-8 rounded-md text-white bg-red-500 border-0'
+                  }
+                }"
+              >
+                <Column field="date" header="তারিখ" sortable>
+                  <template #editor="{ data, field }">
+                    <InputText v-model="data[field]" fluid />
+                  </template>
+                </Column>
+                <Column field="activity" header="কার্যক্রম" sortable>
+                  <template #editor="{ data, field }">
+                    <InputText v-model="data[field]" fluid />
+                  </template>
+                </Column>
+                <Column field="status" header="অবস্থা" sortable>
+                  <template #editor="{ data, field }">
+                    <Select v-model="data[field]" :options="activityStatuses" optionLabel="label" optionValue="value" placeholder="অবস্থা নির্বাচন করুন" fluid>
+                      <template #option="slotProps">
+                        <Tag :value="slotProps.option.label" :severity="getStudentActivitySeverity(slotProps.option.value)" />
+                      </template>
+                    </Select>
+                  </template>
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
                   <template #body="slotProps">
                     <Tag
                       :value="slotProps.data.status"
@@ -215,6 +354,12 @@
                   </template>
                 </Column>
                 <Column field="action" header="পদক্ষেপ" sortable>
+<<<<<<< HEAD
+=======
+                  <template #editor="{ data, field }">
+                    <InputText v-model="data[field]" fluid />
+                  </template>
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
                   <template #body="slotProps">
                     <Button
                       icon="pi pi-search"
@@ -224,6 +369,10 @@
                     />
                   </template>
                 </Column>
+<<<<<<< HEAD
+=======
+                <Column :rowEditor="true" style="width: 10%; min-width: 8rem" bodyStyle="text-align:center"></Column>
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
               </DataTable>
             </div>
           </template>
@@ -471,11 +620,14 @@ const viewStudent = (id) => {
   router.push(`/user/registration/detail/${id}`)
 }
 
+<<<<<<< HEAD
 // Navigate to new registration page
 const navigateToNewRegistration = () => {
   router.push('/user/registration/new')
 }
 
+=======
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
 const submitAllApplications = () => {
   confirmDialog.value = {
     show: true,
@@ -790,21 +942,33 @@ tbody tr:hover {
 
 /* Enhanced pagination styling */
 :deep(.p-paginator) {
+<<<<<<< HEAD
   background: #ffffff !important;
   border: 1px solid #e5e7eb !important;
   border-radius: 0.375rem !important;
   padding: 0.75rem 1rem !important;
   margin-top: 0.5rem !important;
   display: flex !important;
+=======
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  padding: 0.75rem 1rem;
+  margin-top: 0.5rem;
+  display: flex;
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
   gap: 0.5rem;
+<<<<<<< HEAD
   position: sticky;
   bottom: 0;
   z-index: 5;
   box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.1);
   width: 100%;
+=======
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
 }
 
 :deep(.p-paginator .p-paginator-pages) {
@@ -815,6 +979,7 @@ tbody tr:hover {
 :deep(.p-paginator .p-paginator-page) {
   min-width: 2.25rem;
   height: 2.25rem;
+<<<<<<< HEAD
   border: 1px solid #d1d5db !important;
   background: #ffffff !important;
   color: #374151 !important;
@@ -836,6 +1001,25 @@ tbody tr:hover {
   color: #ffffff !important;
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+=======
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #374151;
+  transition: all 0.2s;
+  border-radius: 0.25rem;
+  font-weight: 500;
+}
+
+:deep(.p-paginator .p-paginator-page:hover) {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+:deep(.p-paginator .p-paginator-page.p-paginator-page-selected) {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: #ffffff;
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
 }
 
 :deep(.p-paginator .p-paginator-first),
@@ -844,18 +1028,27 @@ tbody tr:hover {
 :deep(.p-paginator .p-paginator-last) {
   min-width: 2.25rem;
   height: 2.25rem;
+<<<<<<< HEAD
   border: 1px solid #d1d5db !important;
   background: #ffffff !important;
   color: #374151 !important;
   transition: all 0.2s;
   border-radius: 0.25rem;
   cursor: pointer;
+=======
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #374151;
+  transition: all 0.2s;
+  border-radius: 0.25rem;
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
 }
 
 :deep(.p-paginator .p-paginator-first:hover),
 :deep(.p-paginator .p-paginator-prev:hover),
 :deep(.p-paginator .p-paginator-next:hover),
 :deep(.p-paginator .p-paginator-last:hover) {
+<<<<<<< HEAD
   background: #f9fafb !important;
   border-color: #9ca3af !important;
   transform: translateY(-1px);
@@ -872,6 +1065,21 @@ tbody tr:hover {
 }
 
 
+=======
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+:deep(.p-paginator .p-paginator-current) {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+}
+
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
 :deep(.p-paginator .p-dropdown) {
   min-width: 4rem;
   height: 2.25rem;

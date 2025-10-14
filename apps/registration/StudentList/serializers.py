@@ -11,6 +11,7 @@ class StudentBasicSerializer(serializers.ModelSerializer):
     student_image = serializers.CharField(source='photo', read_only=True)
     name_bn = serializers.CharField(source='student_name_bn', read_only=True)
     Date_of_birth = serializers.DateField(source='date_of_birth', read_only=True)
+<<<<<<< HEAD
     student_type = serializers.CharField(source='student_type_display', read_only=True)
     current_class = serializers.CharField(source='marhala_name', read_only=True)
     current_madrasha = serializers.CharField(source='madrasha_name', read_only=True)
@@ -21,6 +22,12 @@ class StudentBasicSerializer(serializers.ModelSerializer):
     division_name = serializers.CharField(read_only=True)
     district_name = serializers.CharField(read_only=True)
     thana_name = serializers.CharField(read_only=True)
+=======
+    student_type = serializers.CharField(source='students_type', read_only=True)
+    current_class = serializers.CharField(source='marhala_name', read_only=True)
+    current_madrasha = serializers.CharField(source='madrasha_name', read_only=True)
+    exam_name_Bn = serializers.CharField(source='exam_name', read_only=True)
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
     
     # Computed fields for frontend compatibility
     payment_status = serializers.CharField(read_only=True)
@@ -35,6 +42,7 @@ class StudentBasicSerializer(serializers.ModelSerializer):
             
             # Frontend mapped fields
             'student_image',
+<<<<<<< HEAD
             'name_bn',
             'father_name_bn',
             'current_madrasha',
@@ -44,6 +52,13 @@ class StudentBasicSerializer(serializers.ModelSerializer):
             'division_name',
             'district_name',
             'thana_name',
+=======
+            'name_bn', 
+            'father_name_bn',
+            'current_madrasha',
+            'exam_name_Bn',
+            'current_class',
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
             'Date_of_birth',
             'student_type',
             'payment_status',
@@ -88,15 +103,22 @@ class StudentBasicListSerializer(serializers.ModelSerializer):
     student_image = serializers.CharField(source='photo', read_only=True)
     name_bn = serializers.CharField(source='student_name_bn', read_only=True)
     Date_of_birth = serializers.DateField(source='date_of_birth', read_only=True)
+<<<<<<< HEAD
     student_type = serializers.CharField(source='student_type_display', read_only=True)
+=======
+    student_type = serializers.CharField(source='students_type', read_only=True)
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
     current_class = serializers.CharField(source='marhala_name', read_only=True)
     current_madrasha = serializers.CharField(source='madrasha_name', read_only=True)
     exam_name_Bn = serializers.CharField(source='exam_name', read_only=True)
     payment_status = serializers.CharField(read_only=True)
     is_paid = serializers.BooleanField(read_only=True)
+<<<<<<< HEAD
     division_name = serializers.CharField(read_only=True)
     district_name = serializers.CharField(read_only=True)
     thana_name = serializers.CharField(read_only=True)
+=======
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
 
     class Meta:
         model = StudentBasic
@@ -113,10 +135,14 @@ class StudentBasicListSerializer(serializers.ModelSerializer):
             'student_type',
             'payment_status',
             'is_paid',
+<<<<<<< HEAD
             'status',
             'division_name',
             'district_name',
             'thana_name'
+=======
+            'status'
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
         ]
 
 

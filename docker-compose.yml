@@ -1,12 +1,4 @@
-# WEMS Application Docker Compose - Complete Microservices Setup
-# Run: docker-compose up -d
-# Access:
-#   - Frontend: http://wifaqerp.com:5173 (add wifaqerp.com to hosts file)
-#   - Django API: http://localhost:8000
-#   - API Gateway: http://localhost:8080
-#   - Redis: localhost:6379
-#   - Note: Uses host PostgreSQL 17 installation on localhost:5432
-#   - For Windows: Add "127.0.0.1 wifaqerp.com" to C:\Windows\System32\drivers\etc\hosts
+
 
 services:
   # Redis Cache & Session Store (same as original)
@@ -113,6 +105,7 @@ services:
       dockerfile_inline: |
         FROM python:3.11-slim
         WORKDIR /app
+
         RUN apt-get update && apt-get install -y gcc postgresql-client && rm -rf /var/lib/apt/lists/*
         RUN pip install --no-cache-dir fastapi==0.104.1 uvicorn[standard]==0.24.0 pydantic[email]==2.5.0 httpx==0.25.2 python-multipart==0.0.6 python-dotenv==1.0.0 asyncpg==0.29.0 sqlalchemy[asyncio]==2.0.23 alembic==1.13.0 psycopg2-binary==2.9.9
         COPY ./services/publication-service/ .
@@ -121,6 +114,7 @@ services:
         EXPOSE 8002
         CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8002"]
     container_name: wems-publication-service-unified-fixed
+
     ports:
       - "8002:8002"
     environment:
@@ -282,9 +276,9 @@ services:
       - ./wems-frontend:/app
       - /app/node_modules
     environment:
-      - NODE_ENV=development
-      - VITE_API_BASE_URL=http://localhost:8000
-      - VITE_AES_KEY=YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=
+    - NODE_ENV=development
+    - VITE_API_BASE_URL=http://wems-django:8000
+    - VITE_AES_KEY=YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=
     networks:
       - wems-network
     depends_on:

@@ -11,7 +11,10 @@ import MainMadrasaInfo from '@/views/Pages/markaz/components/MainMadrasaInfo.vue
 import DynamicMadrasas from '@/views/Pages/markaz/components/DynamicMadrasas.vue'
 import RequirementsSection from '@/views/Pages/markaz/components/RequirementsSection.vue'
 import AttachmentSection from '@/views/Pages/markaz/components/AttachmentSection.vue'
+<<<<<<< HEAD
 import FlashMessage from '@/components/ui/FlashMessage.vue'
+=======
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
 import TabView from 'primevue/tabview'
 import TabPanel from 'primevue/tabpanel'
 import Button from 'primevue/button'
@@ -20,6 +23,7 @@ import Button from 'primevue/button'
 // import Tooltip from 'primevue/tooltip'
 // import Badge from 'primevue/badge'
 
+<<<<<<< HEAD
 // Flash message system
 const flashMessage = ref({
   show: false,
@@ -50,6 +54,23 @@ const showFlashMessage = (message, type = 'success', options = {}) => {
     showCloseButton: options.showCloseButton !== false,
     glowEffect: options.glowEffect !== false
   }
+=======
+const toast = ref({
+  show: false,
+  message: '',
+  type: 'success'
+})
+
+const showToast = (message, type = 'success') => {
+  toast.value = {
+    show: true,
+    message,
+    type
+  }
+  setTimeout(() => {
+    toast.value.show = false
+  }, 5000)
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
 }
 
 const step = ref(0)
@@ -127,15 +148,25 @@ const addRow = () => {
       resolutionPreview: null
     }
   })
+<<<<<<< HEAD
   showFlashMessage('নতুন সারি যোগ করা হয়েছে', 'success')
+=======
+  showToast('নতুন সারি যোগ করা হয়েছে', 'success')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
 }
 
 const removeRow = (index) => {
   if (rows.value.length > 1) {
     rows.value.splice(index, 1)
+<<<<<<< HEAD
     showFlashMessage('সারি সরিয়ে ফেলা হয়েছে', 'success')
   } else {
     showFlashMessage('অন্ততপক্ষে একটি সারি রাখতে হবে', 'error')
+=======
+    showToast('সারি সরিয়ে ফেলা হয়েছে', 'success')
+  } else {
+    showToast('অন্ততপক্ষে একটি সারি রাখতে হবে', 'error')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
   }
 }
 
@@ -145,11 +176,19 @@ const handleFileUpload = (file, type, index) => {
       if (type === 'noc') {
         rows.value[index].files.noc = file
         rows.value[index].files.nocPreview = URL.createObjectURL(file)
+<<<<<<< HEAD
         showFlashMessage(`অনাপত্তিপত্র আপলোড সফল হয়েছে: ${file.name}`, 'success')
       } else {
         rows.value[index].files.resolution = file
         rows.value[index].files.resolutionPreview = URL.createObjectURL(file)
         showFlashMessage(`সম্মতিপত্র আপলোড সফল হয়েছে: ${file.name}`, 'success')
+=======
+        showToast(`অনাপত্তিপত্র আপলোড সফল হয়েছে: ${file.name}`, 'success')
+      } else {
+        rows.value[index].files.resolution = file
+        rows.value[index].files.resolutionPreview = URL.createObjectURL(file)
+        showToast(`সম্মতিপত্র আপলোড সফল হয়েছে: ${file.name}`, 'success')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
       }
       return
     }
@@ -168,6 +207,7 @@ const handleFileUpload = (file, type, index) => {
       if (type === 'noc') {
         rows.value[index].files.noc = extractedFile
         rows.value[index].files.nocPreview = URL.createObjectURL(extractedFile)
+<<<<<<< HEAD
         showFlashMessage(`অনাপত্তিপত্র আপলোড সফল হয়েছে: ${extractedFile.name}`, 'success')
       } else {
         rows.value[index].files.resolution = extractedFile
@@ -179,6 +219,19 @@ const handleFileUpload = (file, type, index) => {
     }
   } catch  {
     showFlashMessage('ফাইল আপলোডে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।', 'error')
+=======
+        showToast(`অনাপত্তিপত্র আপলোড সফল হয়েছে: ${extractedFile.name}`, 'success')
+      } else {
+        rows.value[index].files.resolution = extractedFile
+        rows.value[index].files.resolutionPreview = URL.createObjectURL(extractedFile)
+        showToast(`সম্মতিপত্র আপলোড সফল হয়েছে: ${extractedFile.name}`, 'success')
+      }
+    } else {
+      showToast('ফাইল নির্বাচন করা হয়নি। অনুগ্রহ করে আবার চেষ্টা করুন।', 'error')
+    }
+  } catch  {
+    showToast('ফাইল আপলোডে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।', 'error')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
   }
 }
 
@@ -191,7 +244,11 @@ const removeFile = (type, index) => {
     rows.value[index].files.resolution = null
     rows.value[index].files.resolutionPreview = null
   }
+<<<<<<< HEAD
   showFlashMessage(`${fileName} সরিয়ে ফেলা হয়েছে`, 'success')
+=======
+  showToast(`${fileName} সরিয়ে ফেলা হয়েছে`, 'success')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
 }
 
 const nocFileForMadrahsa = ref(null)
@@ -212,17 +269,29 @@ const handleFileUploadMumtahin = (event, type) => {
         case 'muhtamim':
           muhtamimFile.value = event
           muhtamimPreview.value = URL.createObjectURL(event)
+<<<<<<< HEAD
           showFlashMessage(`মুহতামিমের সম্মতিপত্র আপলোড সফল হয়েছে: ${event.name}`, 'success')
+=======
+          showToast(`মুহতামিমের সম্মতিপত্র আপলোড সফল হয়েছে: ${event.name}`, 'success')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
           break
         case 'president':
           presidentFile.value = event
           presidentPreview.value = URL.createObjectURL(event)
+<<<<<<< HEAD
           showFlashMessage(`সভাপতির সম্মতিপত্র আপলোড সফল হয়েছে: ${event.name}`, 'success')
+=======
+          showToast(`সভাপতির সম্মতিপত্র আপলোড সফল হয়েছে: ${event.name}`, 'success')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
           break
         case 'committee':
           committeeFile.value = event
           committeePreview.value = URL.createObjectURL(event)
+<<<<<<< HEAD
           showFlashMessage(`কমিটির প্রস্তাব আপলোড সফল হয়েছে: ${event.name}`, 'success')
+=======
+          showToast(`কমিটির প্রস্তাব আপলোড সফল হয়েছে: ${event.name}`, 'success')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
           break
       }
       return
@@ -239,7 +308,11 @@ const handleFileUploadMumtahin = (event, type) => {
     }
 
     if (!file) {
+<<<<<<< HEAD
       showFlashMessage('ফাইল নির্বাচন করা হয়নি। অনুগ্রহ করে আবার চেষ্টা করুন।', 'error')
+=======
+      showToast('ফাইল নির্বাচন করা হয়নি। অনুগ্রহ করে আবার চেষ্টা করুন।', 'error')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
       return
     }
 
@@ -247,21 +320,37 @@ const handleFileUploadMumtahin = (event, type) => {
       case 'muhtamim':
         muhtamimFile.value = file
         muhtamimPreview.value = URL.createObjectURL(file)
+<<<<<<< HEAD
         showFlashMessage(`মুহতামিমের সম্মতিপত্র আপলোড সফল হয়েছে: ${file.name}`, 'success')
+=======
+        showToast(`মুহতামিমের সম্মতিপত্র আপলোড সফল হয়েছে: ${file.name}`, 'success')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
         break
       case 'president':
         presidentFile.value = file
         presidentPreview.value = URL.createObjectURL(file)
+<<<<<<< HEAD
         showFlashMessage(`সভাপতির সম্মতিপত্র আপলোড সফল হয়েছে: ${file.name}`, 'success')
+=======
+        showToast(`সভাপতির সম্মতিপত্র আপলোড সফল হয়েছে: ${file.name}`, 'success')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
         break
       case 'committee':
         committeeFile.value = file
         committeePreview.value = URL.createObjectURL(file)
+<<<<<<< HEAD
         showFlashMessage(`কমিটির প্রস্তাব আপলোড সফল হয়েছে: ${file.name}`, 'success')
         break
     }
   } catch {
     showFlashMessage('ফাইল আপলোডে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।', 'error')
+=======
+        showToast(`কমিটির প্রস্তাব আপলোড সফল হয়েছে: ${file.name}`, 'success')
+        break
+    }
+  } catch {
+    showToast('ফাইল আপলোডে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।', 'error')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
   }
 }
 
@@ -270,17 +359,29 @@ const removeFileMumtahin = (type) => {
     case 'muhtamim':
       muhtamimFile.value = null
       muhtamimPreview.value = null
+<<<<<<< HEAD
       showFlashMessage('মুহতামিমের সম্মতিপত্র সরিয়ে ফেলা হয়েছে', 'success')
+=======
+      showToast('মুহতামিমের সম্মতিপত্র সরিয়ে ফেলা হয়েছে', 'success')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
       break
     case 'president':
       presidentFile.value = null
       presidentPreview.value = null
+<<<<<<< HEAD
       showFlashMessage('সভাপতির সম্মতিপত্র সরিয়ে ফেলা হয়েছে', 'success')
+=======
+      showToast('সভাপতির সম্মতিপত্র সরিয়ে ফেলা হয়েছে', 'success')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
       break
     case 'committee':
       committeeFile.value = null
       committeePreview.value = null
+<<<<<<< HEAD
       showFlashMessage('কমিটির প্রস্তাব সরিয়ে ফেলা হয়েছে', 'success')
+=======
+      showToast('কমিটির প্রস্তাব সরিয়ে ফেলা হয়েছে', 'success')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
       break
   }
 }
@@ -292,12 +393,20 @@ const handleFileUploadForMadrahsa = (file, type) => {
         form.value.noc_file = file
         nocFileForMadrahsa.value = file
         nocPreviewForMadrahsa.value = URL.createObjectURL(file)
+<<<<<<< HEAD
         showFlashMessage(`মূল মাদরাসার অনাপত্তিপত্র আপলোড সফল হয়েছে: ${file.name}`, 'success')
+=======
+        showToast(`মূল মাদরাসার অনাপত্তিপত্র আপলোড সফল হয়েছে: ${file.name}`, 'success')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
       } else {
         form.value.resolution_file = file
         resolutionFileForMadrahsa.value = file
         resolutionPreviewForMadrahsa.value = URL.createObjectURL(file)
+<<<<<<< HEAD
         showFlashMessage(`মূল মাদরাসার সম্মতিপত্র আপলোড সফল হয়েছে: ${file.name}`, 'success')
+=======
+        showToast(`মূল মাদরাসার সম্মতিপত্র আপলোড সফল হয়েছে: ${file.name}`, 'success')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
       }
       return
     }
@@ -317,11 +426,16 @@ const handleFileUploadForMadrahsa = (file, type) => {
         form.value.noc_file = extractedFile
         nocFileForMadrahsa.value = extractedFile
         nocPreviewForMadrahsa.value = URL.createObjectURL(extractedFile)
+<<<<<<< HEAD
         showFlashMessage(`মূল মাদরাসার অনাপত্তিপত্র আপলোড সফল হয়েছে: ${extractedFile.name}`, 'success')
+=======
+        showToast(`মূল মাদরাসার অনাপত্তিপত্র আপলোড সফল হয়েছে: ${extractedFile.name}`, 'success')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
       } else {
         form.value.resolution_file = extractedFile
         resolutionFileForMadrahsa.value = extractedFile
         resolutionPreviewForMadrahsa.value = URL.createObjectURL(extractedFile)
+<<<<<<< HEAD
         showFlashMessage(`মূল মাদরাসার সম্মতিপত্র আপলোড সফল হয়েছে: ${extractedFile.name}`, 'success')
       }
     } else {
@@ -329,6 +443,15 @@ const handleFileUploadForMadrahsa = (file, type) => {
     }
   } catch  {
     showFlashMessage('ফাইল আপলোডে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।', 'error')
+=======
+        showToast(`মূল মাদরাসার সম্মতিপত্র আপলোড সফল হয়েছে: ${extractedFile.name}`, 'success')
+      }
+    } else {
+      showToast('ফাইল নির্বাচন করা হয়নি। অনুগ্রহ করে আবার চেষ্টা করুন।', 'error')
+    }
+  } catch  {
+    showToast('ফাইল আপলোডে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।', 'error')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
   }
 }
 
@@ -343,7 +466,11 @@ const removeFileForMadrahsa = (type) => {
     resolutionPreviewForMadrahsa.value = null
     form.value.resolution_file = null
   }
+<<<<<<< HEAD
   showFlashMessage(`${fileName} সরিয়ে ফেলা হয়েছে`, 'success')
+=======
+  showToast(`${fileName} সরিয়ে ফেলা হয়েছে`, 'success')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
 }
 
 const madrashas = ref([])
@@ -366,7 +493,11 @@ const selectOption = (madrasha, row) => {
   row.madrasa_Name = madrasha.name
   row.madrasa_id = madrasha.id
   row.isOpen = false
+<<<<<<< HEAD
   showFlashMessage(`মাদরাসা নির্বাচিত হয়েছে: ${madrasha.name}`, 'success')
+=======
+  showToast(`মাদরাসা নির্বাচিত হয়েছে: ${madrasha.name}`, 'success')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
 }
 
 watch(() => form.value.markaz_type, (newType) => {
@@ -566,26 +697,39 @@ const submitForm = async () => {
 
     if (response.data.success) {
       formErrors.value = []
+<<<<<<< HEAD
       showFlashMessage('আপনার আবেদন সফলভাবে জমা হয়েছে! ধন্যবাদ।', 'success')
+=======
+      showToast('আপনার আবেদন সফলভাবে জমা হয়েছে! ধন্যবাদ।', 'success')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
       // Optionally redirect or reset form
       // await router.push('/dashboard')
       // resetForm()
     } else {
       formErrors.value = [response.data.error || 'আবেদন জমা দিতে সমস্যা হয়েছে']
+<<<<<<< HEAD
       showFlashMessage(response.data.error || 'আবেদন জমা দিতে সমস্যা হয়েছে', 'error')
+=======
+      showToast(response.data.error || 'আবেদন জমা দিতে সমস্যা হয়েছে', 'error')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
     }
 
   } catch (error) {
     loading.value = false
     if (error.response?.status === 401) {
       formErrors.value = ['আপনার লগইন সেশন শেষ হয়ে গেছে। পুনরায় লগইন করুন।']
+<<<<<<< HEAD
       showFlashMessage('আপনার লগইন সেশন শেষ হয়ে গেছে। পুনরায় লগইন করুন।', 'error')
+=======
+      showToast('আপনার লগইন সেশন শেষ হয়ে গেছে। পুনরায় লগইন করুন।', 'error')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
       localStorage.removeItem('token')
       localStorage.removeItem('user_id')
       localStorage.removeItem('user_type')
       localStorage.removeItem('permissions')
     } else if (error.response?.status === 403) {
       formErrors.value = ['আপনার এই কাজের অনুমতি নেই।']
+<<<<<<< HEAD
       showFlashMessage('আপনার এই কাজের অনুমতি নেই।', 'error')
     } else if (error.response?.status >= 500) {
       formErrors.value = ['সার্ভার ত্রুটি। পরে আবার চেষ্টা করুন।']
@@ -596,6 +740,18 @@ const submitForm = async () => {
     } else {
       formErrors.value = ['আবেদন জমা দিতে সমস্যা হয়েছে: ' + (error.message || 'অজানা সমস্যা')]
       showFlashMessage('আবেদন জমা দিতে সমস্যা হয়েছে: ' + (error.message || 'অজানা সমস্যা'), 'error')
+=======
+      showToast('আপনার এই কাজের অনুমতি নেই।', 'error')
+    } else if (error.response?.status >= 500) {
+      formErrors.value = ['সার্ভার ত্রুটি। পরে আবার চেষ্টা করুন।']
+      showToast('সার্ভার ত্রুটি হয়েছে। অনুগ্রহ করে কিছুক্ষণ পরে আবার চেষ্টা করুন।', 'error')
+    } else if (error.request) {
+      formErrors.value = ['নেটওয়ার্ক ত্রুটি। ইন্টারনেট সংযোগ চেক করুন।']
+      showToast('নেটওয়ার্ক ত্রুটি হয়েছে। ইন্টারনেট সংযোগ চেক করুন।', 'error')
+    } else {
+      formErrors.value = ['আবেদন জমা দিতে সমস্যা হয়েছে: ' + (error.message || 'অজানা সমস্যা')]
+      showToast('আবেদন জমা দিতে সমস্যা হয়েছে: ' + (error.message || 'অজানা সমস্যা'), 'error')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
     }
   }
 }
@@ -1063,6 +1219,7 @@ onMounted(() => {
     </div>
   </div>
 
+<<<<<<< HEAD
   <!-- Flash Message Component -->
   <FlashMessage
     v-if="flashMessage.show"
@@ -1075,6 +1232,44 @@ onMounted(() => {
     :glow-effect="flashMessage.glowEffect"
     @close="flashMessage.show = false"
   />
+=======
+  <!-- Toast Notification -->
+  <transition name="toast-slide">
+    <div v-if="toast.show"
+         style="font-family: 'SolaimanLipi', sans-serif;"
+         class="fixed top-6 right-6 z-50 flex items-start animate-toast-in"
+         :class="toast.type === 'success' ? 'success-toast' : 'error-toast'">
+      <div class="flex items-center bg-white rounded-lg shadow-xl border-l-4 p-4 min-w-[320px] max-w-md">
+        <!-- Icon -->
+        <div class="flex-shrink-0 mr-3">
+          <div class="w-10 h-10 rounded-full flex items-center justify-center"
+               :class="toast.type === 'success' ? 'bg-green-100' : 'bg-red-100'">
+            <i :class="toast.type === 'success' ? 'pi pi-check text-green-600' : 'pi pi-times text-red-600'"
+               class="text-lg font-bold"></i>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div class="flex-1">
+          <h3 class="font-bold text-sm mb-1"
+              :class="toast.type === 'success' ? 'text-green-800' : 'text-red-800'">
+            {{ toast.type === 'success' ? 'সফলভাবে সম্পন্ন হয়েছে' : 'সমস্যা হয়েছে' }}
+          </h3>
+          <p class="text-sm"
+             :class="toast.type === 'success' ? 'text-green-700' : 'text-red-700'">
+            {{ toast.message }}
+          </p>
+        </div>
+
+        <!-- Close Button -->
+        <button @click="toast.show = false"
+                class="flex-shrink-0 ml-3 text-gray-400 hover:text-gray-600 transition-colors">
+          <i class="pi pi-times text-lg"></i>
+        </button>
+      </div>
+    </div>
+  </transition>
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
 
 </template>
  <style scoped>
@@ -1085,7 +1280,98 @@ onMounted(() => {
     opacity: 0;
   }
 
+<<<<<<< HEAD
   /* Flash message styles are handled by the FlashMessage component */
+=======
+  /* Toast Animations */
+  .toast-slide-enter-active {
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+  .toast-slide-leave-active {
+    transition: all 0.3s ease-in-out;
+  }
+  .toast-slide-enter-from {
+    transform: translateX(100%) scale(0.8);
+    opacity: 0;
+  }
+  .toast-slide-leave-to {
+    transform: translateX(100%) scale(0.9);
+    opacity: 0;
+  }
+
+  /* Toast Styles */
+  .success-toast {
+    border-left-color: #10b981;
+  }
+  .success-toast .border-l-4 {
+    border-left-color: #10b981 !important;
+  }
+  .error-toast {
+    border-left-color: #ef4444;
+  }
+  .error-toast .border-l-4 {
+    border-left-color: #ef4444 !important;
+  }
+
+  /* Custom animation for smooth entrance */
+  @keyframes toastSlideIn {
+    0% {
+      transform: translateX(100%) translateY(-20px);
+      opacity: 0;
+      filter: blur(4px);
+    }
+    50% {
+      filter: blur(2px);
+    }
+    100% {
+      transform: translateX(0) translateY(0);
+      opacity: 1;
+      filter: blur(0);
+    }
+  }
+
+  .animate-toast-in {
+    animation: toastSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* Hover effects */
+  .success-toast:hover .bg-white,
+  .error-toast:hover .bg-white {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Pulse animation for success */
+  @keyframes successPulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+  }
+
+  .success-toast .w-10 {
+    animation: successPulse 0.6s ease-in-out;
+  }
+
+  /* Shake animation for error */
+  @keyframes errorShake {
+    0%, 100% {
+      transform: translateX(0);
+    }
+    25% {
+      transform: translateX(-5px);
+    }
+    75% {
+      transform: translateX(5px);
+    }
+  }
+
+  .error-toast .w-10 {
+    animation: errorShake 0.5s ease-in-out;
+  }
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
 
   /* Old modal animation (keeping for reference) */
   .animate-modal-open {

@@ -40,7 +40,6 @@ class StudentBasic(models.Model):
     is_old = models.IntegerField(null=True, blank=True, default=0)
     irregular_sub = models.IntegerField(null=True, blank=True, default=0)
 
-    
     class Meta:
         db_table = 'student_basic'
         managed = False  # This table already exists in database
@@ -74,6 +73,7 @@ class StudentBasic(models.Model):
         return None
 
     @property
+<<<<<<< HEAD
     def markaz_name(self):
         """Get markaz name from markaz_id"""
         if self.markaz_id:

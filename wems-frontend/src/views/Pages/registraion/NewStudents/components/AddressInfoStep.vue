@@ -1,7 +1,10 @@
 <script setup>
 import { ref, watch, defineEmits, defineProps, onMounted, computed } from 'vue'
 import InputText from 'primevue/inputtext'
+<<<<<<< HEAD
 import Dropdown from 'primevue/dropdown'
+=======
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
 import axios from 'axios'
 
 const emit = defineEmits(['update:modelValue', 'prev', 'next'])
@@ -228,6 +231,7 @@ const handleBoardChange = () => {
             <!-- <div class="text-xs text-gray-500 mb-1">
               Board Options Count: {{ availableBoardOptions.length }}
             </div> -->
+<<<<<<< HEAD
             <Dropdown
               v-model="localForm.board_name"
               :options="availableBoardOptions"
@@ -237,6 +241,18 @@ const handleBoardChange = () => {
               @change="handleBoardChange"
               class="w-full mt-1"
             />
+=======
+            <select
+              v-model="localForm.board_name"
+              @change="handleBoardChange"
+              class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50"
+            >
+              <option value="">বোর্ড নির্বাচন করুন</option>
+              <option v-for="board in availableBoardOptions" :key="board.id" :value="board.value">
+                {{ board.name }}
+              </option>
+            </select>
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
             <!-- Debug: Show selected board ID -->
             <div v-if="localForm.board_id" class="text-xs text-gray-500 mt-1">
               বোর্ড আইডি: {{ localForm.board_id }}
@@ -246,6 +262,7 @@ const handleBoardChange = () => {
         <!-- Non Befaq Board হলে বছর ফিল্ড দেখাও -->
         <div v-if="isNonBefaqBoard" class="mt-6">
           <label class="block font-medium text-sm text-gray-700">বছর নির্বাচন করুন</label>
+<<<<<<< HEAD
           <Dropdown
             v-model="localForm.board_year"
             :options="years"
@@ -254,6 +271,17 @@ const handleBoardChange = () => {
             placeholder="বছর নির্বাচন করুন"
             class="w-full mt-1"
           />
+=======
+          <select
+            v-model="localForm.board_year"
+            class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50"
+          >
+            <option value="">বছর নির্বাচন করুন</option>
+            <option v-for="year in years" :key="year.value" :value="year.value">
+              {{ year.label }}
+            </option>
+          </select>
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
         </div>
         <!-- Non Befaq Board হলে এটাচমেন্ট ফিল্ড দেখাও -->
         <div v-if="isNonBefaqBoard" class="mt-6">
@@ -280,6 +308,7 @@ const handleBoardChange = () => {
       <div class="p-6 bg-gray-50 overflow-visible">
         <div class="grid grid-cols-1 gap-6 overflow-visible">
           <!-- Address Section -->
+<<<<<<< HEAD
           <div>
             <label class="block text-base font-medium text-gray-700 mb-1">বিভাগ</label>
             <Dropdown
@@ -325,14 +354,61 @@ const handleBoardChange = () => {
             <span v-if="addressFilters.district && !thanas.length" class="text-md text-gray-500 mt-2 block">Loading thanas...</span>
             <span v-else-if="!addressFilters.district && districts.length > 0" class="text-md text-gray-500 mt-2 block">জেলা নির্বাচন করুন</span>
           </div>
+=======
+          <label class="block text-base font-medium text-gray-700 mb-1">বিভাগ</label>
+          <select
+            v-model="addressFilters.division"
+            :disabled="!divisions.length"
+            @change="handleDivisionChange"
+            class="w-full px-3 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 bg-gray-50"
+          >
+            <option value="">সকল বিভাগ</option>
+            <option v-for="division in divisions" :key="division.did" :value="division.did">{{ division.division }}</option>
+          </select>
+          <span v-if="!divisions.length" class="text-md text-gray-500">Loading divisions...</span>
+
+          <label class="block text-base font-medium text-gray-700 mb-1 mt-4">জেলা</label>
+          <select
+            v-model="addressFilters.district"
+            :disabled="!addressFilters.division || !districts.length"
+            @change="handleDistrictChange"
+            class="w-full px-3 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 bg-gray-50"
+          >
+            <option value="">সকল জেলা</option>
+            <option v-for="district in districts" :key="district.desid" :value="district.desid">
+              {{ district.district }}
+            </option>
+          </select>
+          <span v-if="addressFilters.division && !districts.length" class="text-md text-gray-500">Loading districts...</span>
+          <span v-else-if="!addressFilters.division && divisions.length > 0" class="text-md text-gray-500">বিভাগ নির্বাচন করুন</span>
+
+          <label class="block text-base font-medium text-gray-700 mb-1 mt-4">থানা/উপজিলা</label>
+          <select
+            v-model="addressFilters.Thana"
+            :disabled="!addressFilters.district || !thanas.length"
+            class="w-full px-3 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 bg-gray-50"
+          >
+            <option value="">সকল থানা</option>
+            <option v-for="thana in thanas" :key="thana.thana_id" :value="thana.thana_id">{{ thana.thana }}</option>
+          </select>
+          <span v-if="addressFilters.district && !thanas.length" class="text-md text-gray-500">Loading thanas...</span>
+          <span v-else-if="!addressFilters.district && districts.length > 0" class="text-md text-gray-500">জেলা নির্বাচন করুন</span>
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
         </div>
       </div>
     </div>
     <div class="flex justify-between mt-6">
+<<<<<<< HEAD
       <button type="button" @click="emit('prev')" class="inline-flex items-center px-4 py-2 bg-gray-300 border border-transparent rounded-sm font-semibold text-xl text-gray-800 uppercase tracking-widest hover:bg-gray-400">
         আগের ধাপ
       </button>
       <button type="button" @click="emit('next')" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-sm font-semibold text-xl text-white uppercase tracking-widest hover:bg-gray-700">
+=======
+      <button type="button" @click="emit('prev')" class="inline-flex items-center px-4 py-2 bg-gray-300 border border-transparent rounded-md font-semibold text-xs text-gray-800 uppercase tracking-widest hover:bg-gray-400">
+        আগের ধাপ
+      </button>
+      <button type="button" @click="emit('next')" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
         পরবর্তী ধাপ
       </button>
     </div>
@@ -352,4 +428,72 @@ const handleBoardChange = () => {
 .backdrop-blur-sm {
   backdrop-filter: blur(4px);
 }
+<<<<<<< HEAD
+=======
+/* Custom select styling */
+select {
+  background-image: none;
+  max-height: none !important;
+  overflow-y: visible !important;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* Browser-specific dropdown fixes */
+select::-ms-expand {
+  display: none;
+}
+
+/* Fix dropdown options visibility */
+select option {
+  padding: 8px 12px;
+  background-color: white;
+  color: #374151;
+  border: none;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+select option:hover {
+  background-color: #f3f4f6;
+}
+
+select option:checked {
+  background-color: #e5e7eb;
+  font-weight: 600;
+}
+
+/* Ensure dropdown appears above other elements */
+.relative select {
+  position: relative;
+  z-index: 50;
+}
+
+/* Fix for dropdown size and visibility */
+select {
+  min-height: 48px;
+  line-height: 1.5;
+}
+
+/* Container overflow fixes */
+.overflow-visible {
+  overflow: visible !important;
+}
+
+/* Ensure proper stacking context */
+.relative.overflow-visible {
+  z-index: 1;
+}
+
+.relative.overflow-visible:focus-within {
+  z-index: 10;
+}
+
+/* Disabled state improvements */
+select:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
 </style>

@@ -7,10 +7,13 @@ from .views import (
     StudentBulkUpdateView,
     StudentSearchView
 )
+<<<<<<< HEAD
 from .field_update_views import (
     StudentFieldUpdateView,
     StudentAddressFieldUpdateView
 )
+=======
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
 from .test_views import TestStudentAPIView
 
 urlpatterns = [
@@ -35,8 +38,11 @@ urlpatterns = [
     # Individual student operations (must be last to avoid conflicts)
     # Now returns combined data by default
     path('<int:pk>/', StudentDetailView.as_view(), name='student-detail'),
+<<<<<<< HEAD
 
     # Field update operations
     path('<int:pk>/update/', StudentFieldUpdateView.as_view(), name='student-field-update'),
     path('<int:pk>/update-address/', StudentAddressFieldUpdateView.as_view(), name='student-address-field-update'),
+=======
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
 ]

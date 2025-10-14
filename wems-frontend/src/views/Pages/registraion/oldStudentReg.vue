@@ -7,6 +7,7 @@
     <div class="rounded-sm mt-5 overflow-hidden"
       :class="[!isDark ? 'bg-white' : 'bg-gray-800']">
       <!-- Stepper Header -->
+<<<<<<< HEAD
       <Panel
         :class="[!isDark ? 'bg-gray-800' : 'bg-gray-900']"
         :toggleable="false"
@@ -28,10 +29,25 @@
 
         <Steps v-model:activeStep="currentTab" :model="stepItems" :readonly="true" class="mt-4">
           <template #item="{item, index}">
+=======
+      <div class="flex flex-col sm:flex-row justify-between items-center px-8 pt-8 pb-4"
+        :class="[!isDark ? 'bg-gray-800' : 'bg-gray-900']">
+        <div class="flex items-center gap-4">
+          <i class="fa-solid fa-user-graduate text-3xl text-gray-300"></i>
+          <h2 class="text-2xl font-bold text-gray-200 tracking-wide">ছাত্র তথ্য সম্পাদনা</h2>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="px-8 pt-4">
+        <div class="flex items-center gap-2 mb-2">
+          <template v-for="(tab, idx) in tabs" :key="tab">
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
             <div class="flex flex-col items-center">
               <div
                 :class="[
                   'w-8 h-8 flex items-center justify-center rounded-full text-base font-bold transition-all duration-300 shadow',
+<<<<<<< HEAD
                   currentTab === index ? 'bg-gray-600 text-white scale-110 shadow-lg ring-2 ring-gray-500' :
                     index < currentTab ? 'bg-gray-500 text-white' :
                     'bg-gray-300 text-gray-600',
@@ -46,6 +62,34 @@
             </div>
           </template>
         </Steps>
+=======
+                  currentTab === idx ? 'bg-gray-600 text-white scale-110 shadow-lg ring-2 ring-gray-500' :
+                    idx < currentTab ? 'bg-gray-500 text-white' :
+                    'bg-gray-300 text-gray-600',
+                  isDark && (currentTab === idx || idx < currentTab) ? 'bg-gray-700 text-white' : ''
+                ]"
+              >{{ idx + 1 }}</div>
+              <span class="mt-1 text-xs font-medium"
+                :class="currentTab === idx
+                  ? isDark ? 'text-gray-300' : 'text-gray-700'
+                  : isDark ? 'text-gray-500' : 'text-gray-500'
+              ">{{ tab }}</span>
+            </div>
+            <template v-if="idx < tabs.length - 1">
+              <div class="w-6 h-1 rounded"
+                :class="isDark ? 'bg-gray-600' : 'bg-gray-500'"></div>
+            </template>
+          </template>
+        </div>
+        <div class="w-full h-1 bg-gray-200 rounded relative mb-2"
+          :class="isDark ? 'bg-gray-700' : ''">
+          <div
+            class="h-1 bg-gray-600 rounded transition-all duration-300"
+            :class="isDark ? 'bg-gray-500' : ''"
+            :style="{ width: ((currentTab + 1) / tabs.length * 100) + '%' }"
+          ></div>
+        </div>
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
       </div>
 
       <form @submit.prevent="submitStudentInfo" class="p-8 space-y-8 rounded-b-2xl">
@@ -62,6 +106,7 @@
           <div :key="currentTab" class="min-h-[400px]">
             <!-- Tab 1: Personal Info -->
             <div v-if="currentTab === 0" class="fade-in">
+<<<<<<< HEAD
               <Panel header="ব্যক্তিগত তথ্য" :toggleable="false">
                 <OldStudentPersonalInfo v-model="studentInfoForm" />
               </Panel>
@@ -109,12 +154,58 @@
                   সকল তথ্য সঠিক থাকলে <b>সংরক্ষণ করুন</b> বাটনে ক্লিক করুন।
                 </Message>
               </Panel>
+=======
+              <OldStudentPersonalInfo v-model="studentInfoForm" />
+            </div>
+
+            <div v-if="currentTab === 1" class="fade-in">
+              <OldStudentAddressSection
+                :divisions="divisions"
+                :addressFilters="addressFilters"
+                :districts="districts"
+                :thanas="thanas"
+                @update:addressFilters="onUpdateAddressFilters"
+                v-model:studentInfoForm="studentInfoForm"
+              />
+            </div>
+            <!-- Tab 4: Attachments -->
+            <div v-if="currentTab === 2" class="fade-in">
+              <OldStudentAttachments
+                :studentPhoto="studentPhoto"
+                :studentPhotoPreview="studentPhotoPreview"
+                :nidAttachment="nidAttachment"
+                :nidAttachmentPreview="nidAttachmentPreview"
+                @file-upload="handleFileUpload"
+                @remove-file="removeFile"
+              />
+            </div>
+            <!-- Tab 5: Review & Submit -->
+            <div v-if="currentTab === 3" class="fade-in">
+              <div
+                class="text-xl font-semibold mb-3 flex items-center gap-2"
+                :class="isDark ? 'text-gray-300' : 'text-gray-700'"
+              >
+                <i class="fa-solid fa-circle-check text-2xl text-gray-500"></i> তথ্য যাচাই ও সংরক্ষণ
+              </div>
+              <div class="mb-3"
+                :class="isDark ? 'text-gray-400' : 'text-gray-600'"
+              >
+                অনুগ্রহ করে পূর্বের সকল তথ্য যাচাই করুন। চাইলে আগের ধাপে ফিরে তথ্য পরিবর্তন করতে পারেন।
+              </div>
+              <div class="rounded-lg border border-dashed p-4"
+                :class="isDark ? 'border-gray-600 bg-gray-700 text-gray-300' : 'border-gray-300 bg-gray-100 text-gray-700'"
+              >
+                <i class="fa-solid fa-info-circle mr-2 text-gray-500"></i>
+                সকল তথ্য সঠিক থাকলে <b>সংরক্ষণ করুন</b> বাটনে ক্লিক করুন।
+              </div>
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
             </div>
           </div>
         </transition>
 
         <!-- Navigation Buttons -->
         <div class="flex justify-between items-center mt-8">
+<<<<<<< HEAD
           <Button
             type="button"
             :label="'পূর্বের ধাপ'"
@@ -142,18 +233,88 @@
               iconPos="left"
               :class="[isDark ? 'p-button-outlined' : '']"
             />
+=======
+          <button
+            type="button"
+            class="flex items-center gap-2 px-6 py-2 rounded-md font-medium transition-colors"
+            :class="[isDark ? 'text-gray-300 bg-gray-700 hover:bg-gray-600' : 'text-gray-700 bg-gray-200 hover:bg-gray-300']"
+            @click="prevTab"
+            :disabled="currentTab === 0"
+          >
+            <i class="fa-solid fa-arrow-left"></i> পূর্বের ধাপ
+          </button>
+          <div class="flex gap-2">
+            <button
+              v-if="currentTab < tabs.length - 1"
+              type="button"
+              class="flex items-center gap-2 px-8 py-2 rounded-md font-bold shadow transition-colors"
+              :class="[isDark ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-600 text-white hover:bg-gray-500']"
+              @click="nextTab"
+            >
+              পরবর্তী ধাপ <i class="fa-solid fa-arrow-right"></i>
+            </button>
+            <button
+              v-else
+              type="submit"
+              class="flex items-center gap-2 px-10 py-2 rounded-md font-bold shadow transition-colors"
+              :class="[isDark ? 'bg-gray-600 text-white hover:bg-gray-500' : 'bg-gray-500 text-white hover:bg-gray-400']"
+            >
+              <i class="fa-solid fa-cloud-upload-alt"></i> সংরক্ষণ করুন
+            </button>
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
           </div>
         </div>
       </form>
     </div>
   </div>
 
+<<<<<<< HEAD
   </template>
+=======
+  <!-- Toast Notification -->
+  <transition name="toast-slide">
+    <div v-if="toast.show"
+         style="font-family: 'SolaimanLipi', sans-serif;"
+         class="fixed top-6 right-6 z-50 flex items-start animate-toast-in"
+         :class="toast.type === 'success' ? 'success-toast' : 'error-toast'">
+      <div class="flex items-center bg-white rounded-lg shadow-xl border-l-4 p-4 min-w-[320px] max-w-md">
+        <!-- Icon -->
+        <div class="flex-shrink-0 mr-3">
+          <div class="w-10 h-10 rounded-full flex items-center justify-center"
+               :class="toast.type === 'success' ? 'bg-green-100' : 'bg-red-100'">
+            <i :class="toast.type === 'success' ? 'fa-solid fa-check text-green-600' : 'fa-solid fa-times text-red-600'"
+               class="text-lg font-bold"></i>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div class="flex-1">
+          <h3 class="font-bold text-sm mb-1"
+              :class="toast.type === 'success' ? 'text-green-800' : 'text-red-800'">
+            {{ toast.type === 'success' ? 'সফলভাবে সম্পন্ন হয়েছে' : 'সমস্যা হয়েছে' }}
+          </h3>
+          <p class="text-sm"
+             :class="toast.type === 'success' ? 'text-green-700' : 'text-red-700'">
+            {{ toast.message }}
+          </p>
+        </div>
+
+        <!-- Close Button -->
+        <button @click="toast.show = false"
+                class="flex-shrink-0 ml-3 text-gray-400 hover:text-gray-600 transition-colors">
+          <i class="fa-solid fa-times text-lg"></i>
+        </button>
+      </div>
+    </div>
+  </transition>
+</template>
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
 
 <script setup>
 import { watch, ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { getCurrentUserId } from '@/stores/userProfile'
+<<<<<<< HEAD
 import { useToast } from 'primevue/usetoast'
 
 import Button from 'primevue/button'
@@ -161,6 +322,8 @@ import Panel from 'primevue/panel'
 import ProgressBar from 'primevue/progressbar'
 import Steps from 'primevue/steps'
 import Message from 'primevue/message'
+=======
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
 
 import OldStudentPersonalInfo from '@/views/Pages/registraion/components/OldStudentPersonalInfo.vue'
 import OldStudentAddressSection from '@/views/Pages/registraion/components/OldStudentAddressSection.vue'
@@ -173,14 +336,18 @@ defineProps({
   modelValue: Object
 })
 
+<<<<<<< HEAD
 // Toast setup
 const toast = useToast()
 
+=======
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
 // Dark mode detection
 const isDark = computed(() => {
   return document.documentElement.classList.contains('dark')
 })
 
+<<<<<<< HEAD
 // Step items for Steps
 const stepItems = computed(() => {
   return tabs.map((tab, index) => ({
@@ -189,6 +356,8 @@ const stepItems = computed(() => {
   }))
 })
 
+=======
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
 // Local state & forms
 function useForm(obj) {
   return ref({ ...obj })
@@ -265,6 +434,7 @@ const currentTab = ref(0)
 const loading = ref(true)
 const fadeIn = ref(false)
 
+<<<<<<< HEAD
 // Flash message system using PrimeVue Toast
 const showFlashMessage = (message, type = 'success', options = {}) => {
   const titles = {
@@ -281,6 +451,24 @@ const showFlashMessage = (message, type = 'success', options = {}) => {
     life: options.duration || 5000,
     closable: options.showCloseButton !== false
   })
+=======
+// Toast notification system
+const toast = ref({
+  show: false,
+  message: '',
+  type: 'success'
+})
+
+const showToast = (message, type = 'success') => {
+  toast.value = {
+    show: true,
+    message,
+    type
+  }
+  setTimeout(() => {
+    toast.value.show = false
+  }, 5000)
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
 }
 
 // Real API functions
@@ -399,7 +587,11 @@ const handleFileUpload = (event, type) => {
         studentPhotoPreview.value = (e.target?.result ?? null)
       }
       reader.readAsDataURL(file)
+<<<<<<< HEAD
       showFlashMessage(`ছাত্রের ছবি আপলোড সফল হয়েছে: ${file.name}`, 'success')
+=======
+      showToast(`ছাত্রের ছবি আপলোড সফল হয়েছে: ${file.name}`, 'success')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
     } else if (type === 'nidAttachment') {
       nidAttachment.value = file
       const reader = new FileReader()
@@ -407,10 +599,17 @@ const handleFileUpload = (event, type) => {
         nidAttachmentPreview.value = (e.target?.result ?? null)
       }
       reader.readAsDataURL(file)
+<<<<<<< HEAD
       showFlashMessage(`এনআইডি সংযুক্তি আপলোড সফল হয়েছে: ${file.name}`, 'success')
     }
   } catch  {
     showFlashMessage('ফাইল আপলোডে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।', 'error')
+=======
+      showToast(`এনআইডি সংযুক্তি আপলোড সফল হয়েছে: ${file.name}`, 'success')
+    }
+  } catch  {
+    showToast('ফাইল আপলোডে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।', 'error')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
   }
 }
 
@@ -423,7 +622,11 @@ const removeFile = (type) => {
     nidAttachment.value = null
     nidAttachmentPreview.value = null
   }
+<<<<<<< HEAD
   showFlashMessage(`${fileName} সরিয়ে ফেলা হয়েছে`, 'success')
+=======
+  showToast(`${fileName} সরিয়ে ফেলা হয়েছে`, 'success')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
 }
 
 const handleDivisionChange = async () => {
@@ -434,9 +637,15 @@ const handleDivisionChange = async () => {
     thanas.value = []
     if (!addressFilters.value.division) return
     districts.value = await fetchDistricts(addressFilters.value.division)
+<<<<<<< HEAD
     showFlashMessage('বিভাগ নির্বাচন করা হয়েছে, জেলা লোড হয়েছে', 'success')
   } catch  {
     showFlashMessage('জেলা লোড করতে সমস্যা হয়েছে', 'error')
+=======
+    showToast('বিভাগ নির্বাচন করা হয়েছে, জেলা লোড হয়েছে', 'success')
+  } catch  {
+    showToast('জেলা লোড করতে সমস্যা হয়েছে', 'error')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
   }
 }
 const handleDistrictChange = async () => {
@@ -445,9 +654,15 @@ const handleDistrictChange = async () => {
     thanas.value = []
     if (!addressFilters.value.district) return
     thanas.value = await fetchThanas(addressFilters.value.district)
+<<<<<<< HEAD
     showFlashMessage('জেলা নির্বাচন করা হয়েছে, থানা লোড হয়েছে', 'success')
   } catch  {
     showFlashMessage('থানা লোড করতে সমস্যা হয়েছে', 'error')
+=======
+    showToast('জেলা নির্বাচন করা হয়েছে, থানা লোড হয়েছে', 'success')
+  } catch  {
+    showToast('থানা লোড করতে সমস্যা হয়েছে', 'error')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
   }
 }
 
@@ -535,7 +750,11 @@ const submitStudentInfo = async () => {
     } catch {
       const text = await res.text()
       loading.value = false
+<<<<<<< HEAD
       showFlashMessage('সংরক্ষণ ব্যর্থ: ' + text.slice(0, 300), 'error')
+=======
+      showToast('সংরক্ষণ ব্যর্থ: ' + text.slice(0, 300), 'error')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
       return
     }
     loading.value = false
@@ -544,7 +763,11 @@ const submitStudentInfo = async () => {
       const madrashaInfo = `madrasha_id: ${result.madrasha_id} (${result.madrasha_id_source})`
       const mappingInfo = ` (${marhalaInfo}, ${madrashaInfo})`
 
+<<<<<<< HEAD
       showFlashMessage(`ছাত্রের তথ্য সফলভাবে সংরক্ষণ করা হয়েছে! রেজিস্ট্রেশন নম্বর: ${result.reg_no}${mappingInfo}`, 'success')
+=======
+      showToast(`ছাত্রের তথ্য সফলভাবে সংরক্ষণ করা হয়েছে! রেজিস্ট্রেশন নম্বর: ${result.reg_no}${mappingInfo}`, 'success')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
     } else {
       let errorMessage = result.message || result.error || 'Unknown error'
       if (result.code === 'REG_NO_OUT_OF_RANGE') {
@@ -552,11 +775,19 @@ const submitStudentInfo = async () => {
       } else if (result.code === 'DUPLICATE_REGISTRATION') {
         errorMessage = `ডুপ্লিকেট রেজিস্ট্রেশন: এই রেজিস্ট্রেশন নম্বরটি ইতিমধ্যে বিদ্যমান (${result.reg_no})`
       }
+<<<<<<< HEAD
       showFlashMessage('সংরক্ষণ ব্যর্থ: ' + errorMessage, 'error')
     }
   } catch (err) {
     loading.value = false
     showFlashMessage('সংরক্ষণ ব্যর্থ: ' + (err instanceof Error ? err.message : String(err)), 'error')
+=======
+      showToast('সংরক্ষণ ব্যর্থ: ' + errorMessage, 'error')
+    }
+  } catch (err) {
+    loading.value = false
+    showToast('সংরক্ষণ ব্যর্থ: ' + (err instanceof Error ? err.message : String(err)), 'error')
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
   }
 }
 
@@ -589,4 +820,96 @@ async function onUpdateAddressFilters(filters) {
     transform: translateY(0);
   }
 }
+<<<<<<< HEAD
+=======
+
+/* Toast Animations */
+.toast-slide-enter-active {
+  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+.toast-slide-leave-active {
+  transition: all 0.3s ease-in-out;
+}
+.toast-slide-enter-from {
+  transform: translateX(100%) scale(0.8);
+  opacity: 0;
+}
+.toast-slide-leave-to {
+  transform: translateX(100%) scale(0.9);
+  opacity: 0;
+}
+
+/* Toast Styles */
+.success-toast {
+  border-left-color: #10b981;
+}
+.success-toast .border-l-4 {
+  border-left-color: #10b981 !important;
+}
+.error-toast {
+  border-left-color: #ef4444;
+}
+.error-toast .border-l-4 {
+  border-left-color: #ef4444 !important;
+}
+
+/* Custom animation for smooth entrance */
+@keyframes toastSlideIn {
+  0% {
+    transform: translateX(100%) translateY(-20px);
+    opacity: 0;
+    filter: blur(4px);
+  }
+  50% {
+    filter: blur(2px);
+  }
+  100% {
+    transform: translateX(0) translateY(0);
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+.animate-toast-in {
+  animation: toastSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Hover effects */
+.success-toast:hover .bg-white,
+.error-toast:hover .bg-white {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Pulse animation for success */
+@keyframes successPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.success-toast .w-10 {
+  animation: successPulse 0.6s ease-in-out;
+}
+
+/* Shake animation for error */
+@keyframes errorShake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+.error-toast .w-10 {
+  animation: errorShake 0.5s ease-in-out;
+}
+>>>>>>> 23df0c6f00d2008386bfdb315ab240eaf25b2d01
 </style>
